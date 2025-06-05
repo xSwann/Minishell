@@ -47,12 +47,25 @@ git merge feature-name
 git push
 ```
 
-### 4. Merger dev dans main (quqnd une version stable est prete)
+### 4. Créer une Pull Request et se la faire valider
+- Aller sur la page GitHub du projet
+- Cliquer sur "Create a Pull Request"
+- Sélectionner **base : main** et **compare : dev**
+- Ajouter une description
+- Attendre la validation du binôme
+- Une fois la PR acceptée, GitHub merge automatiquement `dev` dans `main`
+
+### 5. Réaliser un pull sur main en local
 ```bash
 git checkout main
 git pull origin main
-git merge dev
-git push
+```
+
+### 5.bonus  Effacer sa copie locale et se syncronyser avec le main
+```bash
+git checkout main
+git fetch origin
+git reset --hard origin/main
 ```
 
 
