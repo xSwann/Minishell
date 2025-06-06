@@ -1,4 +1,4 @@
-#include "../parsing.h"
+#include "parsing.h"
 #include <stdio.h>
 
 int is_space(char chr)

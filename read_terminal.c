@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-#include "parsing.h"
+#include "parsing/parsing.h"
 
 int    read_terminal()
 {

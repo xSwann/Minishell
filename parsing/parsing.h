@@ -16,7 +16,7 @@ typedef enum type
 typedef struct s_token
 {
     char    *word;
-    int     type;
+    t_type     type;
 }   t_token;
 
 // FUNC
