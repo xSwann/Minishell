@@ -31,12 +31,18 @@ git checkout -b feature-name
 git push -u origin feature-name
 ```
 
-### 2. Se syncroniser avec dev avant de merge
+### 2. Se syncroniser avec dev avant de merge(local)
 ```bash
 git checkout dev
 git pull origin dev
 git checkout feature-name
 git merge dev  # Résoudre les conflits ici si besoin
+```
+
+### 2.1 Se syncroniser avec dev avant de merge(recuperer la copie distante)
+```bash
+git fetch origin dev
+git merge origin/dev
 ```
 
 ### 3. Merger sa branche dans dev
