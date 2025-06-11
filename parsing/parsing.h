@@ -11,7 +11,7 @@ typedef enum type
     INVALID = 0,
     WORD,           //le reste
     PIPE,           // |
-    REDIN,          // >
+    REDIN,          // <
     HEREDOC,        // <<
     REDOUT,         // >
     APPEND,         // >>

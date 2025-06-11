@@ -4,14 +4,14 @@ t_type    find_type(t_token token)
 {
     if (token.word[0] == '|')
         return (PIPE);
-    else if (token.word[0] == '>')
-        return (REDIN);
     else if (token.word[0] == '<' && token.word[1] == '<')
         return (HEREDOC);
-    else if (token.word[0] == '>')
-        return (REDOUT);
     else if (token.word[0] == '>' && token.word[1] == '>')
         return (APPEND);
+    else if (token.word[0] == '<')
+        return (REDIN);
+    else if (token.word[0] == '>')
+        return (REDOUT);
     return (WORD);
 }
 
