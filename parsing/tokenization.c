@@ -1,6 +1,4 @@
 #include "parsing.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 int is_space(char chr)
 {
@@ -175,7 +173,6 @@ void	put_tokens_in_tab(int nb_of_token, char *line, char **tab)
 					if (!tab[j])
 						exit(EXIT_FAILURE);
 					fill_line(tab[j], line, l, i + end_quote);
-					printf("ss %c\n", line[l]);
 					j++;
 				}
 			}
