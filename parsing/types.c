@@ -1,0 +1,51 @@
+#include "parsing.h"
+
+t_type    find_type(t_token token)
+{
+    if (token.word[0] == '|')
+        return (PIPE);
+    else if (token.word[0] == '<' && token.word[1] == '<')
+        return (HEREDOC);
+    else if (token.word[0] == '>' && token.word[1] == '>')
+        return (APPEND);
+    else if (token.word[0] == '<')
+        return (REDIN);
+    else if (token.word[0] == '>')
+        return (REDOUT);
+    return (WORD);
+}
+
+void    put_tokens_in_struct(char **tab, int nb_of_tokens)
+{
+    int i;
+    t_token *tokens;
+
+    i = 0;
+    tokens = malloc(sizeof(t_token) * nb_of_tokens + 1);
+    tokens[nb_of_tokens].type = END;
+    while (i < nb_of_tokens)
+    {
+        tokens[i].word = strdup(tab[i]);
+        tokens[i].type = find_type(tokens[i]);
+        free(tab[i]);
+        i++;
+    }
+    i = 0;
+    while (i < nb_of_tokens)
+    {
+        printf("word = %s ", tokens[i].word);
+        if (tokens[i].type == PIPE)
+            printf("type = PIPE\n");
+        else if (tokens[i].type == REDIN)
+            printf("type = REDIN\n");
+        else if (tokens[i].type == HEREDOC)
+            printf("type = HEREDOC\n");
+        else if (tokens[i].type == REDOUT)
+            printf("type = REDOUT\n");
+        else if (tokens[i].type == APPEND)
+            printf("type = APPEND\n");
+        else if (tokens[i].type == WORD)
+            printf("type = WORD\n");
+        i++;
+    }
+}
