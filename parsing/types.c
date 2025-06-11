@@ -2,6 +2,8 @@
 
 t_type    find_type(t_token token)
 {
+    if (!token.word)
+		return (END);
     if (token.word[0] == '|')
         return (PIPE);
     else if (token.word[0] == '<' && token.word[1] == '<')
@@ -21,8 +23,7 @@ void    put_tokens_in_struct(char **tab, int nb_of_tokens)
     t_token *tokens;
 
     i = 0;
-    tokens = malloc(sizeof(t_token) * nb_of_tokens + 1);
-    tokens[nb_of_tokens].type = END;
+    tokens = malloc(sizeof(t_token) * (nb_of_tokens + 1));
     while (i < nb_of_tokens)
     {
         tokens[i].word = strdup(tab[i]);
@@ -30,8 +31,9 @@ void    put_tokens_in_struct(char **tab, int nb_of_tokens)
         free(tab[i]);
         i++;
     }
+    tokens[i].type = find_type(tokens[i]);
     i = 0;
-    while (i < nb_of_tokens)
+    while (i <= nb_of_tokens)
     {
         printf("word = %s ", tokens[i].word);
         if (tokens[i].type == PIPE)
@@ -46,6 +48,8 @@ void    put_tokens_in_struct(char **tab, int nb_of_tokens)
             printf("type = APPEND\n");
         else if (tokens[i].type == WORD)
             printf("type = WORD\n");
+        else if (tokens[i].type == END)
+            printf("type = END\n");
         i++;
     }
 }

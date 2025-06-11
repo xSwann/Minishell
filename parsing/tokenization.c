@@ -82,10 +82,10 @@ int    count_tokens(char *line)
 		}
         while(line[i] && is_space(line[i]))
             i++;
-		if (is_symbol(line[i]))
+		if (line[i] && is_symbol(line[i]))
 		{
-			if(is_double_symbol(line, i))
-				i+=2;
+			if(line[i] && is_double_symbol(line, i))
+				i += 2;
 			else 
 				i++;
 			nb_of_token++;
@@ -96,16 +96,16 @@ int    count_tokens(char *line)
 		}
 		if (quote == 0)
 		{
-			while(line[i] && !is_space(line[i]) && !is_symbol(line[i]) && !is_quote(line[i]))
+			while (line[i] && !is_space(line[i]) && !is_symbol(line[i]) && !is_quote(line[i]))
 				i++;
 		}
-		if(quote != 0)
+		if (quote != 0)
 		{
-			while(line[i] && line[i] != quote)
+			while (line[i] && line[i] != quote)
 				i++;
 		}
     }
-	if(quote != 0)// Erreur si l'utilisateur a laisse une quote ouverte (a transferer vers gestionnaire d'erreur)
+	if (quote != 0)// Erreur si l'utilisateur a laisse une quote ouverte (a transferer vers gestionnaire d'erreur)
 		printf("Error: quote no-closed\n");
 	return (nb_of_token);
 }
