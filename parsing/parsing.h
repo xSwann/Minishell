@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+# include <readline/readline.h>
+# include "../libft/libft.h"
+
 typedef enum type
 {
     INVALID = 0,
