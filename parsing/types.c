@@ -22,7 +22,7 @@ void    put_tokens_in_struct(char **tab, int nb_of_tokens)
 
     i = 0;
     tokens = malloc(sizeof(t_token) * nb_of_tokens + 1);
-
+    tokens[nb_of_tokens].type = END;
     while (i < nb_of_tokens)
     {
         tokens[i].word = strdup(tab[i]);
