@@ -8,12 +8,25 @@ int    read_terminal()
 {
     char    *line;
     int     nb_of_token;
+    char    **tokens;
+    int i;
+
+    i = 0;
     while (1)
     {
         line = readline("Minishell: ");
-        nb_of_token = count_token(line);
+        nb_of_token = count_tokens(line);
+        tokens = malloc(sizeof(t_token) * nb_of_token + 1);
+        if (!tokens)
+            exit(EXIT_FAILURE);
+        tokens[nb_of_token] = 0;
         printf("Nb of tokens: %d\n", nb_of_token);
-        printf("%s\n", line);
+        put_tokens_in_tab(nb_of_token, line, tokens);
+        while (tokens[i])
+        {
+		    printf("line: %s\n", tokens[i]);
+		    i++;
+	    }
         free(line);
     }
     return (0);
