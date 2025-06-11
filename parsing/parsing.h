@@ -1,6 +1,9 @@
 #ifndef PARSING_H
 # define PARSING_H
 
+# include <readline/readline.h>
+# include "../libft/libft.h"
+
 typedef enum type
 {
     INVALID = 0,
