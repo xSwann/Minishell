@@ -1,0 +1,39 @@
+# Fichiers objets
+*.o
+
+# Binaires
+minishell
+
+# Archives statiques
+*.a
+
+# Fichiers de compilation
+*.out
+*.log
+*.dSYM/
+*.swp
+
+# Backup d'éditeurs de texte
+*~
+.#*
+*.sw?
+
+# Historique du shell
+.history
+
+# MacOS si dev depuis la maison
+.DS_Store
+
+# Emacs / Vim
+*~
+*.swo
+*.swp
+
+# Pre-compilateur gcc
+*.gch
+
+# VS Code
+.vscode/
+
+# JetBrains IDEs (CLion, etc.)
+.idea/
