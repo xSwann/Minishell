@@ -110,7 +110,7 @@ int    count_tokens(char *line)
 	return (nb_of_token);
 }
 
-void	put_tokens_in_tab(int nb_of_token, char *line, char **tab)
+void	put_tokens_in_tab(char *line, char **tab)
 {
 	int i;
 	int l;
