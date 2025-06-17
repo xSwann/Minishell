@@ -22,11 +22,6 @@ int    read_terminal()
         tokens[nb_of_token] = 0;
         printf("Nb of tokens: %d\n", nb_of_token);
         put_tokens_in_tab(nb_of_token, line, tokens);
-/*         while (tokens[i])
-        {
-		    printf("tokens: %s\n", tokens[i]);
-		    i++;
-	    } */
         put_tokens_in_struct(tokens, nb_of_token);
         free(line);
     }
