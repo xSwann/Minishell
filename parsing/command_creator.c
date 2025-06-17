@@ -1,20 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>//printf
-#include <fcntl.h>//Convertit_0_CREATE,_O_APPEND,O_TRUNC_en_binaire
-#include <stdbool.h>	// Pour inclure le type boolean
 #include "parsing.h"
-
-typedef struct s_cmd	t_cmd;
-
-struct	s_cmd
-{
-    char	**args;        // Tableau de commande + parametres
-    char	*outfile;      // outfile.txt
-    char	*infile;       // outfile.txt
-    int		open_options;  // Mode du open O_WRONLY | O_CREAT | O_TRUNC
-	t_cmd	*pipe_cmd;	   // 
-	int		is_here_doc;
-};
 
 t_cmd	*free_cmd(t_cmd *cmd)
 {
@@ -168,6 +152,7 @@ int	main(int ac, char **av)
 	print_cmd(cmd);
 	free(tokens[0]);
 	free(tokens);
+	cmd_executor(cmd);
 	/*while (cmd && cmd->pipe_cmd)
 	{
 		prev_cmd = cmd;

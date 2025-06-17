@@ -5,6 +5,8 @@ CFLAGS	= -Wall -Wextra -Werror -g3
 
 SRCS	= \
 	command_executor.c \
+	executor_utils.c \
+	executor_utils_2.c \
 
 OBJS	= $(SRCS:.c=.o)
 
