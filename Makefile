@@ -11,12 +11,8 @@ LIBFT = $(LIBFT_DIR)/libft.a
 PARSING_DIR = parsing/
 PARSING = $(PARSING_DIR)/parsing.a
 
-# Exec functions
-EXEC_DIR = exec/
-EXEC = $(EXEC_DIR)/exec.a
-
 # Headers integrations
-INCLUDES = -I$(LIBFT_DIR) -I$(PARSING_DIR) -I$(EXEC_DIR)
+INCLUDES = -I$(LIBFT_DIR) -I$(PARSING_DIR)
 
 BLU = \033[44m
 RES = \033[0m
@@ -31,20 +27,15 @@ $(LIBFT):
 $(PARSING):
 	$(MAKE) -C $(PARSING_DIR)
 
-$(EXEC)
-	$(MAKE) -C $(EXEC_DIR)
-
 clean:
 	$(MAKE) -C $(LIBFT_DIR) clean
 	$(MAKE) -C $(PARSING_DIR) clean
-	$(MAKE) -C $(EXEC_DIR) clean
 	@echo "\n  $(BLU)[•] Swiped all the .o files from $(LIBFT) and $(PARSING)  $(RES)  \n"
 
 fclean: clean
 	rm -f $(NAME)
 	$(MAKE) -C $(LIBFT_DIR) fclean
 	$(MAKE) -C $(PARSING_DIR) fclean
-	$(MAKE) -C $(EXEC_DIR) fclean
 	@echo "\n  $(BLU)[×]  Swiped $(NAME)  $(RES)  \n"
 
 re: fclean all
