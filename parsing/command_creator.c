@@ -89,7 +89,7 @@ void	handle_token(t_cmd *cmd, t_token *token, int *n_args, t_type prev_type)
 	curr_type = token->type;
 	if (curr_type == WORD)
 	{
-		if (prev_type == REDIN || prev_type == HEREDOC && ++cmd->is_here_doc)
+		if (prev_type == REDIN || (prev_type == HEREDOC && ++cmd->is_here_doc))
 			cmd->infile = token->word;
 		else
 			cmd->args[(*n_args)++] = token->word;
@@ -151,7 +151,6 @@ int	main(int ac, char **av)
 {
 	t_token	**tokens;
 	t_cmd	*cmd;
-	t_cmd	*prev_cmd;
 	int		i;
 
 	i = 0;
