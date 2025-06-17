@@ -55,7 +55,7 @@ typedef struct s_token
 */
 int		count_tokens(char *line);
 void	put_tokens_in_tab(int nb_of_token, char *line, char **tab);
-void	put_tokens_in_struct(char **tab, int nb_of_tokens);
+t_token	**put_tokens_in_struct(char **tab, int nb_of_tokens);
 
 /*
 ** Utility functions
@@ -64,11 +64,13 @@ int		is_space(char chr);
 int		is_symbol(char chr);
 int		is_double_symbol(char *str, int i);
 int		is_quote(char chr);
-void	fill_line(char *tab, char *line, int start);
+void	fill_line(char *tab, char *line, int start, int end);
 void	symbol_handler(int *i, char *line);
 
 /*
 ** Command functions
 */
 t_cmd	*cmd_creator(t_token **tokens);
+void	print_cmd(t_cmd *cmd);
+
 #endif /* PARSING_H */

@@ -1,56 +1,64 @@
 #include "parsing.h"
 
-t_type	find_type(t_token token)
+t_type	find_type(t_token *token)
 {
-	if (!token.word)
+	if (!token->word)
 		return (END);
-	if (token.word[0] == '|')
+	if (token->word[0] == '|')
 		return (PIPE);
-	else if (token.word[0] == '<' && token.word[1] == '<')
+	else if (token->word[0] == '<' && token->word[1] == '<')
 		return (HEREDOC);
-	else if (token.word[0] == '>' && token.word[1] == '>')
+	else if (token->word[0] == '>' && token->word[1] == '>')
 		return (APPEND);
-	else if (token.word[0] == '<')
+	else if (token->word[0] == '<')
 		return (REDIN);
-	else if (token.word[0] == '>')
+	else if (token->word[0] == '>')
 		return (REDOUT);
 	return (WORD);
 }
 
-void	put_tokens_in_struct(char **tab, int nb_of_tokens)
+t_token	**put_tokens_in_struct(char **tab, int nb_of_tokens)
 {
 	int		i;
-	t_token	*tokens;
+	t_token	**tokens;
 
 	i = 0;
-	tokens = malloc(sizeof(t_token) * (nb_of_tokens + 1));
+	tokens = malloc(sizeof(t_token *) * (nb_of_tokens + 2));
 	while (i < nb_of_tokens)
 	{
-		tokens[i].word = strdup(tab[i]);
-		tokens[i].type = find_type(tokens[i]);
+		tokens[i] = malloc(sizeof(t_token));
+		if (!tokens[i])
+			exit(EXIT_FAILURE);
+		tokens[i]->word = strdup(tab[i]);
+		tokens[i]->type = find_type(tokens[i]);
 		free(tab[i]);
 		i++;
 	}
-	tokens[i].word = NULL;
-	tokens[i].type = find_type(tokens[i]);
+	tokens[i] = malloc(sizeof(t_token));
+	if (!tokens[i])
+		exit(EXIT_FAILURE);
+	tokens[i]->word = NULL;
+	tokens[i]->type = END;
+	tokens[i + 1] = NULL;
 	i = 0;
 	while (i <= nb_of_tokens)
 	{
-		printf("word = %s ", tokens[i].word);
-		if (tokens[i].type == PIPE)
+		printf("word = %s ", tokens[i]->word);
+		if (tokens[i]->type == PIPE)
 			printf("type = PIPE\n");
-		else if (tokens[i].type == REDIN)
+		else if (tokens[i]->type == REDIN)
 			printf("type = REDIN\n");
-		else if (tokens[i].type == HEREDOC)
+		else if (tokens[i]->type == HEREDOC)
 			printf("type = HEREDOC\n");
-		else if (tokens[i].type == REDOUT)
+		else if (tokens[i]->type == REDOUT)
 			printf("type = REDOUT\n");
-		else if (tokens[i].type == APPEND)
+		else if (tokens[i]->type == APPEND)
 			printf("type = APPEND\n");
-		else if (tokens[i].type == WORD)
+		else if (tokens[i]->type == WORD)
 			printf("type = WORD\n");
-		else if (tokens[i].type == END)
+		else if (tokens[i]->type == END)
 			printf("type = END\n");
 		i++;
 	}
+	return (tokens);
 }

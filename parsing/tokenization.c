@@ -41,12 +41,13 @@ int	is_quote(char chr)
 	return (0);
 }
 
-void	fill_line(char *tab, char *line, int start)
+void	fill_line(char *tab, char *line, int start, int end)
 {
 	int	i;
 
 	i = 0;
-{
+	while (start < end)
+	{
 		tab[i] = line[start];
 		i++;
 		start++;

@@ -6,6 +6,8 @@
 
 int    read_terminal()
 {
+	t_token	**tokens_struct;
+	t_cmd	*cmd;
     char    *line;
     int     nb_of_token;
     char    **tokens;
@@ -22,15 +24,23 @@ int    read_terminal()
             exit(EXIT_FAILURE);
         printf("Nb of tokens: %d\n", nb_of_token);
         put_tokens_in_tab(nb_of_token, line, tokens);
-<<<<<<< flavien_parsing
 		/*while (tokens[i])
         {
 		    printf("tokens: %s\n", tokens[i]);
 		    i++;
 	    } */
-=======
->>>>>>> main
-        put_tokens_in_struct(tokens, nb_of_token);
+        tokens_struct = put_tokens_in_struct(tokens, nb_of_token);
+		cmd = cmd_creator(tokens_struct);
+		print_cmd(cmd);
+		free(tokens_struct[0]);
+		free(tokens_struct);
+		/*cmd_executor(cmd);
+		while (cmd && cmd->pipe_cmd)
+		{
+			prev_cmd = cmd;
+			cmd = cmd->pipe_cmd;
+			free(prev_cmd);
+		}*/
         free(line);
     }
     return (0);
