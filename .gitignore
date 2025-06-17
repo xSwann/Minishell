@@ -29,6 +29,9 @@ minishell
 *.swo
 *.swp
 
+# Valgrind output
+valgrind.out
+
 # Pre-compilateur gcc
 *.gch
 

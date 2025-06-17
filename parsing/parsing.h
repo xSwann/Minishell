@@ -8,7 +8,7 @@
 # include <stdio.h>
 # include <string.h>
 # include <readline/readline.h>
-# include "libft.h"
+# include "../libft/libft.h"
 
 /*
 ** Token types
