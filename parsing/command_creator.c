@@ -131,7 +131,7 @@ void	print_cmd(t_cmd *cmd)
 	}
 }
 
-int	main(int ac, char **av)
+/* int	main(int ac, char **av)
 {
 	t_token	**tokens;
 	t_cmd	*cmd;
@@ -153,10 +153,10 @@ int	main(int ac, char **av)
 	free(tokens[0]);
 	free(tokens);
 	//cmd_executor(cmd);
-	/*while (cmd && cmd->pipe_cmd)
+	while (cmd && cmd->pipe_cmd)
 	{
 		prev_cmd = cmd;
 		cmd = cmd->pipe_cmd;
 		free(prev_cmd);
-	}*/
-}
+	}
+} */

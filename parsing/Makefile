@@ -6,6 +6,8 @@ CFLAGS	= -Wall -Wextra -Werror -g3
 SRCS	= \
 	command_creator.c \
 	tokenization.c \
+	count_tokens.c \
+	put_tokens_in_tab.c \
 	types.c
 
 OBJS	= $(SRCS:.c=.o)

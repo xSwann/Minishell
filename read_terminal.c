@@ -22,14 +22,11 @@ int    read_terminal()
             exit(EXIT_FAILURE);
         printf("Nb of tokens: %d\n", nb_of_token);
         put_tokens_in_tab(nb_of_token, line, tokens);
-<<<<<<< flavien_parsing
 		/*while (tokens[i])
         {
 		    printf("tokens: %s\n", tokens[i]);
 		    i++;
 	    } */
-=======
->>>>>>> main
         put_tokens_in_struct(tokens, nb_of_token);
         free(line);
     }

@@ -64,7 +64,7 @@ int		is_space(char chr);
 int		is_symbol(char chr);
 int		is_double_symbol(char *str, int i);
 int		is_quote(char chr);
-void	fill_line(char *tab, char *line, int start);
+void	fill_line(char *tab, char *line, int start, int end);
 void	symbol_handler(int *i, char *line);
 
 /*
