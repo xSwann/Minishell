@@ -152,7 +152,7 @@ int	main(int ac, char **av)
 	print_cmd(cmd);
 	free(tokens[0]);
 	free(tokens);
-	cmd_executor(cmd);
+	//cmd_executor(cmd);
 	/*while (cmd && cmd->pipe_cmd)
 	{
 		prev_cmd = cmd;
