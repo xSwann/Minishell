@@ -16,6 +16,11 @@ SRCS	= \
 
 OBJS	= $(SRCS:.c=.o)
 
+SRCS	= \
+	read_terminal.c
+
+OBJS	= $(SRCS:.c=.o)
+
 # Headers integrations
 INCLUDES = -I$(LIBFT_DIR) -I$(PARSING_DIR)
 
