@@ -72,5 +72,7 @@ void	symbol_handler(int *i, char *line);
 /*
 ** Command functions
 */
-t_cmd	*cmd_creator(t_token **tokens);
+t_cmd	*cmd_creator(t_token *tokens);
+void	print_cmd(t_cmd *cmd);
+
 #endif /* PARSING_H */
