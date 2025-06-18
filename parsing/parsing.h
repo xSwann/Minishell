@@ -55,7 +55,9 @@ typedef struct s_token
 */
 int		count_tokens(char *line);
 void	put_tokens_in_tab(int nb_of_token, char *line, char **tab);
-void	put_tokens_in_struct(char **tab, int nb_of_tokens);
+void	put_tokens_in_struct(char **tab, int nb_of_tokens, t_token *tokens);
+void	print_tokens(int nb_of_tokens, t_token *tokens);
+
 
 /*
 ** Utility functions

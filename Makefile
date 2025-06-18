@@ -5,11 +5,11 @@ NAME = minishell
 
 # Libft functions
 LIBFT_DIR = libft/
-LIBFT = $(LIBFT_DIR)/libft.a
+LIBFT = $(LIBFT_DIR)libft.a
 
 # Parsing functions
 PARSING_DIR = parsing/
-PARSING = $(PARSING_DIR)/parsing.a
+PARSING = $(PARSING_DIR)parsing.a
 
 SRCS	= \
 	read_terminal.c

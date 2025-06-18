@@ -10,6 +10,8 @@ int    read_terminal()
     int     nb_of_token;
     char    **tokens;
     int		i;
+    t_token	*tokens_struct;
+
 
     i = 0;
     while (1)
@@ -22,19 +24,19 @@ int    read_terminal()
             exit(EXIT_FAILURE);
         printf("Nb of tokens: %d\n", nb_of_token);
         put_tokens_in_tab(nb_of_token, line, tokens);
-		/*while (tokens[i])
-        {
-		    printf("tokens: %s\n", tokens[i]);
-		    i++;
-	    } */
-        put_tokens_in_struct(tokens, nb_of_token);
+       	tokens_struct = malloc(sizeof(t_token) * (nb_of_token + 1));
+        put_tokens_in_struct(tokens, nb_of_token, tokens_struct);
+        print_tokens(nb_of_token, tokens_struct);
         free(line);
     }
     return (0);
 }
 
-int main()
+int main(int argc, char **argv, char **envp)
 {
+    (void)argc;
+    (void)argv;
+    (void)envp;
     read_terminal();
     return (0);
 }

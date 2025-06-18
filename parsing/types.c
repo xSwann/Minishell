@@ -1,38 +1,9 @@
 #include "parsing.h"
 
-t_type	find_type(t_token token)
+void	print_tokens(int nb_of_tokens, t_token *tokens)
 {
-	if (!token.word)
-		return (END);
-	if (token.word[0] == '|')
-		return (PIPE);
-	else if (token.word[0] == '<' && token.word[1] == '<')
-		return (HEREDOC);
-	else if (token.word[0] == '>' && token.word[1] == '>')
-		return (APPEND);
-	else if (token.word[0] == '<')
-		return (REDIN);
-	else if (token.word[0] == '>')
-		return (REDOUT);
-	return (WORD);
-}
+	int i;
 
-void	put_tokens_in_struct(char **tab, int nb_of_tokens)
-{
-	int		i;
-	t_token	*tokens;
-
-	i = 0;
-	tokens = malloc(sizeof(t_token) * (nb_of_tokens + 1));
-	while (i < nb_of_tokens)
-	{
-		tokens[i].word = strdup(tab[i]);
-		tokens[i].type = find_type(tokens[i]);
-		free(tab[i]);
-		i++;
-	}
-	tokens[i].word = NULL;
-	tokens[i].type = find_type(tokens[i]);
 	i = 0;
 	while (i <= nb_of_tokens)
 	{
@@ -53,4 +24,38 @@ void	put_tokens_in_struct(char **tab, int nb_of_tokens)
 			printf("type = END\n");
 		i++;
 	}
+}
+
+t_type	find_type(t_token token)
+{
+	if (!token.word)
+		return (END);
+	if (token.word[0] == '|')
+		return (PIPE);
+	else if (token.word[0] == '<' && token.word[1] == '<')
+		return (HEREDOC);
+	else if (token.word[0] == '>' && token.word[1] == '>')
+		return (APPEND);
+	else if (token.word[0] == '<')
+		return (REDIN);
+	else if (token.word[0] == '>')
+		return (REDOUT);
+	return (WORD);
+}
+
+void	put_tokens_in_struct(char **tab, int nb_of_tokens, t_token *tokens)
+{
+	int		i;
+
+	i = 0;
+	while (i < nb_of_tokens)
+	{
+		tokens[i].word = strdup(tab[i]);
+		tokens[i].type = find_type(tokens[i]);
+		free(tab[i]);
+		i++;
+	}
+	tokens[i].word = NULL;
+	tokens[i].type = find_type(tokens[i]);
+	i = 0;
 }
