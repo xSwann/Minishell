@@ -1,16 +1,10 @@
-NAME	= libft.a
+NAME	= built_ins.a
 
 CC		= cc
 CFLAGS	= -Wall -Wextra -Werror -g3
 
 SRCS	= \
-	ft_calloc.c \
-	ft_memcpy.c \
-	ft_memset.c \
-	ft_split.c \
-	ft_substr.c \
-	ft_strlen.c \
-	ft_strdup.c
+	ft_pwd.c \
 
 OBJS	= $(SRCS:.c=.o)
 

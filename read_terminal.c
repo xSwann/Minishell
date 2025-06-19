@@ -3,6 +3,7 @@
 #include <readline/history.h>
 #include <readline/readline.h>
 #include "parsing/parsing.h"
+#include "built_ins/built_ins.h"
 
 int    read_terminal()
 {
@@ -36,7 +37,24 @@ int main(int argc, char **argv, char **envp)
 {
     (void)argc;
     (void)argv;
-    (void)envp;
-    read_terminal();
+
+    int i;
+    t_env    *env;
+    int nb_of_env_v;
+
+    i = 0;
+    nb_of_env_v = 0;
+    
+    env = NULL;
+    nb_of_env_v = init_env(envp, &env);
+    //read_terminal();
+    //ft_env(env, nb_of_env_v);
+    //ft_pwd(env, nb_of_env_v);
+    env = ft_export(env, &nb_of_env_v, "TEST=salut");
+    env = ft_export(env, &nb_of_env_v, "JU=LLOOO");
+
+    ft_env(env, nb_of_env_v);
+    free_env(env, nb_of_env_v);
     return (0);
 }
+

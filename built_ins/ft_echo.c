@@ -1,6 +1,9 @@
+
+#include "built_ins.h"
+
 //le int param sert si l'option -n est requise, dans ce cas la, le param devra etre different de 0
 
-void    echo(char **str, int param)
+void    ft_echo(char **str, int param)
 {
     int i;
 

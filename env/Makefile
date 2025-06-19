@@ -1,16 +1,13 @@
-NAME	= libft.a
+NAME	= env.a
 
 CC		= cc
 CFLAGS	= -Wall -Wextra -Werror -g3
 
 SRCS	= \
-	ft_calloc.c \
-	ft_memcpy.c \
-	ft_memset.c \
-	ft_split.c \
-	ft_substr.c \
-	ft_strlen.c \
-	ft_strdup.c
+	init_env.c \
+	free_env.c \
+	ft_env.c \
+	ft_export.c
 
 OBJS	= $(SRCS:.c=.o)
 
