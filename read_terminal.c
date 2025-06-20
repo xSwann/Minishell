@@ -50,7 +50,14 @@ int main(int argc, char **argv, char **envp)
     //read_terminal();
     //ft_pwd(env, nb_of_env_v);
     env = ft_export(env, &nb_of_env_v, "TEST=salut");
-    env = ft_export(env, &nb_of_env_v, "JU=LLOOO");
+    env = ft_export(env, &nb_of_env_v, "sss=salut");
+    env = ft_export(env, &nb_of_env_v, "dd=salut");
+    env = ft_export(env, &nb_of_env_v, "TEST=salut");
+    env = ft_export(env, &nb_of_env_v, "d=d");
+    env = ft_export(env, &nb_of_env_v, "TEST=qq");
+    env = ft_export(env, &nb_of_env_v, "d=HEYY");
+    env = ft_export(env, &nb_of_env_v, "OLDPWD=HEYY");
+
 
     ft_env(env, nb_of_env_v);
     free_env(env, nb_of_env_v);

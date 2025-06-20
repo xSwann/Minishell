@@ -19,6 +19,7 @@ void	*ft_calloc(size_t n, size_t size);
 void	*ft_memcpy(void *dest, const void *source, size_t size);
 //void	*ft_memmove(void *dst, const void *src, size_t size);
 void	*ft_memset(void *p, int value, size_t count);
+int ft_strcmp(char *s1, char *s2);
 //void	ft_putchar_fd(char c, int fd);
 //void	ft_putstr_fd(char *s, int fd);
 //void	ft_putendl_fd(char *s, int fd);
