@@ -1,6 +1,7 @@
 
 #include "built_ins.h"
 #include <string.h>
+
 void    ft_pwd(t_env *env, int count)
 {
     int i;

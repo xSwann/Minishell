@@ -5,6 +5,7 @@
         "libft.h": "c",
         "free_env": "c",
         "string.h": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "built_ins.h": "c"
     }
 }

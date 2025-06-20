@@ -11,10 +11,6 @@ LIBFT = $(LIBFT_DIR)libft.a
 PARSING_DIR = parsing/
 PARSING = $(PARSING_DIR)parsing.a
 
-# Env functions
-ENV_DIR = env/
-ENV = $(ENV_DIR)env.a
-
 # Built_ins functions
 BUILT_INS_DIR = built_ins/
 BUILT_INS = $(BUILT_INS_DIR)built_ins.a
@@ -25,20 +21,17 @@ SRCS	= \
 OBJS	= $(SRCS:.c=.o)
 
 # Headers integrations
-INCLUDES = -I$(LIBFT_DIR) -I$(ENV_DIR) -I$(BUILT_INS_DIR) -I$(PARSING_DIR) 
+INCLUDES = -I$(LIBFT_DIR) -I$(BUILT_INS_DIR) -I$(PARSING_DIR) 
 
 BLU = \033[44m
 RES = \033[0m
 
-all: $(LIBFT) $(ENV) $(BUILT_INS) $(PARSING) $(OBJS)
+all: $(LIBFT) $(BUILT_INS) $(PARSING) $(OBJS)
 	$(CC) $(CFLAGS) $(INCLUDES) $(OBJS) $(ENV) $(BUILT_INS) $(PARSING) $(EXEC) $(LIBFT) -o $(NAME) $(RL_FLAGS)
 	@echo "\n  $(BLU)[✓] Minishell generated  $(RES)  \n"
 
 $(LIBFT):
 	$(MAKE) -C $(LIBFT_DIR)
-
-$(ENV):
-	$(MAKE) -C $(ENV_DIR)
 
 $(BUILT_INS):
 	$(MAKE) -C $(BUILT_INS_DIR)
@@ -49,7 +42,6 @@ $(PARSING):
 clean:
 	rm -f $(OBJS)
 	$(MAKE) -C $(LIBFT_DIR) clean
-	$(MAKE) -C $(ENV_DIR) clean
 	$(MAKE) -C $(BUILT_INS_DIR) clean
 	$(MAKE) -C $(PARSING_DIR) clean
 	@echo "\n  $(BLU)[•] Swiped all the .o files from $(LIBFT) and $(PARSING)  $(RES)  \n"
@@ -57,11 +49,10 @@ clean:
 fclean: clean
 	rm -f $(NAME)
 	$(MAKE) -C $(LIBFT_DIR) fclean
-	$(MAKE) -C $(ENV_DIR) fclean
 	$(MAKE) -C $(BUILT_INS_DIR) fclean
 	$(MAKE) -C $(PARSING_DIR) fclean
 	@echo "\n  $(BLU)[×]  Swiped $(NAME)  $(RES)  \n"
 
 re: fclean all
 
-.PHONY: all clean fclean re $(LIBFT) $(ENV) $(BUILT_INS) $(PARSING) 
+.PHONY: all clean fclean re $(LIBFT) $(BUILT_INS) $(PARSING) 

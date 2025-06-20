@@ -48,7 +48,6 @@ int main(int argc, char **argv, char **envp)
     env = NULL;
     nb_of_env_v = init_env(envp, &env);
     //read_terminal();
-    //ft_env(env, nb_of_env_v);
     //ft_pwd(env, nb_of_env_v);
     env = ft_export(env, &nb_of_env_v, "TEST=salut");
     env = ft_export(env, &nb_of_env_v, "JU=LLOOO");

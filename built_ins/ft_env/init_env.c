@@ -1,6 +1,5 @@
-#include "env.h"
-#include "../libft/libft.h"
 
+#include "../built_ins.h"
 
 int init_env(char **envp, t_env **env)
 {

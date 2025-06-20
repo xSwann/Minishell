@@ -1,4 +1,5 @@
-#include "env.h"
+
+#include "../built_ins.h"
 
 void    ft_env(t_env *env, int nb_of_env_v)
 {

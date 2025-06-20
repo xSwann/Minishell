@@ -5,6 +5,10 @@ CFLAGS	= -Wall -Wextra -Werror -g3
 
 SRCS	= \
 	ft_pwd.c \
+	ft_export.c \
+	ft_env/ft_env.c \
+	ft_env/init_env.c \
+	ft_env/free_env.c \
 
 OBJS	= $(SRCS:.c=.o)
 
