@@ -7,7 +7,7 @@ int init_env(char **envp, t_env **env)
     int   i;
     int   j;
     int   len;
-    char cwd[4097];
+    //char cwd[4097];
 
     count = 0;
     while (envp[count])
@@ -16,10 +16,10 @@ int init_env(char **envp, t_env **env)
     if (!*env)
         exit(EXIT_FAILURE);
     i = 0;
-    getcwd(cwd, sizeof(cwd));
+/*     getcwd(cwd, sizeof(cwd));
     (*env)[i].key = ft_strdup("PWD");
     (*env)[i].value = ft_strdup(cwd);
-    i++;
+    i++; */
     while (i < count)
     {
         j = 0;

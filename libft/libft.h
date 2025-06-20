@@ -29,7 +29,7 @@ char	*ft_substr(char const *s, unsigned int start, size_t len);
 //char	*ft_strchr(const char *string, int searchedchar);
 char	*ft_strdup(const char *src);
 //void	ft_striteri(char *s, void (*f)(unsigned int, char*));
-//char	*ft_strjoin(char const *s1, char const *s2);
+char	*ft_strjoin(char const *s1, char const *s2);
 //char	*ft_strmapi(char const *s, char (*f)(unsigned int, char));
 //size_t	ft_strlcat(char *dst, const char *src, size_t dstsize);
 //size_t	ft_strlcpy(char *dst, const char *src, size_t size);

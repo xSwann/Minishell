@@ -39,7 +39,7 @@ t_env    *ft_export(t_env *env, int *count, char *arg)
             tmp = j;
             while(arg[j])
                 j++;
-            arg_malloc = ft_substr(arg, tmp, j - tmp);
+            arg_malloc = ft_substr(arg, tmp+1, j - tmp);
             new_env[i].value = ft_strdup(arg_malloc);
             free(arg_malloc);
             i++;
@@ -56,7 +56,7 @@ t_env    *ft_export(t_env *env, int *count, char *arg)
         tmp = j;
         while(arg[j])
             j++;
-        new_env[i].value = ft_substr(arg, tmp, j - tmp);
+        new_env[i].value = ft_substr(arg, tmp+1, j - tmp);
     }
     else
         (*count)--;

@@ -49,17 +49,29 @@ int main(int argc, char **argv, char **envp)
     nb_of_env_v = init_env(envp, &env);
     //read_terminal();
     //ft_pwd(env, nb_of_env_v);
-    env = ft_export(env, &nb_of_env_v, "TEST=salut");
+    /* env = ft_export(env, &nb_of_env_v, "TEST=salut");
     env = ft_export(env, &nb_of_env_v, "sss=salut");
     env = ft_export(env, &nb_of_env_v, "dd=salut");
     env = ft_export(env, &nb_of_env_v, "TEST=salut");
     env = ft_export(env, &nb_of_env_v, "d=d");
     env = ft_export(env, &nb_of_env_v, "TEST=qq");
     env = ft_export(env, &nb_of_env_v, "d=HEYY");
-    env = ft_export(env, &nb_of_env_v, "OLDPWD=HEYY");
-
-
+    env = ft_export(env, &nb_of_env_v, "OLDPWD=HEYY"); */
+    //ft_env(env, nb_of_env_v);
+    //env = ft_cd("built_ins", env, &nb_of_env_v);
+    /* if (env == NULL)
+        return (0); */
+    //pourquoi quqnd j'appelle 2 fois ca marche pas;
+    env = ft_cd("built_ins", env, &nb_of_env_v);
+    env = ft_cd("ft_env", env, &nb_of_env_v);
+    env = ft_cd("../", env, &nb_of_env_v);
+    env = ft_cd("/", env, &nb_of_env_v);
+    //env = ft_cd("/", env, &nb_of_env_v);
+    
+    if (env == NULL)
+        return (0);
     ft_env(env, nb_of_env_v);
+    
     free_env(env, nb_of_env_v);
     return (0);
 }
