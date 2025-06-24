@@ -10,7 +10,8 @@ SRCS	= \
 	ft_env/init_env.c \
 	ft_env/free_env.c \
 	ft_cd.c \
-	ft_env/get_env.c
+	ft_env/get_env.c \
+	ft_unset.c
 
 OBJS	= $(SRCS:.c=.o)
 

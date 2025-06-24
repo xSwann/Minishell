@@ -5,6 +5,7 @@ t_env    *ft_cd(char *path, t_env *env, int *count)
 {
 
     t_env *new_env;
+    char *word;
     char *path_env;
     char cwd[4097];
     int i;
@@ -14,7 +15,7 @@ t_env    *ft_cd(char *path, t_env *env, int *count)
     if (chdir(path) != 0)
     {
         printf("this path doesn't exist");
-        return (NULL);
+        return (env);
     }
     getcwd(cwd, sizeof(cwd));
     while(i < *count && ft_strcmp(env[i].key, "PWD") != 0)
@@ -23,7 +24,11 @@ t_env    *ft_cd(char *path, t_env *env, int *count)
     new_env = ft_export(env, count, path_env);
     free(path_env);
     if (ft_strcmp(path, "/") == 0)
-        path_env = ft_strjoin("PWD=", get_env(new_env, count, "HOME"));
+    {
+        word = get_env(new_env, count, "HOME");
+        path_env = ft_strjoin("PWD=", word);
+        free(word);
+    }
     else
     { 
         getcwd(cwd, sizeof(cwd));

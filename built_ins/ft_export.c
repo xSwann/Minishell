@@ -20,6 +20,11 @@ t_env    *ft_export(t_env *env, int *count, char *arg)
     new_env = malloc((sizeof(t_env)) * (*count + 1));
     while(arg[j] && arg[j] != '=')
         j++;
+    if (arg[j] != '=')
+    {
+        printf("You must enter a combo key/value (key=value)");
+        return (NULL);
+    }
     arg_malloc = ft_substr(arg, 0, j);
     while (i < *count - 1)
     {

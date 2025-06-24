@@ -21,3 +21,4 @@ char    *get_env(t_env *env, int *count, char *arg);
 
 t_env   *ft_export(t_env *env, int *count, char *arg);
 t_env   *ft_cd(char *path, t_env *env, int *count);
+t_env *ft_unset(t_env *env, int *count, char *arg);
