@@ -1,8 +1,9 @@
+
 #include "parsing.h"
 
 void	print_tokens(int nb_of_tokens, t_token *tokens)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (i <= nb_of_tokens)
@@ -24,6 +25,7 @@ void	print_tokens(int nb_of_tokens, t_token *tokens)
 			printf("type = END\n");
 		i++;
 	}
+	return (tokens);
 }
 
 t_type	find_type(t_token token)
@@ -51,11 +53,13 @@ void	put_tokens_in_struct(char **tab, int nb_of_tokens, t_token *tokens)
 	while (i < nb_of_tokens)
 	{
 		tokens[i].word = strdup(tab[i]);
-		tokens[i].type = find_type(tokens[i]);
 		free(tab[i]);
+		tab[i] = NULL;
+		tokens[i].type = find_type(tokens[i]);
 		i++;
 	}
+	free(tab);
+	tab = NULL;
 	tokens[i].word = NULL;
 	tokens[i].type = find_type(tokens[i]);
-	i = 0;
 }

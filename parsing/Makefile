@@ -8,6 +8,7 @@ SRCS	= \
 	tokenization.c \
 	count_tokens.c \
 	put_tokens_in_tab.c \
+	here_doc_manipulations.c \
 	types.c
 
 OBJS	= $(SRCS:.c=.o)
