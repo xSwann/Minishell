@@ -36,6 +36,7 @@ valgrind.out
 *.gch
 
 # VS Code
+.vscode
 .vscode/
 
 # JetBrains IDEs (CLion, etc.)
