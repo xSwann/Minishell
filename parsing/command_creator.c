@@ -1,30 +1,5 @@
 #include "parsing.h"
 
-t_cmd	*free_cmd(t_cmd *cmd)
-{
-	int		i;
-	t_cmd	*pipe_cmd;
-
-	i = 0;
-	pipe_cmd = NULL;
-	if (!cmd)
-		return (pipe_cmd);
-	if (cmd->args)
-	{
-		/*while (cmd->args[i])
-		{
-			printf("PIGNOUF\n");
-			free(cmd->args[i]);
-			i++;
-		}*/
-		free(cmd->args);
-	}
-	/*if (cmd->outfile)
-		free(cmd->outfile);*/
-	pipe_cmd = cmd->pipe_cmd;
-	return (pipe_cmd);
-}
-
 char	**cmd_init(t_token *tokens)
 {
 	t_type	prev_type;
@@ -37,15 +12,15 @@ char	**cmd_init(t_token *tokens)
 	prev_type = INVALID;
 	while (tokens[i].type != END)
 	{
-		if (tokens[i].type == PIPE
-			|| tokens[i].type == REDOUT || tokens[i].type == APPEND)
+		if (tokens[i].type == PIPE || tokens[i].type == REDOUT
+			|| tokens[i].type == APPEND)
 			break ;
 		if (tokens[i].type == WORD
 			&& (!(prev_type == HEREDOC || prev_type == REDIN)))
 			n_args++;
 		i++;
 	}
-	if (!n_args)
+	if (n_args == 0)
 		return (NULL);
 	args = (char **)ft_calloc(n_args + 1, sizeof(char *));
 	if (!args)
@@ -60,54 +35,62 @@ t_cmd	*init_command(t_token *tokens)
 	cmd = (t_cmd *)ft_calloc(1, sizeof(t_cmd));
 	if (!cmd)
 		return (NULL);
+	cmd->here_doc_fd = 0;
+	cmd->pipe_cmd = 0;
 	cmd->args = cmd_init(tokens);
 	return (cmd);
 }
 
 void	handle_token(t_cmd *cmd, t_token token, int *n_args, t_type prev_type)
 {
-	t_type curr_type;
+	t_type	curr_type;
 
 	curr_type = token.type;
 	if (curr_type == WORD)
 	{
-		if (prev_type == REDIN || prev_type == HEREDOC)
-		{
-			cmd->is_here_doc = 1;
-			cmd->infile = token.word;
-		}
-		else if (prev_type != REDOUT)
-			cmd->args[(*n_args)++] = token.word;
+		if (prev_type == HEREDOC)
+			cmd->here_doc_fd = ft_here_doc(ft_strdup(token.word));
+		else if (prev_type == REDIN)
+			cmd->infile = ft_strdup(token.word);
+		else if (prev_type == REDOUT || prev_type == APPEND)
+			cmd->outfile = ft_strdup(token.word);
+		else
+			cmd->args[(*n_args)++] = ft_strdup(token.word);
+		free(token.word);
+		token.word = NULL;
 	}
-	else if (prev_type == REDOUT)
+	if (prev_type == REDOUT)
 		cmd->open_options = O_WRONLY | O_CREAT | O_TRUNC;
-	else if (prev_type == APPEND)
+	if (prev_type == APPEND)
 		cmd->open_options = O_WRONLY | O_CREAT | O_APPEND;
 }
 
-t_cmd	*cmd_creator(t_token *tokens)
+int	cmd_creator(t_cmd **cmd, t_token *tokens)
 {
 	int			i;
 	int			n_args;
 	t_type		prev_type;
-	t_cmd		*cmd;
 
 	i = 0;
 	n_args = 0;
 	prev_type = INVALID;
-	cmd = init_command(tokens);
-	if (!cmd)
-		return (NULL);
-	while (!cmd->pipe_cmd && tokens[i].type != END)
+	if (!tokens || tokens[i].type == END)
+		return ((*cmd) = NULL, 0);
+	*cmd = init_command(tokens);
+	if (!*cmd)
+		return (1);
+	while (tokens[i].type != END)
 	{
 		if (prev_type == PIPE)
-			cmd->pipe_cmd = cmd_creator(tokens + i);
-		handle_token(cmd, tokens[i], &n_args, prev_type);
+		{
+			if (cmd_creator(&(*cmd)->pipe_cmd, tokens + i))
+				return (1);
+			return (0);
+		}
+		handle_token(*cmd, tokens[i], &n_args, prev_type);
 		prev_type = tokens[i++].type;
 	}
-	if (prev_type == WORD && !cmd->outfile)
-		cmd->outfile = tokens[i - 1].word;
-	return (cmd);
+	return (0);
 }
 
 void	print_cmd(t_cmd *cmd)
@@ -116,17 +99,16 @@ void	print_cmd(t_cmd *cmd)
 	int	n_cmd;
 
 	n_cmd = 0;
-	while (cmd && cmd->args)
+	if (cmd)
 	{
-		i = 0;
-		printf("|||  print_cmd num %d   |||\n", n_cmd++);
-		while (cmd->args[i])
-		{
-			printf("cmd->args[%i] = %s\n", i, cmd->args[i]);
-			i++;
-		}
-		printf("cmd->infile = %s\ncmd->outfile = %s\ncmd->open_options = %i\ncmd->is_here_doc = %d\n", cmd->infile, cmd->outfile, cmd->open_options, cmd->is_here_doc);
-		cmd = free_cmd(cmd);
+		i = -1;
+		fprintf(stderr, "		|||  print_cmd  |||\n");
+		while (++i >= 0 && cmd->args && cmd->args[i])
+			fprintf(stderr, "cmd->args[%i] = %s\n", i, cmd->args[i]);
+		fprintf(stderr, "cmd->infile = %s\ncmd->outfile = %s\n\
+		cmd->open_options = %i\ncmd->fd_here_doc = %i\ncmd->pipe_cmd = %p\n", \
+		cmd->infile, cmd->outfile, cmd->open_options, cmd->here_doc_fd, \
+		cmd->pipe_cmd);
 	}
 }
 
