@@ -14,8 +14,8 @@ t_env    *ft_cd(char *path, t_env *env, int *count)
     new_env = NULL;
     if (chdir(path) != 0)
     {
-        printf("this path doesn't exist");
-        return (env);
+        printf("cd: %s: No such file or directory", path);
+        return (ft_export(env, count, "EXIT_CODE=1"));
     }
     getcwd(cwd, sizeof(cwd));
     while(i < *count && ft_strcmp(env[i].key, "PWD") != 0)
@@ -36,5 +36,5 @@ t_env    *ft_cd(char *path, t_env *env, int *count)
     }
     new_env = ft_export(new_env, count, path_env);
     free(path_env);
-    return (new_env);
+    return (ft_export(new_env, count, "EXIT_CODE=0"));
 }

@@ -12,7 +12,7 @@ t_env *ft_unset(t_env *env, int *count, char *arg)
     i = 0;
     j = 0;
     already_in_env = *count;
-    while (i <= *count)
+    while (i < *count)
     {
         if (ft_strcmp(env[i].key, arg) == 0)
         {
@@ -42,5 +42,5 @@ t_env *ft_unset(t_env *env, int *count, char *arg)
     new_env[*count].key   = NULL;
     new_env[*count].value = NULL;
     free_env(env, *count);
-    return(new_env);
+    return(ft_export(new_env, count, "EXIT_CODE=0"));
 }

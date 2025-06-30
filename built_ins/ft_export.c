@@ -11,7 +11,19 @@ t_env    *ft_export(t_env *env, int *count, char *arg)
     t_env   *new_env;
     int already_in_env;
     char *arg_malloc;
+    char *identifier;
 
+    i = 0;
+    while (arg[i] != '=')
+        i++;
+    identifier = ft_substr(arg, 0, i);
+    if (!is_exportable(arg))
+    {
+        printf("export: `%s': not a valid identifier\n", identifier);
+        free(identifier);
+        return (ft_export(env, count, "EXIT_CODE=1"));
+    }
+    free(identifier);
     i = 0;
     j = 0;
     tmp = 0;
@@ -22,8 +34,9 @@ t_env    *ft_export(t_env *env, int *count, char *arg)
         j++;
     if (arg[j] != '=')
     {
-        printf("You must enter a combo key/value (key=value)");
-        return (NULL);
+        free(new_env);
+        (*count)--;
+        return (env);
     }
     arg_malloc = ft_substr(arg, 0, j);
     while (i < *count - 1)
