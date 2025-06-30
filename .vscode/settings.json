@@ -1,5 +1,11 @@
 {
     "files.associations": {
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "env.h": "c",
+        "libft.h": "c",
+        "free_env": "c",
+        "string.h": "c",
+        "type_traits": "c",
+        "built_ins.h": "c"
     }
 }

@@ -1,18 +1,19 @@
-NAME	= libft.a
+NAME	= built_ins.a
 
 CC		= cc
 CFLAGS	= -Wall -Wextra -Werror -g3
 
 SRCS	= \
-	ft_calloc.c \
-	ft_memcpy.c \
-	ft_memset.c \
-	ft_split.c \
-	ft_substr.c \
-	ft_strlen.c \
-	ft_strdup.c \
-	ft_strcmp.c \
-	ft_strjoin.c
+	ft_pwd.c \
+	ft_export.c \
+	ft_env/ft_env.c \
+	ft_env/init_env.c \
+	ft_env/free_env.c \
+	ft_cd.c \
+	ft_echo.c \
+	ft_env/get_env.c \
+	ft_unset.c \
+	is_exportable.c
 
 OBJS	= $(SRCS:.c=.o)
 
