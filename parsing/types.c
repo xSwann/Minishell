@@ -1,3 +1,4 @@
+
 #include "parsing.h"
 
 void	print_tokens(int nb_of_tokens, t_token *tokens)
@@ -24,6 +25,7 @@ void	print_tokens(int nb_of_tokens, t_token *tokens)
 			printf("type = END\n");
 		i++;
 	}
+	return (tokens);
 }
 
 t_type	find_type(t_token token)
