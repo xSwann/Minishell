@@ -20,7 +20,6 @@ BUILT_INS = $(BUILT_INS_DIR)built_ins.a
 EXEC_DIR = exec/
 EXEC = $(EXEC_DIR)exec.a
 
-
 SRCS	= \
 	read_terminal.c
 
@@ -34,7 +33,7 @@ BLU = \033[44m
 RES = \033[0m
 
 
-all: $(LIBFT) $(BUILT_INS) $(PARSING) $(OBJS)
+all: $(LIBFT) $(BUILT_INS) $(PARSING) $(OBJS) $(EXEC)
 	$(CC) $(CFLAGS) $(INCLUDES) $(OBJS) $(ENV) $(BUILT_INS) $(PARSING) $(EXEC) $(LIBFT) -o $(NAME) $(RL_FLAGS)
 
 	@echo "\n  $(BLU)[✓] Minishell generated  $(RES)  \n"
