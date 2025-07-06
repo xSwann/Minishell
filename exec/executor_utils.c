@@ -1,4 +1,4 @@
-#include "exec.h"
+#include "../includes/exec.h"
 
 void	path_builder(char *envp, char *cmd, char *path, int len)
 {
@@ -45,34 +45,8 @@ char	*path_parser(char *envp, char *cmd)
 	return (error_printer(cmd), NULL);
 }
 
-int	free_args(char **args)
-{
-	int	i;
-
-	i = 0;
-	if (!args)
-		return (1);
-	while (args[i])
-		free(args[i++]);
-	return (free(args), 1);
-}
-
-int	manage_outfile(t_pipex *px)
-{
-	if (px->outfile < 0)
-		return (px->outfile = -1, close_pipe(px), 1);
-	if (dup2(px->outfile, 1) == -1 && error_printer("dup2: error"))
-		return (close_fd(&px->outfile), close_pipe(px), 1);
-	if (close_fd(&px->outfile) == -1)
-		return (close_pipe(px), 1);
-	return (0);
-}
-
 int	close_pipe(t_pipex *px)
 {
-	//fprintf(stderr, "En fin de pipe on a :\n\
-	//	px->infile = %i || px->outfile = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n", \
-	//	px->infile, px->outfile, px->pipe_fd[0], px->pipe_fd[1]);
 	if (px->infile && px->infile >= 0 && close(px->infile) == -1)
 		return (px->infile = -1, error_printer("close: infile"), 1);
 	if (px->pipe_fd[0] && px->pipe_fd[0] >= 0 && close(px->pipe_fd[0]) == -1)
@@ -82,4 +56,37 @@ int	close_pipe(t_pipex *px)
 		return (px->pipe_fd[1] = -1, error_printer("close: pipe_fd[1]"), 1);
 	px->pipe_fd[1] = -1;
 	return (0);
+}
+
+int	wait_execs(pid_t pid)
+{
+	int	status;
+
+	if (pid < 0)
+		return (1);
+	if (waitpid(pid, &status, 0) == -1)
+		error_printer("waitpid failed");
+	if (WIFEXITED(status))
+		status = WEXITSTATUS(status);
+	return (status);
+}
+
+char	**env_create(t_env *envp)
+{
+	char	**envp_string_form;
+	int		i;
+
+	i = 0;
+	envp_string_form = NULL;
+	if (!envp || !(*envp->key))
+		return (NULL);
+	while (envp[i].key)
+		i++;
+	envp_string_form = malloc(sizeof (char *) * (i + 1));
+	if (!envp_string_form)
+		return (NULL);
+	envp_string_form[i] = NULL;
+	while (--i >= 0 && envp[i].key)
+		envp_string_form[i] = ft_strjoin(ft_strjoin(envp[i].key, "="), envp[i].value);
+	return (envp_string_form);
 }

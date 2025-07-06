@@ -1,5 +1,5 @@
 // parsing/put_tokens_in_tab.c
-#include "parsing.h"
+#include "../includes/parsing.h"
 
 static void	skip_spaces(char *line, int *i)
 {

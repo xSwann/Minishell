@@ -1,12 +1,8 @@
+#include "./includes/structs.h"
+#include "./includes/libft.h"
+#include "./includes/exec.h"
 
-#include <stdlib.h>
-#include <readline/history.h>
-#include <readline/readline.h>
-#include "parsing/parsing.h"
-#include "built_ins/built_ins.h"
-#include "exec/exec.h"
-
-int	read_terminal(char **envp)
+int	read_terminal(t_env **env)
 {
 	char	*line;
 	int		nb_of_token;
@@ -38,15 +34,15 @@ int	read_terminal(char **envp)
 		if (cmd_creator(&cmd, tokens_struct))
 			exit(EXIT_FAILURE);
 		//print_cmd(cmd);
-		cmd_executor(envp, &cmd);
+		cmd_executor(env, &cmd);
 		free(tokens_struct);
 		if (line)
 			free(line);
-		line = NULL;
 		tokens = NULL;
+		line = NULL;
 	}
 	if (line)
-		free(line);	
+		free(line);
 	return (rl_clear_history(), 0);
 }
 
@@ -55,51 +51,49 @@ int	main(int argc, char **argv, char **envp)
     (void)argc;
     (void)argv;
 
-    int i;
+    //int i;
     t_env    *env;
-    int nb_of_env_v;
-    char *str[2];
+    //char *str[2];
 
-    str[0] = "$?";
-    str[1] = 0;
-    i = 0;
-    nb_of_env_v = 0;
+    //str[0] = "$?";
+    //str[1] = 0;
+    //i = 0;
     env = NULL;
-    nb_of_env_v = init_env(envp, &env);
-    env = ft_pwd(env, &nb_of_env_v);
-    env = ft_export(env, &nb_of_env_v, "1alut=d");
-    env = ft_export(env, &nb_of_env_v, "sss=salut");
-    env = ft_export(env, &nb_of_env_v, "dd=salut");
-    env = ft_export(env, &nb_of_env_v, "TEST=salut");
-    env = ft_export(env, &nb_of_env_v, "d=d");
-    env = ft_export(env, &nb_of_env_v, "TEST=qq");
-    env = ft_export(env, &nb_of_env_v, "d=HEYY");
-    env = ft_export(env, &nb_of_env_v, "OLDPWD=HEYY");
+    init_env(envp, &env);
+    //env = ft_pwd(env, &nb_of_env_v);
+    //env = ft_export(env, &nb_of_env_v, "1alut=d");
+    //env = ft_export(env, &nb_of_env_v, "sss=salut");
+    //env = ft_export(env, &nb_of_env_v, "dd=salut");
+    //env = ft_export(env, &nb_of_env_v, "TEST=salut");
+    //env = ft_export(env, &nb_of_env_v, "d=d");
+    //env = ft_export(env, &nb_of_env_v, "TEST=qq");
+    //env = ft_export(env, &nb_of_env_v, "d=HEYY");
+    //env = ft_export(env, &nb_of_env_v, "OLDPWD=HEYY");
     //ft_env(env, nb_of_env_v);
     //env = ft_cd("built_ins", env, &nb_of_env_v);
     // /* if (env == NULL)
     //     return (0); */
-    env = ft_echo(str, 0, env, &nb_of_env_v);
+    //env = ft_echo(str, 0, env, &nb_of_env_v);
     // //pourquoi quqnd j'appelle 2 fois ca marche pas;
-    env = ft_cd("built_ins", env, &nb_of_env_v);
-    env = ft_cd("ft_env", env, &nb_of_env_v);
-    env = ft_cd("../", env, &nb_of_env_v);
-    env = ft_cd("/", env, &nb_of_env_v);
-    env = ft_cd("/", env, &nb_of_env_v);
-    env = ft_env(env, &nb_of_env_v);
+    //env = ft_cd("built_ins", env, &nb_of_env_v);
+    //env = ft_cd("ft_env", env, &nb_of_env_v);
+    //env = ft_cd("../", env, &nb_of_env_v);
+    //env = ft_cd("/", env, &nb_of_env_v);
+    //env = ft_cd("/", env, &nb_of_env_v);
+    //env = ft_env(env, &nb_of_env_v);
     //printf("\n\n\n\n\n");
-    env = ft_unset(env, &nb_of_env_v, "alut");
-    env = ft_unset(env, &nb_of_env_v, "LS_COLORS");
-    env = ft_unset(env, &nb_of_env_v, "LS_COLORS");
-    env = ft_unset(env, &nb_of_env_v, "PWD");
-    env = ft_env(env, &nb_of_env_v);
-    // //read_terminal();
-    env = ft_env(env, &nb_of_env_v);
+    //env = ft_unset(env, &nb_of_env_v, "alut");
+    //env = ft_unset(env, &nb_of_env_v, "LS_COLORS");
+    //env = ft_unset(env, &nb_of_env_v, "LS_COLORS");
+    //env = ft_unset(env, &nb_of_env_v, "PWD");
+    //env = ft_envenv, &nb_of_env_v);
+    //read_terminal();
+    //env = ft_env(env, &nb_of_env_v);
     // if (env == NULL)
     //     return (0);
-    free_env(env, nb_of_env_v);
-	  read_terminal(envp);
-	  return (0);
+    //free_env(env, nb_of_env_v);
+	read_terminal(&env);
+	return (0);
 }
 
 void    tests()
