@@ -1,5 +1,5 @@
 
-#include "built_ins.h"
+#include "../includes/built_ins.h"
 
 int ft_exit(t_env **env)
 {
@@ -12,4 +12,5 @@ int ft_exit(t_env **env)
             printf ("%s", (*env)[i].value);
         i++;
     }
+    return (0);
 }

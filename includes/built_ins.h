@@ -8,13 +8,6 @@
 # include <stdio.h>
 # include "libft.h"
 
-//ENV STRUCT
-typedef struct s_env
-{
-    char *key;
-    char *value;
-}   t_env;
-
 //FUNCTIONS
 int     ft_pwd(t_env **env);
 int     ft_echo(char **str, int param, t_env **env);

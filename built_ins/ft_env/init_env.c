@@ -30,5 +30,5 @@ int init_env(char **envp, t_env **env)
     count++;
     (*env)[count].key   = NULL;
     (*env)[count].value = NULL;
-    return (count);
+    return (0);
 }
