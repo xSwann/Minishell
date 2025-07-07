@@ -1,7 +1,7 @@
 NAME	= built_ins.a
 
 CC		= cc
-CFLAGS	= -Wall -Wextra -Werror -g3
+CFLAGS	= -Wall -Wextra -Werror -g3 
 
 SRCS	= \
 	ft_pwd.c \
@@ -13,7 +13,8 @@ SRCS	= \
 	ft_echo.c \
 	ft_env/get_env.c \
 	ft_unset.c \
-	is_exportable.c
+	is_exportable.c \
+	ft_exit.c
 
 OBJS	= $(SRCS:.c=.o)
 

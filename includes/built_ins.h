@@ -8,24 +8,26 @@
 # include <stdio.h>
 # include "libft.h"
 
-/*==============================
-=          FUNCTIONS           =
-==============================*/
+//ENV STRUCT
+typedef struct s_env
+{
+    char *key;
+    char *value;
+}   t_env;
 
-t_env	*ft_echo(char **str, int param, t_env *env, int *count);
-t_env	*ft_export(t_env *env, int *count, char *arg);
-t_env	*ft_unset(t_env *env, int *count, char *arg);
-t_env	*ft_cd(char *path, t_env *env, int *count);
-t_env	*ft_env(t_env *env, int *nb_of_env_v);
-t_env	*ft_pwd(t_env *env, int *count);
-int		is_exportable(char *arg);
+//FUNCTIONS
+int     ft_pwd(t_env **env);
+int     ft_echo(char **str, int param, t_env **env);
+int     ft_export(t_env **env, char *arg);
+int     is_exportable(char *arg);
+int     ft_cd(char *path, t_env **env);
+int     ft_unset(t_env **env, char *arg);
+int     ft_env(t_env **env);
+int     ft_exit(t_env **env);
 
-/*==============================
-=          ENV UTILS           =
-==============================*/
-
-char    *get_env(t_env *env, int *count, char *arg);
+//env_utils
 int     init_env(char **envp, t_env **env);
-void    free_env(t_env *env, int count);
+void    free_env(t_env *env);
+char *get_env(t_env *env, char *arg);
 
 #endif

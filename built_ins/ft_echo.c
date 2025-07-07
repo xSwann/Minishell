@@ -4,7 +4,7 @@
 //le int param sert si l'option -n est requise, dans ce cas la, le param devra etre different de 0
 //si l'user entre -n ou -nnn (le nombre qu'il veut) le param doit etre different de 0
 
-t_env    *ft_echo(char **str, int param, t_env *env, int *count)
+int ft_echo(char **str, int param, t_env **env)
 {
     int i;
     int len;
@@ -16,13 +16,14 @@ t_env    *ft_echo(char **str, int param, t_env *env, int *count)
     {
         if (param == 0)
             printf("\n");
-        return (ft_export(env, count, "EXIT_CODE=0"));
+        ft_export(env, "EXIT_CODE=0");
+        return (0);
     }
     while(str[i][len])
             len++;
     if (len == 2 && str[i][0] == '$' && str[i][1] == '?' && str[i][2] == '\0')
     {
-        exit_code = get_env(env, count, "EXIT_CODE");
+        exit_code = get_env(*env, "EXIT_CODE");
         printf("%s", exit_code);
         free(exit_code);
     }
@@ -36,12 +37,13 @@ t_env    *ft_echo(char **str, int param, t_env *env, int *count)
             len++;
         printf("%d", len);
         if (len == 2 && str[i][0] == '$' && str[i][1] == '?' && str[i][3] == '\0')
-            printf("%s\n", get_env(env, count, "EXIT_CODE"));
+            printf("%s\n", get_env(*env, "EXIT_CODE"));
         else
             printf(" %s", str[i]);
         i++;
     }
     if (param == 0)
         printf("\n");
-    return (ft_export(env, count, "EXIT_CODE=0"));
+    ft_export(env, "EXIT_CODE=0");
+    return (0);
 }
