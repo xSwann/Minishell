@@ -1,15 +1,4 @@
-#include "exec.h"
-
-int	wait_execs(pid_t pid)
-{
-	int	status;
-
-	if (waitpid(pid, &status, 0) == -1)
-		error_printer("waitpid failed");
-	if (WIFEXITED(status))
-		status = WEXITSTATUS(status);
-	return (status);
-}
+#include "../includes/exec.h"
 
 void	executor(char **envp, t_pipex *px)
 {
@@ -38,8 +27,10 @@ void	executor(char **envp, t_pipex *px)
 	return (free(path), exit(126));
 }
 
-int	child_process(char **envp, t_pipex *px)
+int	child_process(t_env **envp, t_pipex *px)
 {
+	char	**envp_string_form;
+
 	if (px->prev_fd >= 0)
 	{
 		if ((dup2(px->prev_fd, 0) == -1 && error_printer("dup2: error")
@@ -54,16 +45,39 @@ int	child_process(char **envp, t_pipex *px)
 	}
 	else if (px->outfile && manage_outfile(px))
 		return (exit(1), 1);
-	executor(envp, px);
+	envp_string_form = env_create(*envp);
+	if (envp_string_form)
+		executor(envp_string_form, px);
 	exit(1);
 }
 
-int	pipex(char **envp, t_pipex *px)
+int	is_built_ins(t_env **envp, char **cmd)
+{
+	if (!envp || !(*envp)->key || !cmd || !*cmd)
+		return (0);
+	else if (!ft_strcmp("cd", cmd[0]) && fprintf(stderr, "built-ins %s appelle\n", cmd[0]))
+		return (/*ft_cd(envp, cmd[1]), */1);
+	else if (!ft_strcmp("env", cmd[0]) && fprintf(stderr, "built-ins %s appelle\n", cmd[0]))
+		return (/*ft_env(envp), */1);
+	else if (!ft_strcmp("echo", cmd[0]) && fprintf(stderr, "built-ins %s appelle\n", cmd[0]))
+		return (/*ft_env(envp, cmd + 1), */1);
+	else if (!ft_strcmp("export", cmd[0]) && fprintf(stderr, "built-ins %s appelle\n", cmd[0]))
+		return (/*ft_export(envp, cmd[1]), */1);
+	else if (!ft_strcmp("pwd", cmd[0]) && fprintf(stderr, "built-ins %s appelle\n", cmd[0]))
+		return (/*ft_pwd(envp), */1);
+	else if (!ft_strcmp("unset", cmd[0]) && fprintf(stderr, "built-ins %s appelle\n", cmd[0]))
+		return (/*ft_unset(envp, cmd[1]), */1);
+	return (0);
+}
+
+int	pipex(t_env **envp, t_pipex *px)
 {
 	int	pid;
 
 	if (pipe(px->pipe_fd) == -1)
 		return (perror("pipe: error"), 1);
+	if (px && px->args && px->args[0] && is_built_ins(envp, px->args))
+		return (px->pid = -1, 0);
 	pid = fork();
 	if (pid == 0)
 	{
@@ -82,7 +96,7 @@ int	pipex(char **envp, t_pipex *px)
 	return (px->prev_fd = px->pipe_fd[0], 0);
 }
 
-int	cmd_executor(char **envp, t_cmd **cmd)
+int	cmd_executor(t_env **envp, t_cmd **cmd)
 {
 	t_pipex	px;
 	int		exit_status;

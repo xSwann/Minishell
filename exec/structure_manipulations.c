@@ -6,11 +6,34 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 16:57:03 by flebrun           #+#    #+#             */
-/*   Updated: 2025/06/29 16:29:45 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/07/06 17:02:35 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "exec.h"
+#include "../includes/exec.h"
+
+int	free_args(char **args)
+{
+	int	i;
+
+	i = 0;
+	if (!args)
+		return (1);
+	while (args[i])
+		free(args[i++]);
+	return (free(args), 1);
+}
+
+int	manage_outfile(t_pipex *px)
+{
+	if (px->outfile < 0)
+		return (px->outfile = -1, close_pipe(px), 1);
+	if (dup2(px->outfile, 1) == -1 && error_printer("dup2: error"))
+		return (close_fd(&px->outfile), close_pipe(px), 1);
+	if (close_fd(&px->outfile) == -1)
+		return (close_pipe(px), 1);
+	return (0);
+}
 
 t_cmd	*free_cmd(t_cmd **cmd)
 {
