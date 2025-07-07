@@ -6,11 +6,11 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:00:26 by flebrun           #+#    #+#             */
-/*   Updated: 2025/06/27 09:50:14 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/07/06 14:23:27 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "parsing.h"
+#include "../includes/parsing.h"
 
 int	error_printer(char *path)
 {

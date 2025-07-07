@@ -1,4 +1,4 @@
-#include "parsing.h"
+#include "../includes/parsing.h"
 
 static void	skip_spaces(char *line, int *i)
 {

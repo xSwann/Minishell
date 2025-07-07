@@ -1,5 +1,5 @@
 
-#include "libft.h"
+#include "../includes/libft.h"
 
 
 int ft_strcmp(char *s1, char *s2)

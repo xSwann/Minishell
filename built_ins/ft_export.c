@@ -1,7 +1,4 @@
-
-//permet de mettre des mouvelles variables dans le env, si la cle de la variable existe deja, remplace juste sa value
-//peut aussi etre utiliser pour mettre a jour des values, (exemple: pwd)
-#include "built_ins.h"
+#include "../includes/built_ins.h"
 
 int    ft_export(t_env **env, char *arg)
 {

@@ -23,11 +23,16 @@ EXEC = $(EXEC_DIR)exec.a
 SRCS	= \
 	read_terminal.c
 
-OBJS	= $(SRCS:.c=.o)
+OBJS	= \
+		  $(SRCS:.c=.o) \
+		  $(EXEC) \
+		  $(PARSING) \
+		  $(LIBFT) \
+		  $(BUILT_INS)
 
 # Headers integrations
 
-INCLUDES = -I$(LIBFT_DIR) -I$(BUILT_INS_DIR) -I$(PARSING_DIR) -I$(EXEC_DIR)
+INCLUDES = -Iincludes/
 
 BLU = \033[44m
 RES = \033[0m

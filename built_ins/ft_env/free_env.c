@@ -1,12 +1,12 @@
 
-#include "../built_ins.h"
+#include "../../includes/built_ins.h"
 
-void    free_env(t_env *env, int count)
+void    free_env(t_env *env)
 {
     int i;
 
     i = 0;
-    while(i <= count)
+    while(env[i].key)
     {
         free(env[i].key);
         free(env[i].value);

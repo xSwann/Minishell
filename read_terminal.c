@@ -1,12 +1,8 @@
+#include "./includes/structs.h"
+#include "./includes/libft.h"
+#include "./includes/exec.h"
 
-#include <stdlib.h>
-#include <readline/history.h>
-#include <readline/readline.h>
-#include "parsing/parsing.h"
-#include "built_ins/built_ins.h"
-#include "exec/exec.h"
-
-int	read_terminal(char **envp)
+int	read_terminal(t_env **env)
 {
 	char	*line;
 	int		nb_of_token;
@@ -38,15 +34,15 @@ int	read_terminal(char **envp)
 		if (cmd_creator(&cmd, tokens_struct))
 			exit(EXIT_FAILURE);
 		//print_cmd(cmd);
-		cmd_executor(envp, &cmd);
+		cmd_executor(env, &cmd);
 		free(tokens_struct);
 		if (line)
 			free(line);
-		line = NULL;
 		tokens = NULL;
+		line = NULL;
 	}
 	if (line)
-		free(line);	
+		free(line);
 	return (rl_clear_history(), 0);
 }
 
@@ -57,15 +53,12 @@ int	main(int argc, char **argv, char **envp)
 
     int i;
     t_env    *env;
-    int nb_of_env_v;
     char *str[2];
 
     str[0] = "heyyyy";
     str[1] = 0;
     i = 0;
-    nb_of_env_v = 0;
     env = NULL;
-    nb_of_env_v = init_env(envp, &env);
  /* 
     env = ft_pwd(env, &nb_of_env_v);
     env = ft_cd("-", env, &nb_of_env_v);
@@ -127,7 +120,7 @@ int	main(int argc, char **argv, char **envp)
     // env = ft_env(env, &nb_of_env_v);
     // // if (env == NULL)
     // //     return (0);
-    free_env(env, nb_of_env_v);
+    free_env(env);
 	  //read_terminal(envp);
 	  return (0);
 }

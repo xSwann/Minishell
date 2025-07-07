@@ -1,4 +1,4 @@
-#include "libft.h"
+#include "../includes/libft.h"
 
 void	*ft_memcpy(void *dest, const void *source, size_t size)
 {
