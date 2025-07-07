@@ -1,16 +1,20 @@
 
 #include "../built_ins.h"
 
-t_env    *ft_env(t_env *env, int *nb_of_env_v)
+int    ft_env(t_env **env)
 {
     int i;
 
     i = 0;
-    while (i < *nb_of_env_v)
+    while ((*env)[i].key)
     {
-        printf("%s=", env[i].key);
-        printf("%s\n", env[i].value);
+        if (ft_strcmp((*env)[i].key, "EXIT_CODE") != 0)
+        {
+            printf("%s=", (*env)[i].key);
+            printf("%s\n", (*env)[i].value);
+        }
         i++;
     }
-    return (ft_export(env, nb_of_env_v, "EXIT_CODE=0"));
+    ft_export(env, "EXIT_CODE=0");
+    return (0);
 }

@@ -60,45 +60,75 @@ int	main(int argc, char **argv, char **envp)
     int nb_of_env_v;
     char *str[2];
 
-    str[0] = "$?";
+    str[0] = "heyyyy";
     str[1] = 0;
     i = 0;
     nb_of_env_v = 0;
     env = NULL;
     nb_of_env_v = init_env(envp, &env);
+ /* 
     env = ft_pwd(env, &nb_of_env_v);
-    env = ft_export(env, &nb_of_env_v, "1alut=d");
-    env = ft_export(env, &nb_of_env_v, "sss=salut");
-    env = ft_export(env, &nb_of_env_v, "dd=salut");
-    env = ft_export(env, &nb_of_env_v, "TEST=salut");
-    env = ft_export(env, &nb_of_env_v, "d=d");
-    env = ft_export(env, &nb_of_env_v, "TEST=qq");
-    env = ft_export(env, &nb_of_env_v, "d=HEYY");
-    env = ft_export(env, &nb_of_env_v, "OLDPWD=HEYY");
-    //ft_env(env, nb_of_env_v);
-    //env = ft_cd("built_ins", env, &nb_of_env_v);
-    // /* if (env == NULL)
-    //     return (0); */
-    env = ft_echo(str, 0, env, &nb_of_env_v);
-    // //pourquoi quqnd j'appelle 2 fois ca marche pas;
-    env = ft_cd("built_ins", env, &nb_of_env_v);
-    env = ft_cd("ft_env", env, &nb_of_env_v);
-    env = ft_cd("../", env, &nb_of_env_v);
-    env = ft_cd("/", env, &nb_of_env_v);
-    env = ft_cd("/", env, &nb_of_env_v);
-    env = ft_env(env, &nb_of_env_v);
-    //printf("\n\n\n\n\n");
-    env = ft_unset(env, &nb_of_env_v, "alut");
-    env = ft_unset(env, &nb_of_env_v, "LS_COLORS");
-    env = ft_unset(env, &nb_of_env_v, "LS_COLORS");
-    env = ft_unset(env, &nb_of_env_v, "PWD");
-    env = ft_env(env, &nb_of_env_v);
-    // //read_terminal();
-    env = ft_env(env, &nb_of_env_v);
-    // if (env == NULL)
-    //     return (0);
+    env = ft_cd("-", env, &nb_of_env_v);
+    env = ft_pwd(env, &nb_of_env_v);
+     env = ft_cd("built_ins", env, &nb_of_env_v);
+    env = ft_pwd(env, &nb_of_env_v);
+     env = ft_cd("/", env, &nb_of_env_v);
+    env = ft_pwd(env, &nb_of_env_v);
+     env = ft_cd(NULL, env, &nb_of_env_v);
+    env = ft_pwd(env, &nb_of_env_v);
+     env = ft_cd("-", env, &nb_of_env_v);
+    env = ft_pwd(env, &nb_of_env_v); */
+    //ft_pwd(&env, &nb_of_env_v);
+    //ft_export(&env, &nb_of_env_v, "aalut=d");
+    //ft_env(&env, &nb_of_env_v);
+    //ft_pwd(&env, &nb_of_env_v);
+    // env = ft_export(env, &nb_of_env_v, "sss=salut");
+    // env = ft_export(env, &nb_of_env_v, "dd=salut");
+    // env = ft_export(env, &nb_of_env_v, "TEST=salut");
+    // env = ft_export(env, &nb_of_env_v, "d=d");
+    // env = ft_export(env, &nb_of_env_v, "TEST=qq");
+    // env = ft_export(env, &nb_of_env_v, "d=HEYY");
+    // env = ft_export(env, &nb_of_env_v, "OLDPWD=HEYY");
+    // //ft_env(env, nb_of_env_v);
+    // //env = ft_cd("built_ins", env, &nb_of_env_v);
+    // // /* if (env == NULL)
+    // //     return (0); */
+    //ft_echo(str, 0, &env, &nb_of_env_v);
+    // // //pourquoi quqnd j'appelle 2 fois ca marche pas;
+    // env = ft_cd("built_ins", env, &nb_of_env_v);
+    // env = ft_cd("ft_env", env, &nb_of_env_v);
+    // env = ft_cd("../", env, &nb_of_env_v);
+    // env = ft_cd("/", env, &nb_of_env_v);
+    // env = ft_cd("/", env, &nb_of_env_v);
+    // env = ft_env(env, &nb_of_env_v);
+    // //printf("\n\n\n\n\n");
+    ft_unset(&env, "aalut");
+    ft_env(&env);
+    ft_cd("built_ins", &env);
+    ft_cd("s", &env);
+    ft_env(&env);
+    ft_pwd(&env);
+
+    ft_echo(str, 0, &env);
+    ft_export(&env, "HELLO=sa");
+    ft_unset(&env, "HELLO");
+    ft_env(&env);
+/*     printf("\n\n");
+    ft_unset(&env, &nb_of_env_v, "HELLO");
+    ft_unset(&env, &nb_of_env_v, "HO");
+    ft_env(&env, &nb_of_env_v); */ 
+
+
+    // env = ft_unset(env, &nb_of_env_v, "LS_COLORS");
+    // env = ft_unset(env, &nb_of_env_v, "LS_COLORS");
+    // env = ft_unset(env, &nb_of_env_v, "PWD");
+    // env = ft_env(env, &nb_of_env_v);
+    // // //read_terminal();
+    // env = ft_env(env, &nb_of_env_v);
+    // // if (env == NULL)
+    // //     return (0);
     free_env(env, nb_of_env_v);
-	  read_terminal(envp);
+	  //read_terminal(envp);
 	  return (0);
 }
 

@@ -2,7 +2,7 @@
 #include "built_ins.h"
 #include <string.h>
 
-t_env    *ft_pwd(t_env *env, int *count)
+int    ft_pwd(t_env **env)
 {
     char buffer[4097];
     char *cwd;
@@ -12,5 +12,6 @@ t_env    *ft_pwd(t_env *env, int *count)
         perror("getcwd");
     else
         printf("%s\n", buffer);
-    return (ft_export(env, count, "EXIT_CODE=0"));
+    ft_export(env, "EXIT_CODE=0");
+    return (0);
 }
