@@ -55,18 +55,18 @@ int	is_built_ins(t_env **envp, char **cmd)
 {
 	if (!envp || !(*envp)->key || !cmd || !*cmd)
 		return (0);
-	else if (!ft_strcmp("cd", cmd[0]) && fprintf(stderr, "built-ins %s appelle\n", cmd[0]))
-		return (/*ft_cd(envp, cmd[1]), */1);
-	else if (!ft_strcmp("env", cmd[0]) && fprintf(stderr, "built-ins %s appelle\n", cmd[0]))
-		return (/*ft_env(envp), */1);
-	else if (!ft_strcmp("echo", cmd[0]) && fprintf(stderr, "built-ins %s appelle\n", cmd[0]))
-		return (/*ft_env(envp, cmd + 1), */1);
-	else if (!ft_strcmp("export", cmd[0]) && fprintf(stderr, "built-ins %s appelle\n", cmd[0]))
-		return (/*ft_export(envp, cmd[1]), */1);
-	else if (!ft_strcmp("pwd", cmd[0]) && fprintf(stderr, "built-ins %s appelle\n", cmd[0]))
-		return (/*ft_pwd(envp), */1);
-	else if (!ft_strcmp("unset", cmd[0]) && fprintf(stderr, "built-ins %s appelle\n", cmd[0]))
-		return (/*ft_unset(envp, cmd[1]), */1);
+	else if (!ft_strcmp("cd", cmd[0]))
+		return (ft_cd(cmd[1], envp), 1);
+	else if (!ft_strcmp("env", cmd[0]))
+		return (ft_env(envp), 1);
+	else if (!ft_strcmp("echo", cmd[0]))
+		return (ft_echo(cmd + 1, 0, envp), 1);
+	else if (!ft_strcmp("export", cmd[0]))
+		return (ft_export(envp, cmd[1]), 1);
+	else if (!ft_strcmp("pwd", cmd[0]))
+		return (ft_pwd(envp), 1);
+	else if (!ft_strcmp("unset", cmd[0]))
+		return (ft_unset(envp, cmd[1]), 1);
 	return (0);
 }
 

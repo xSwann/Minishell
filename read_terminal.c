@@ -29,7 +29,7 @@ int	read_terminal(t_env **env)
 		tokens_struct = (t_token *)ft_memset(tokens_struct, 0, \
 			sizeof(t_token) * (nb_of_token + 1));
 		put_tokens_in_struct(tokens, nb_of_token, tokens_struct);
-		print_tokens(nb_of_token, tokens_struct);
+		//print_tokens(nb_of_token, tokens_struct);
 		cmd = NULL;
 		if (cmd_creator(&cmd, tokens_struct))
 			exit(EXIT_FAILURE);
@@ -96,7 +96,7 @@ int	main(int argc, char **argv, char **envp)
     // env = ft_cd("/", env, &nb_of_env_v);
     // env = ft_env(env, &nb_of_env_v);
     // //printf("\n\n\n\n\n");
-    ft_unset(&env, "aalut");
+    /*ft_unset(&env, "aalut");
     ft_env(&env);
     ft_cd("built_ins", &env);
     ft_cd("s", &env);
@@ -106,7 +106,7 @@ int	main(int argc, char **argv, char **envp)
     ft_echo(str, 0, &env);
     ft_export(&env, "HELLO=sa");
     ft_unset(&env, "HELLO");
-    ft_env(&env);
+    ft_env(&env);*/
 /*     printf("\n\n");
     ft_unset(&env, &nb_of_env_v, "HELLO");
     ft_unset(&env, &nb_of_env_v, "HO");

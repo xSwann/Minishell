@@ -41,3 +41,6 @@ valgrind.out
 
 # JetBrains IDEs (CLion, etc.)
 .idea/
+
+# Testers
+minishell_tester/
