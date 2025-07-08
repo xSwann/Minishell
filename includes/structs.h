@@ -51,14 +51,17 @@ typedef struct s_token
 
 typedef struct s_pipex
 {
-	int		here_doc_fd;
-	int		pipe_fd[2];
-	int		outfile;
-	int		prev_fd;
-	int		infile;
-	char	**args;
 	t_cmd	*cmd;
-	pid_t	pid;
+	pid_t	*pids;
+	int		n_pids;
+	char	**args;
+	int		infile;
+	int		prev_fd;
+	int		outfile;
+	int		pipe_fd[2];
+	int		here_doc_fd;
+	int		stdin_backup;
+	int		stdout_backup;
 }	t_pipex;
 
 /*==============================
