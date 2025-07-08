@@ -16,7 +16,8 @@ SRCS	= \
 	ft_strjoin.c \
 	ft_itoa.c \
 	ft_atoi.c \
-	str_is_num.c
+	str_is_num.c \
+	ft_isalpha.c \
 
 OBJS	= $(SRCS:.c=.o)
 

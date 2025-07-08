@@ -36,10 +36,7 @@ int ft_echo(char **str, int param, t_env **env)
         while(str[i][len])
             len++;
         printf("%d", len);
-        if (len == 2 && str[i][0] == '$' && str[i][1] == '?' && str[i][3] == '\0')
-            printf("%s\n", get_env(*env, "EXIT_CODE"));
-        else
-            printf(" %s", str[i]);
+        printf(" %s", str[i]);
         i++;
     }
     if (param == 0)

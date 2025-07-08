@@ -8,6 +8,7 @@ SRCS	= \
 	tokenization.c \
 	count_tokens.c \
 	put_tokens_in_tab.c \
+	sanitize_tokens.c \
 	here_doc_manipulations.c \
 	types.c
 
