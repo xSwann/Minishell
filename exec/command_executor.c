@@ -67,6 +67,8 @@ int	is_built_ins(t_env **envp, char **cmd)
 		return (ft_pwd(envp), 1);
 	else if (!ft_strcmp("unset", cmd[0]))
 		return (ft_unset(envp, cmd[1]), 1);
+	else if (!ft_strcmp("exit", cmd[0]))
+		return (ft_exit(envp, cmd[1]), 1);
 	return (0);
 }
 

@@ -32,7 +32,7 @@ int ft_cd(char *path, t_env **env)
         path = ft_strdup(path);
     if (chdir(path) != 0)
     {
-        printf("cd: %s: No such file or directory\n", path);
+        fprintf(stderr, "cd: %s: No such file or directory\n", path);
         free(path);
         return (ft_export(env, "EXIT_CODE=1"));
     }

@@ -13,7 +13,10 @@ SRCS	= \
 	ft_strdup.c \
 	ft_strcmp.c \
 	ft_strncmp.c \
-	ft_strjoin.c
+	ft_strjoin.c \
+	ft_itoa.c \
+	ft_atoi.c \
+	str_is_num.c
 
 OBJS	= $(SRCS:.c=.o)
 

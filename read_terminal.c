@@ -23,6 +23,7 @@ int	read_terminal(t_env **env)
 			exit(EXIT_FAILURE);
 		//fprintf(stderr, "Nb of tokens: %d\n", nb_of_token);
 		put_tokens_in_tab(nb_of_token, line, tokens);
+        //sanitize_token(nb_of_token, tokens, env);
 		tokens_struct = malloc(sizeof(t_token) * (nb_of_token + 1));
 		if (!tokens_struct)
 			exit(EXIT_FAILURE);
