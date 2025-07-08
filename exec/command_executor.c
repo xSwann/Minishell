@@ -1,4 +1,5 @@
 #include "../includes/exec.h"
+#include <unistd.h>
 
 void	executor(char **envp, t_pipex *px)
 {
@@ -27,11 +28,30 @@ void	executor(char **envp, t_pipex *px)
 	return (free(path), exit(126));
 }
 
+int	is_built_ins(t_env **envp, char **cmd)
+{
+	if (!envp || !(*envp)->key || !cmd || !*cmd)
+		return (0);
+	else if (!ft_strcmp("cd", cmd[0]))
+		return (ft_cd(cmd[1], envp));
+	else if (!ft_strcmp("env", cmd[0]))
+		return (ft_env(envp));
+	else if (!ft_strcmp("echo", cmd[0]))
+		return (ft_echo(cmd + 1, 0, envp));
+	else if (!ft_strcmp("export", cmd[0]))
+		return (ft_export(envp, cmd[1]));
+	else if (!ft_strcmp("pwd", cmd[0]))
+		return (ft_pwd(envp));
+	else if (!ft_strcmp("unset", cmd[0]))
+		return (ft_unset(envp, cmd[1]));
+	return (-1);
+}
+
 int	child_process(t_env **envp, t_pipex *px)
 {
 	char	**envp_string_form;
 
-	if (px->prev_fd >= 0)
+	if (px->prev_fd > 0)
 	{
 		if ((dup2(px->prev_fd, 0) == -1 && error_printer("dup2: error")
 				&& close_pipe(px) < 2) || close_fd(&px->prev_fd) == -1)
@@ -43,31 +63,12 @@ int	child_process(t_env **envp, t_pipex *px)
 				&& close_pipe(px) < 2) || close_fd(&px->pipe_fd[1]) == -1)
 			return (exit(1), 1);
 	}
-	else if (px->outfile && manage_outfile(px))
-		return (exit(1), 1);
+	if (is_built_ins(envp, px->args) != -1)
+		exit(1);
 	envp_string_form = env_create(*envp);
 	if (envp_string_form)
 		executor(envp_string_form, px);
 	exit(1);
-}
-
-int	is_built_ins(t_env **envp, char **cmd)
-{
-	if (!envp || !(*envp)->key || !cmd || !*cmd)
-		return (0);
-	else if (!ft_strcmp("cd", cmd[0]))
-		return (ft_cd(cmd[1], envp), 1);
-	else if (!ft_strcmp("env", cmd[0]))
-		return (ft_env(envp), 1);
-	else if (!ft_strcmp("echo", cmd[0]))
-		return (ft_echo(cmd + 1, 0, envp), 1);
-	else if (!ft_strcmp("export", cmd[0]))
-		return (ft_export(envp, cmd[1]), 1);
-	else if (!ft_strcmp("pwd", cmd[0]))
-		return (ft_pwd(envp), 1);
-	else if (!ft_strcmp("unset", cmd[0]))
-		return (ft_unset(envp, cmd[1]), 1);
-	return (0);
 }
 
 int	pipex(t_env **envp, t_pipex *px)
@@ -76,8 +77,6 @@ int	pipex(t_env **envp, t_pipex *px)
 
 	if (pipe(px->pipe_fd) == -1)
 		return (perror("pipe: error"), 1);
-	if (px && px->args && px->args[0] && is_built_ins(envp, px->args))
-		return (px->pid = -1, 0);
 	pid = fork();
 	if (pid == 0)
 	{
@@ -86,42 +85,43 @@ int	pipex(t_env **envp, t_pipex *px)
 	}
 	else if (pid < 0)
 		return (close_pipe(px), error_printer("fork: error"), 1);
-	px->pid = pid;
+	px->pids[px->n_pids++] = pid;
 	if (close_fd(&px->pipe_fd[1]) == -1)
 		return (-1);
 	if (px->infile == px->prev_fd)
 		px->infile = -1;
 	if (close_fd(&px->prev_fd) == -1)
 		return (1);
-	return (px->prev_fd = px->pipe_fd[0], 0);
+	return (px->prev_fd = px->pipe_fd[0], px->pipe_fd[0] = -1, 0);
 }
 
 int	cmd_executor(t_env **envp, t_cmd **cmd)
 {
 	t_pipex	px;
 	int		exit_status;
-	int		stdin_backup;
-	int		stdout_backup;
 
 	if (!envp || !(*cmd))
 		return (1);
-	stdin_backup = dup(STDIN_FILENO);
-	stdout_backup = dup(STDOUT_FILENO);
-	while ((*cmd))
+	px.stdin_backup = 0;
+	px.stdout_backup = 0;
+	if (init_px(cmd, &px))
+		return (1);
+	while (px.cmd)
 	{
-		//fprintf(stderr, "\n\nbefore, cmd is %p\n\n", (*cmd));
-		if (init_px(cmd, &px, stdin_backup, stdout_backup))
-			return (1);
 		if (pipex(envp, &px))
 			return (close_pipe(&px), 1);
-		*cmd = free_cmd(cmd);
-		//fprintf(stderr, "\n\nafter, cmd is %p\n\n", (*cmd));
+		if (update_px(&px))
+			return (1);
 	}
-	exit_status = wait_execs(px.pid);
+	//fprintf(stderr, "		px->here_doc_fd = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n\
+	//	px->outfile = %i || px->prev_fd = %i || px->infile = %i\n\
+	//	args[0] = %s || t_cmd = %p || pid = %i || n_pid = %i\n", px.here_doc_fd, \
+	//	px.pipe_fd[0], px.pipe_fd[1], px.outfile, px.prev_fd, \
+	//	px.infile, px.args[0], px.cmd, px.pids[0], px.n_pids);
+	exit_status = wait_execs(px.pids, px.n_pids);
 	close_pipe(&px);
-	dup2(stdin_backup, STDIN_FILENO);
-	dup2(stdout_backup, STDOUT_FILENO);
 	if (px.outfile >= 0)
 		close_fd(&px.outfile);
-	return (close(stdin_backup), close(stdout_backup), exit_status);
+	fd_std_handler(&px); 
+	return (exit_status);
 }

@@ -6,7 +6,7 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:00:26 by flebrun           #+#    #+#             */
-/*   Updated: 2025/07/06 14:23:27 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/07/08 14:30:24 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 int	error_printer(char *path)
 {
-	write(2, "pipex: ", 7);
+	write(2, "minishell: ", 11);
 	write(2, strerror(errno), strlen(strerror(errno)));
 	write(2, ": ", 2);
 	write(2, path, strlen(path));

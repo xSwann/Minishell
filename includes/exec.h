@@ -18,7 +18,7 @@
 ==============================*/
 
 int		close_fd(int *fd);
-int		wait_execs(pid_t pid);
+int		wait_execs(pid_t *pids, int n_pids);
 int		free_args(char **args);
 int		close_pipe(t_pipex *px);
 char	**env_create(t_env *envp);
@@ -34,7 +34,9 @@ int		child_process(t_env **envp, t_pipex *px);
 =   STRUCTURE MANIPULATIONS   =
 ==============================*/
 
-t_cmd	*free_cmd(t_cmd **cmd);
-int		init_px(t_cmd **cmd, t_pipex *px, int stdin, int stdout);
+t_cmd	*free_cmd_and_advance(t_cmd **cmd);
+int		init_px(t_cmd **cmd, t_pipex *px);
+int		fd_std_handler(t_pipex *px);
+int		update_px(t_pipex *px);
 
 #endif
