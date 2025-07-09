@@ -47,7 +47,12 @@ void    replace_expanded_value(char **str, char *expanded, int len)
         i++;
     }
     i++;
-    while((*str)[i] && ft_isalpha((*str)[i]))
+    if ((*str)[i] != '?')
+    {
+        while((*str)[i] && (ft_isalpha((*str)[i])))
+            i++;
+    }
+    else
         i++;
     while (expanded[k])
     {
@@ -106,40 +111,48 @@ void    expand_var(char **str, t_env *env)
     i = 0;
     len = 0;
     start = 0;
+    to_expand = NULL;
     while ((*str)[i] && (*str)[i] != '$')
         i++;
     start = i;
     i++;
     while ((*str)[i] && ft_isalpha((*str)[i]))
         i++;
-    to_expand = ft_substr(*str, start + 1, i - (start + 1));
+    if ((*str)[i] == '?')
+    {
+        to_expand = ft_strdup("EXIT_CODE");
+        len = 1;
+    }
+    else
+    {
+        to_expand = ft_substr(*str, start + 1, i - (start + 1));
+        len = ft_strlen(to_expand);
+    }
     expanded = get_env(env, to_expand);
     if (!expanded)
         erase_expand(str, ft_strlen(*str) - ft_strlen(to_expand));
-    else if(ft_strcmp(expanded, "?") == 0)
-        replace_expanded_value(str, get_env(env, "EXIT_CODE"), ft_strlen(*str) - ft_strlen(to_expand) + 1);
     else
-        replace_expanded_value(str, expanded, ft_strlen(*str) - ft_strlen(to_expand) + ft_strlen(expanded));
+        replace_expanded_value(str, expanded, ft_strlen(*str) - len + ft_strlen(expanded));
 }
 
 
 void sanitize_tokens(char **tokens, t_env *env)
 {
-    int  i, j, first;
+    int  i;
+    int j;
+    int first;
     char quote;
+    int len;
 
     i = 0;
     while (tokens[i])
     {
         j = 0;
         quote = '\0';
+        len = ft_strlen(tokens[i]);
         while (tokens[i][j])
         {
-            if (ft_strcmp("$?", tokens[i]) == 0)
-            {
-                break;
-            }
-            else if (tokens[i][j] == '$'
+            if (tokens[i][j] == '$' && len != 1 && (ft_isalpha(tokens[i][j+1]) || tokens[i][j+1] == '?')
              && (quote == '\0' || quote == '"'))
             {
                 expand_var(&tokens[i], env);
@@ -158,6 +171,7 @@ void sanitize_tokens(char **tokens, t_env *env)
             }
             j++;
         }
+
         j     = 0;
         quote = '\0';
         while (tokens[i][j])

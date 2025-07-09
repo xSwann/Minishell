@@ -8,7 +8,6 @@ int ft_echo(char **str, int param, t_env **env)
 {
     int i;
     int len;
-    char *exit_code;
 
     i = 0;
     len = 0;
@@ -21,21 +20,13 @@ int ft_echo(char **str, int param, t_env **env)
     }
     while(str[i][len])
             len++;
-    if (len == 2 && str[i][0] == '$' && str[i][1] == '?' && str[i][2] == '\0')
-    {
-        exit_code = get_env(*env, "EXIT_CODE");
-        printf("%s", exit_code);
-        free(exit_code);
-    }
-    else
-        printf("%s", str[i]);
+    printf("%s", str[i]);
     i++;
     while (str[i])
     {
         len = 0;
         while(str[i][len])
             len++;
-        printf("%d", len);
         printf(" %s", str[i]);
         i++;
     }
