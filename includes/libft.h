@@ -37,6 +37,7 @@ char	*ft_strjoin(char const *s1, char const *s2);
 //size_t	ft_strlcat(char *dst, const char *src, size_t dstsize);
 //size_t	ft_strlcpy(char *dst, const char *src, size_t size);
 int		ft_strlen(char *str);
+int  ft_strslen(char **tab);
 int		ft_strncmp(char *s1, char *s2, size_t l);
 //char	*ft_strnstr(const char *s1, const char *s2, size_t l);
 //char	*ft_strrchr(const char *string, int searchedchar);
