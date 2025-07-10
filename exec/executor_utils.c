@@ -58,16 +58,24 @@ int	close_pipe(t_pipex *px)
 	return (0);
 }
 
-int	wait_execs(pid_t pid)
+int	wait_execs(pid_t *pids, int n_pids)
 {
+	int	i;
 	int	status;
 
-	if (pid < 0)
-		return (1);
-	if (waitpid(pid, &status, 0) == -1)
-		error_printer("waitpid failed");
-	if (WIFEXITED(status))
-		status = WEXITSTATUS(status);
+	i = 0;
+	status = 0;
+	while (i < n_pids && pids[i])
+	{
+		if (pids[i] <= 0)
+			break ;
+		if (waitpid(pids[i], &status, 0) == -1)
+			error_printer("waitpid failed");
+		if (WIFEXITED(status))
+			status = WEXITSTATUS(status);
+		i++;
+	}
+	free(pids);
 	return (status);
 }
 

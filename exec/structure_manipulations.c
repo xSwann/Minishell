@@ -6,11 +6,12 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 16:57:03 by flebrun           #+#    #+#             */
-/*   Updated: 2025/07/06 17:02:35 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/07/08 19:24:15 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/exec.h"
+#include <unistd.h>
 
 int	free_args(char **args)
 {
@@ -24,18 +25,7 @@ int	free_args(char **args)
 	return (free(args), 1);
 }
 
-int	manage_outfile(t_pipex *px)
-{
-	if (px->outfile < 0)
-		return (px->outfile = -1, close_pipe(px), 1);
-	if (dup2(px->outfile, 1) == -1 && error_printer("dup2: error"))
-		return (close_fd(&px->outfile), close_pipe(px), 1);
-	if (close_fd(&px->outfile) == -1)
-		return (close_pipe(px), 1);
-	return (0);
-}
-
-t_cmd	*free_cmd(t_cmd **cmd)
+t_cmd	*free_cmd_and_advance(t_cmd **cmd)
 {
 	int		i;
 	t_cmd	*pipe_cmd;
@@ -69,25 +59,76 @@ t_cmd	*free_cmd(t_cmd **cmd)
 	return (pipe_cmd);
 }
 
-int	init_px(t_cmd **cmd, t_pipex *px, int stdin, int stdout)
+int	fd_std_handler(t_pipex *px)
 {
-	if (!cmd || !(*cmd))
+	if (px->stdin_backup == -1 && px->stdout_backup == -1)
+	{
+		px->stdin_backup = dup(STDIN_FILENO);
+		if (px->stdin_backup < 0)
+			return (error_printer("dup: stdin"));
+		px->stdout_backup = dup(STDOUT_FILENO);
+		if (px->stdout_backup < 0)
+			return (dup2(px->stdin_backup, STDIN_FILENO), px->stdin_backup = -1, \
+			error_printer("dup: stdout"));
+	}
+	else
+	{
+		if (dup2(px->stdin_backup, STDIN_FILENO) == -1)
+			error_printer("dup2: stdin");
+		if (dup2(px->stdout_backup, STDOUT_FILENO) == -1)
+			error_printer("dup2: stdout");
+		close_fd(&px->stdin_backup);
+		close_fd(&px->stdout_backup);
+	}
+	return (0);
+}
+
+pid_t	*pid_array_builder(t_cmd *cmd)
+{
+	pid_t	*pids;
+	int		i;
+
+	i = 0;
+	while (cmd)
+	{
+		i++;
+		cmd = cmd->pipe_cmd;
+	}
+	if (!i)
+		return (NULL);
+	pids = (pid_t *)ft_calloc(i + 1, sizeof(pid_t));
+	if (!pids)
+		return (NULL);
+	return (pids);
+}
+
+int	init_px(t_cmd **cmd, t_pipex *px)
+{
+	if (!cmd || !(*cmd) || !(*cmd)->args)
 		return (fprintf(stderr, "\n\ninit_px : cmd is NULL\n\n"));
-	px->infile = stdin;
-	px->outfile = stdout;
+	px->n_pids = 0;
+	px->infile = 0;
+	px->cmd = *cmd;
+	px->pids = NULL;
+	px->outfile = -1;
 	px->here_doc_fd = 0;
-	px->pid = 0;
 	px->pipe_fd[0] = -1;
 	px->pipe_fd[1] = -1;
-	px->prev_fd = px->infile;
+	px->stdin_backup = -1;
+	px->stdout_backup = -1;
 	px->args = (*cmd)->args;
-	px->cmd = *cmd;
-	if ((*cmd)->here_doc_fd && fprintf(stderr, "\n\nhere_doc detected\n\n"))
+	if (fd_std_handler(px))
+		return (1);
+	px->pids = pid_array_builder(*cmd);
+	if (!px->pids)
+		return(error_printer("malloc: pid_t array"), fd_std_handler(px));
+	if ((*cmd)->here_doc_fd)
 		px->infile = (*cmd)->here_doc_fd;
 	else if (!(*cmd)->here_doc_fd && (*cmd)->infile)
 		px->infile = open((*cmd)->infile, O_RDONLY);
 	if (px->infile < 0)
-		return (error_printer((*cmd)->infile), 1);
+		return (error_printer((*cmd)->infile), fd_std_handler(px), 1);
+	px->prev_fd = px->infile;
 	if ((*cmd)->outfile)
 	{
 		if ((*cmd)->open_options == (O_WRONLY | O_CREAT | O_TRUNC))
@@ -95,7 +136,8 @@ int	init_px(t_cmd **cmd, t_pipex *px, int stdin, int stdout)
 		else if ((*cmd)->open_options == (O_WRONLY | O_CREAT | O_APPEND))
 			px->outfile = open((*cmd)->outfile, O_WRONLY | O_CREAT | O_APPEND, 0644);
 		if (px->outfile < 0)
-			return (error_printer((*cmd)->outfile), 1);
+			return (error_printer((*cmd)->outfile), \
+			fd_std_handler(px), close_fd(&px->infile), 1);
 	}
 	else if (!(*cmd)->outfile && (*cmd)->pipe_cmd)
 		(*cmd)->outfile = (*cmd)->pipe_cmd->infile;
@@ -103,6 +145,23 @@ int	init_px(t_cmd **cmd, t_pipex *px, int stdin, int stdout)
 	//	px->outfile = %i || px->prev_fd = %i || px->infile = %i\n\
 	//	args[0] = %s || t_cmd = %p || pid = %i\n", px->here_doc_fd, \
 	//	px->pipe_fd[0], px->pipe_fd[1], px->outfile, px->prev_fd, \
-	//	px->infile, px->args[0], px->cmd, px->pid);
-	return (px->pid = 0, 0);
+	//	px->infile, px->args[0], px->cmd, px->pids[0]);
+	return (0);
+}
+
+int	update_px(t_pipex *px)
+{
+	if (!px->cmd->pipe_cmd)
+		return (px->cmd = NULL, 0);
+	px->args = px->cmd->pipe_cmd->args;
+	if (px->cmd->pipe_cmd->here_doc_fd)
+	{
+		if (px->prev_fd && close_fd(&px->prev_fd))
+			return (error_printer("pipe_fd[0]"), fd_std_handler(px), 1);
+		px->prev_fd = px->cmd->pipe_cmd->here_doc_fd;
+		if (px->prev_fd < 0)
+			return (error_printer("here_doc_fd"), fd_std_handler(px), 1);
+	}
+	px->cmd = /*free_cmd_and_advance(&px->cmd)*/px->cmd->pipe_cmd;
+	return (0);
 }
