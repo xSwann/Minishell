@@ -31,16 +31,13 @@ OBJS	= \
 		  $(BUILT_INS)
 
 # Headers integrations
-
 INCLUDES = -Iincludes/
 
 BLU = \033[44m
 RES = \033[0m
 
-
-all: $(LIBFT) $(BUILT_INS) $(PARSING) $(OBJS) $(EXEC)
+all: $(LIBFT) $(BUILT_INS) $(PARSING) $(EXEC) $(OBJS)
 	$(CC) $(CFLAGS) $(INCLUDES) $(OBJS) $(ENV) $(BUILT_INS) $(PARSING) $(EXEC) $(LIBFT) -o $(NAME) $(RL_FLAGS)
-
 	@echo "\n  $(BLU)[✓] Minishell generated  $(RES)  \n"
 
 $(LIBFT):

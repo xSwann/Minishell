@@ -1,0 +1,879 @@
+#include "../includes/exec.h"
+#include <unistd.h>
+
+void	executor(char **envp, t_pipex *px)
+{
+	char	*path;
+	int		i;
+
+	close_fd(&px->pipe_fd[0]);
+	if ((!px->args || !px->args[0]) && write(2, "Pipex : Empty command\n", 22)
+		&& free_args(px->args))
+	{
+		close_fd(&px->pipe_fd[1]);
+		exit(1);
+	}
+	path = NULL;
+	i = 0;
+	while (envp[i] && ft_strncmp("PATH=", envp[i], 4))
+		i++;
+	path = path_parser(envp[i] + 5, px->args[0]);
+	if (path)
+		execve(path, px->args, envp);
+	close_fd(&px->pipe_fd[1]);
+	free_args(px->args);
+	if (!path)
+		exit(127);
+	error_printer(path);
+	return (free(path), exit(126));
+}
+
+int	is_built_ins(t_env **envp, char **cmd)
+{
+	if (!envp || !(*envp)->key || !cmd || !*cmd)
+		return (0);
+	else if (!ft_strcmp("cd", cmd[0]))
+		return (ft_cd(cmd[1], envp));
+	else if (!ft_strcmp("env", cmd[0]))
+		return (ft_env(envp));
+	else if (!ft_strcmp("echo", cmd[0]))
+		return (ft_echo(cmd + 1, 0, envp));
+	else if (!ft_strcmp("export", cmd[0]))
+		return (ft_export(envp, cmd[1]));
+	else if (!ft_strcmp("pwd", cmd[0]))
+		return (ft_pwd(envp));
+	else if (!ft_strcmp("unset", cmd[0]))
+		return (ft_unset(envp, cmd[1]));
+	return (-1);
+}
+
+int	child_process(t_env **envp, t_pipex *px)
+{
+	char	**envp_string_form;
+
+	if (px->prev_fd >= 0)
+	{
+		if ((dup2(px->prev_fd, 0) == -1 && error_printer("dup2: error")
+				&& close_pipe(px) < 2) || close_fd(&px->prev_fd) == -1)
+			return (exit(1), 1);
+	}
+	if (!px->outfile)
+	{
+		if ((dup2(px->pipe_fd[1], 1) == -1 && error_printer("dup2: error")
+				&& close_pipe(px) < 2) || close_fd(&px->pipe_fd[1]) == -1)
+			return (exit(1), 1);
+	}
+	else if (px->outfile && manage_outfile(px))
+		return (exit(1), 1);
+	if (is_built_ins(envp, px->args) != -1)
+		exit(1);
+	envp_string_form = env_create(*envp);
+	if (envp_string_form)
+		executor(envp_string_form, px);
+	exit(1);
+}
+
+int	pipex(t_env **envp, t_pipex *px)
+{
+	int	pid;
+
+	if (pipe(px->pipe_fd) == -1)
+		return (perror("pipe: error"), 1);
+	pid = fork();
+	if (pid == 0)
+	{
+		child_process(envp, px);
+		return (1);
+	}
+	else if (pid < 0)
+		return (close_pipe(px), error_printer("fork: error"), 1);
+	px->pids[px->n_pids] = pid;
+	fprintf(stderr, "pid[%i] = %i\n", px->n_pids, px->pids[px->n_pids]);
+	if (close_fd(&px->pipe_fd[1]) == -1)
+		return (-1);
+	if (px->infile == px->prev_fd)
+		px->infile = -1;
+	if (close_fd(&px->prev_fd) == -1)
+		return (1);
+	return (px->prev_fd = px->pipe_fd[0], px->pipe_fd[0] = -1, 0);
+}
+
+int	cmd_executor(t_env **envp, t_cmd **cmd)
+{
+	t_pipex	px;
+	int		exit_status;
+
+	if (!envp || !(*cmd))
+		return (1);
+	px.stdin_backup = 0;
+	px.stdout_backup = 0;
+	if (init_px(cmd, &px))
+		return (1);
+	while (px.cmd)
+	{
+		if (pipex(envp, &px))
+			return (close_pipe(&px), 1);
+		if (update_px(&px))
+			return (1);
+	}
+	fprintf(stderr, "		px->here_doc_fd = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n\
+		px->outfile = %i || px->prev_fd = %i || px->infile = %i\n\
+		args[0] = %s || t_cmd = %p || pid = %i || n_pid = %i\n", px.here_doc_fd, \
+		px.pipe_fd[0], px.pipe_fd[1], px.outfile, px.prev_fd, \
+		px.infile, px.args[0], px.cmd, px.pids[px.n_pids], px.n_pids);
+	exit_status = wait_execs(px.pids);
+	close_pipe(&px);
+	dup2(px.stdin_backup, STDIN_FILENO);
+	dup2(px.stdout_backup, STDOUT_FILENO);
+	if (px.outfile >= 0)
+		close_fd(&px.outfile);
+	return (close_fd(&px.stdin_backup), close_fd(&px.stdout_backup), exit_status);
+}
+#include "../includes/exec.h"
+
+void	path_builder(char *envp, char *cmd, char *path, int len)
+{
+	int	i;
+
+	i = 0;
+	while (envp && envp[i] && i < len)
+	{
+		path[i] = envp[i];
+		i++;
+	}
+	path[i] = '/';
+	i++;
+	while (cmd && *cmd)
+	{
+		path[i] = *cmd++;
+		i++;
+	}
+	path[i] = '\0';
+}
+
+char	*path_parser(char *envp, char *cmd)
+{
+	char	*path;
+	int		len;
+
+	path = NULL;
+	while (*envp)
+	{
+		len = 0;
+		while (envp[len] && envp[len] != ':')
+			len++;
+		path = malloc(len + ft_strlen(cmd) + 2);
+		if (!path)
+			return (write(2, "pipex: malloc failed\n", 22), NULL);
+		path_builder(envp, cmd, path, len);
+		if (access(path, X_OK) == 0)
+			return (path);
+		free(path);
+		envp += len;
+		if (*envp == ':')
+			envp++;
+	}
+	return (error_printer(cmd), NULL);
+}
+
+int	close_pipe(t_pipex *px)
+{
+	if (px->infile && px->infile >= 0 && close(px->infile) == -1)
+		return (px->infile = -1, error_printer("close: infile"), 1);
+	if (px->pipe_fd[0] && px->pipe_fd[0] >= 0 && close(px->pipe_fd[0]) == -1)
+		return (px->pipe_fd[0] = -1, error_printer("close: pipe_fd[0]"), 1);
+	px->pipe_fd[0] = -1;
+	if (px->pipe_fd[1] && px->pipe_fd[1] >= 0 && close(px->pipe_fd[1]) == -1)
+		return (px->pipe_fd[1] = -1, error_printer("close: pipe_fd[1]"), 1);
+	px->pipe_fd[1] = -1;
+	return (0);
+}
+
+int	wait_execs(pid_t *pids)
+{
+	int	i;
+	int	status;
+
+	i = 0;
+	status = 0;
+	while (pids[i])
+	{
+		fprintf(stderr, "pids[%i] = %i\n", i, pids[i]);
+		if (pids[i] <= 0)
+			return (status);
+		if (waitpid(pids[i], &status, 0) == -1)
+			error_printer("waitpid failed");
+		if (WIFEXITED(status))
+			status = WEXITSTATUS(status);
+		i++;
+	}
+	return (status);
+}
+
+char	**env_create(t_env *envp)
+{
+	char	**envp_string_form;
+	int		i;
+
+	i = 0;
+	envp_string_form = NULL;
+	if (!envp || !(*envp->key))
+		return (NULL);
+	while (envp[i].key)
+		i++;
+	envp_string_form = malloc(sizeof (char *) * (i + 1));
+	if (!envp_string_form)
+		return (NULL);
+	envp_string_form[i] = NULL;
+	while (--i >= 0 && envp[i].key)
+		envp_string_form[i] = ft_strjoin(ft_strjoin(envp[i].key, "="), envp[i].value);
+	return (envp_string_form);
+}
+NAME	= exec.a
+
+CC		= cc
+CFLAGS	= -Wall -Wextra -Werror -g3
+
+SRCS	= \
+	command_executor.c \
+	executor_utils.c \
+	structure_manipulations.c
+
+OBJS	= $(SRCS:.c=.o)
+
+AR		= ar rcs
+
+all: $(NAME)
+
+$(NAME): $(OBJS)
+	$(AR) $(NAME) $(OBJS)
+
+clean:
+	rm -f $(OBJS)
+
+fclean: clean
+	rm -f $(NAME)
+
+re: fclean all
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   structure_manipulations.c                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 16:57:03 by flebrun           #+#    #+#             */
+/*   Updated: 2025/07/08 18:32:37 by flebrun          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/exec.h"
+#include <unistd.h>
+
+int	free_args(char **args)
+{
+	int	i;
+
+	i = 0;
+	if (!args)
+		return (1);
+	while (args[i])
+		free(args[i++]);
+	return (free(args), 1);
+}
+
+int	manage_outfile(t_pipex *px)
+{
+	if (px->outfile < 0)
+		return (px->outfile = -1, close_pipe(px), 1);
+	if (dup2(px->outfile, 1) == -1 && error_printer("dup2: error"))
+		return (close_fd(&px->outfile), close_pipe(px), 1);
+	if (close_fd(&px->outfile) == -1)
+		return (close_pipe(px), 1);
+	return (0);
+}
+
+t_cmd	*free_cmd_and_advance(t_cmd **cmd)
+{
+	int		i;
+	t_cmd	*pipe_cmd;
+
+	pipe_cmd = NULL;
+	if (!(*cmd))
+		return (pipe_cmd);
+	if ((*cmd)->args)
+	{
+		i = 0;
+		while ((*cmd)->args[i])
+		{
+			free((*cmd)->args[i]);
+			(*cmd)->args[i++] = NULL;
+		}
+		free((*cmd)->args);
+		(*cmd)->args = NULL;
+	}
+	if ((*cmd)->infile)
+	{
+		free((*cmd)->infile);
+		(*cmd)->infile = NULL;
+	}
+	if ((*cmd)->outfile)
+	{
+		free((*cmd)->outfile);
+		(*cmd)->outfile = NULL;
+	}
+	pipe_cmd = (*cmd)->pipe_cmd;
+	free(*cmd);
+	return (pipe_cmd);
+}
+
+int	fd_std_handler(t_pipex *px)
+{
+	if (px->stdin_backup > -1 && px->stdout_backup > -1)
+	{
+		px->stdin_backup = dup(STDIN_FILENO);
+		if (px->stdin_backup < 0)
+			return (error_printer("dup: stdin"));
+		px->stdout_backup = dup(STDOUT_FILENO);
+		if (px->stdout_backup < 0)
+			return (dup2(px->stdin_backup, STDIN_FILENO), px->stdin_backup = -1, \
+			error_printer("dup: stdout"));
+	}
+	else
+	{
+		if (dup2(px->stdin_backup, STDIN_FILENO) == -1)
+			error_printer("dup2: stdin");
+		if (dup2(px->stdout_backup, STDOUT_FILENO) == -1)
+			error_printer("dup2: stdout");
+		close_fd(&px->stdin_backup);
+		close_fd(&px->stdout_backup);
+	}
+	return (0);
+}
+
+pid_t	*pid_array_builder(t_cmd *cmd)
+{
+	pid_t	*pids;
+	int		i;
+
+	i = 0;
+	while (cmd)
+	{
+		i++;
+		cmd = cmd->pipe_cmd;
+	}
+	if (!i)
+		return (NULL);
+	pids = (pid_t *)ft_calloc(i + 1, sizeof(pid_t));
+	if (!pids)
+		return (NULL);
+	return (pids);
+}
+
+int	init_px(t_cmd **cmd, t_pipex *px)
+{
+	if (!cmd || !(*cmd) || !(*cmd)->args)
+		return (fprintf(stderr, "\n\ninit_px : cmd is NULL\n\n"));
+	px->n_pids = 0;
+	px->infile = 0;
+	px->cmd = *cmd;
+	px->outfile = -1;
+	px->here_doc_fd = 0;
+	px->pipe_fd[0] = -1;
+	px->pipe_fd[1] = -1;
+	px->args = (*cmd)->args;
+	if (fd_std_handler(px))
+		return (1);
+	px->pids = pid_array_builder(*cmd);
+	if (!px->pids)
+		return(error_printer("malloc: pid_t array"), fd_std_handler(px));
+	if ((*cmd)->here_doc_fd)
+		px->infile = (*cmd)->here_doc_fd;
+	else if (!(*cmd)->here_doc_fd && (*cmd)->infile)
+		px->infile = open((*cmd)->infile, O_RDONLY);
+	if (px->infile < 0)
+		return (error_printer((*cmd)->infile), free(px->pids), fd_std_handler(px), 1);
+	px->prev_fd = px->infile;
+	if ((*cmd)->outfile)
+	{
+		if ((*cmd)->open_options == (O_WRONLY | O_CREAT | O_TRUNC))
+			px->outfile = open((*cmd)->outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		else if ((*cmd)->open_options == (O_WRONLY | O_CREAT | O_APPEND))
+			px->outfile = open((*cmd)->outfile, O_WRONLY | O_CREAT | O_APPEND, 0644);
+		if (px->outfile < 0)
+			return (error_printer((*cmd)->outfile), free(px->pids), \
+			fd_std_handler(px), close_fd(&px->infile), 1);
+	}
+	else if (!(*cmd)->outfile && (*cmd)->pipe_cmd)
+		(*cmd)->outfile = (*cmd)->pipe_cmd->infile;
+	fprintf(stderr, "		px->here_doc_fd = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n\
+		px->outfile = %i || px->prev_fd = %i || px->infile = %i\n\
+		args[0] = %s || t_cmd = %p || pid = %i\n", px->here_doc_fd, \
+		px->pipe_fd[0], px->pipe_fd[1], px->outfile, px->prev_fd, \
+		px->infile, px->args[0], px->cmd, px->pids[0]);
+	return (0);
+}
+
+int	update_px(t_pipex *px)
+{
+	if (!px->cmd->pipe_cmd)
+		return (free(px->pids), fd_std_handler(px), px->cmd = NULL, 0);
+	px->n_pids++;
+	px->args = px->cmd->pipe_cmd->args;
+	if (px->cmd->pipe_cmd->here_doc_fd)
+	{
+		if (px->prev_fd && close_fd(&px->prev_fd))
+			return (error_printer("pipe_fd[0]"), free(px->pids), fd_std_handler(px), 1);
+		px->prev_fd = px->cmd->pipe_cmd->here_doc_fd;
+		if (px->prev_fd < 0)
+			return (error_printer("here_doc_fd"), free(px->pids), fd_std_handler(px), 1);
+	}
+	px->cmd = /*free_cmd_and_advance(&px->cmd)*/px->cmd->pipe_cmd;
+	return (0);
+}
+#include "../includes/exec.h"
+#include <unistd.h>
+
+void	executor(char **envp, t_pipex *px)
+{
+	char	*path;
+	int		i;
+
+	if ((!px->args || !px->args[0]) && write(2, "Pipex : Empty command\n", 22)
+		&& free_args(px->args))
+	{
+		close_fd(&px->pipe_fd[1]);
+		exit(1);
+	}
+	path = NULL;
+	i = 0;
+	while (envp[i] && ft_strncmp("PATH=", envp[i], 4))
+		i++;
+	path = path_parser(envp[i] + 5, px->args[0]);
+	if (path)
+		execve(path, px->args, envp);
+	close_fd(&px->pipe_fd[1]);
+	free_args(px->args);
+	if (!path)
+		exit(127);
+	error_printer(path);
+	return (free(path), exit(126));
+}
+
+int	is_built_ins(t_env **envp, char **cmd)
+{
+	if (!envp || !(*envp)->key || !cmd || !*cmd)
+		return (0);
+	else if (!ft_strcmp("cd", cmd[0]))
+		return (ft_cd(cmd, envp), 1);
+	else if (!ft_strcmp("env", cmd[0]))
+		return (ft_env(envp), 1);
+	else if (!ft_strcmp("echo", cmd[0]))
+		return (ft_echo(cmd + 1, 0, envp), 1);
+	else if (!ft_strcmp("export", cmd[0]))
+		return (ft_export(envp, cmd[1]), 1);
+	else if (!ft_strcmp("pwd", cmd[0]))
+		return (ft_pwd(envp), 1);
+	else if (!ft_strcmp("unset", cmd[0]))
+		return (ft_unset(envp, cmd[1]), 1);
+	else if (!ft_strcmp("exit", cmd[0]))
+		return (ft_exit(envp, cmd), 1);
+	return (-1);
+}
+
+int	child_process(t_env **envp, t_pipex *px)
+{
+	char	**envp_string_form;
+
+	//fd_std_handler(px);
+	if (px->prev_fd >= 0)
+	{
+		if ((dup2(px->prev_fd, 0) == -1 && error_printer("dup2: error")
+				&& close_pipe(px) < 2) || close_fd(&px->prev_fd) == -1)
+			return (exit(1), 1);
+	}
+	if (!px->outfile)
+	{
+		if ((dup2(px->pipe_fd[1], 1) == -1 && error_printer("dup2: error")
+				&& close_pipe(px) < 2) || close_fd(&px->pipe_fd[1]) == -1)
+			return (exit(1), 1);
+	}
+	if ((px->cmd->outfile || !px->cmd->pipe_cmd) && manage_outfile(px))
+		return (free(px->pids), exit(ft_exit(envp, NULL)), 1);
+	close_fd(&px->pipe_fd[0]);
+	if (is_built_ins(envp, px->args) != -1)
+	{
+		close_fd(&px->pipe_fd[1]);
+		free_args(px->args);
+		return (ft_exit(envp, NULL));
+	}
+	envp_string_form = env_create(*envp);
+	if (envp_string_form)
+		executor(envp_string_form, px);
+	exit(ft_exit(envp, NULL));
+}
+
+int	pipex(t_env **envp, t_pipex *px)
+{
+	int	pid;
+
+	if (pipe(px->pipe_fd) == -1)
+		return (perror("pipe: error"), 1);
+	pid = fork();
+	if (pid == 0)
+	{
+		child_process(envp, px);
+		return (1);
+	}
+	else if (pid < 0)
+		return (close_pipe(px), error_printer("fork: error"), 1);
+	px->pids[px->n_pids++] = pid;
+	if (close_fd(&px->pipe_fd[1]) == -1)
+		return (-1);
+	if (px->infile == px->prev_fd)
+		px->infile = -1;
+	if (close_fd(&px->prev_fd) == -1)
+		return (1);
+	return (px->prev_fd = px->pipe_fd[0], px->pipe_fd[0] = -1, 0);
+}
+
+int	cmd_executor(t_env **envp, t_cmd **cmd)
+{
+	t_pipex	px;
+	int		exit_status;
+
+	if (!envp || !(*cmd))
+		return (1);
+	px.stdin_backup = 0;
+	if (init_px(cmd, &px))
+		return (1);
+	while (px.cmd)
+	{
+		if (pipex(envp, &px))
+			return (close_pipe(&px), 1);
+		if (update_px(&px))
+			return (1);
+	}
+	//fprintf(stderr, "		px->here_doc_fd = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n\
+	//	px->outfile = %i || px->prev_fd = %i || px->infile = %i\n\
+	//	args[0] = %s || t_cmd = %p || pid = %i || n_pid = %i\n", px.here_doc_fd, \
+	//	px.pipe_fd[0], px.pipe_fd[1], px.outfile, px.prev_fd, \
+	//	px.infile, px.args[0], px.cmd, px.pids[0], px.n_pids);
+	exit_status = wait_execs(envp, &px);
+	//if (dup2(px.stdin_backup, STDIN_FILENO) == -1)
+	//	error_printer("dup2: stdin");
+	close_pipe(&px);
+	return (exit_status);
+}
+#include "../includes/exec.h"
+
+void	path_builder(char *envp, char *cmd, char *path, int len)
+{
+	int	i;
+
+	i = 0;
+	while (envp && envp[i] && i < len)
+	{
+		path[i] = envp[i];
+		i++;
+	}
+	path[i] = '/';
+	i++;
+	while (cmd && *cmd)
+	{
+		path[i] = *cmd++;
+		i++;
+	}
+	path[i] = '\0';
+}
+
+char	*path_parser(char *envp, char *cmd)
+{
+	char	*path;
+	int		len;
+
+	path = NULL;
+	while (*envp)
+	{
+		len = 0;
+		while (envp[len] && envp[len] != ':')
+			len++;
+		path = malloc(len + ft_strlen(cmd) + 2);
+		if (!path)
+			return (write(2, "pipex: malloc failed\n", 22), NULL);
+		path_builder(envp, cmd, path, len);
+		if (access(path, X_OK) == 0)
+			return (path);
+		free(path);
+		envp += len;
+		if (*envp == ':')
+			envp++;
+	}
+	return (error_printer(cmd), NULL);
+}
+
+int	close_pipe(t_pipex *px)
+{
+	if (px->infile && px->infile >= 0 && close(px->infile) == -1)
+		return (px->infile = -1, error_printer("close: infile"), 1);
+	if (px->pipe_fd[0] && px->pipe_fd[0] >= 0 && close(px->pipe_fd[0]) == -1)
+		return (px->pipe_fd[0] = -1, error_printer("close: pipe_fd[0]"), 1);
+	px->pipe_fd[0] = -1;
+	if (px->pipe_fd[1] && px->pipe_fd[1] >= 0 && close(px->pipe_fd[1]) == -1)
+		return (px->pipe_fd[1] = -1, error_printer("close: pipe_fd[1]"), 1);
+	px->pipe_fd[1] = -1;
+	return (0);
+}
+
+int	wait_execs(t_env **envp, t_pipex *px)
+{
+	int		i;
+	int		status;
+	char	*status_code;
+	char	*exit_code;
+
+	i = -1;
+	status = 0;
+	while (++i < px->n_pids && px->pids[i])
+	{
+		if (px->pids[i] <= 0)
+			break ;
+		if (waitpid(px->pids[i], &status, 0) == -1)
+			error_printer("waitpid failed");
+		if (WIFEXITED(status))
+			status = WEXITSTATUS(status);
+	}
+	free(px->pids);
+	//fd_std_handler(px);
+	status_code = ft_itoa(status);
+	if (status_code)
+	{
+		exit_code = ft_strjoin("EXIT_CODE=", status_code);
+		free(status_code);
+		if (exit_code)
+			return (ft_export(envp, exit_code), free(exit_code), 0);
+	}
+	return (status);
+}
+
+char	**env_create(t_env *envp)
+{
+	char	**envp_string_form;
+	int		i;
+
+	i = 0;
+	envp_string_form = NULL;
+	if (!envp || !(*envp->key))
+		return (NULL);
+	while (envp[i].key)
+		i++;
+	envp_string_form = malloc(sizeof (char *) * (i + 1));
+	if (!envp_string_form)
+		return (NULL);
+	envp_string_form[i] = NULL;
+	while (--i >= 0 && envp[i].key)
+		envp_string_form[i] = ft_strjoin(ft_strjoin(envp[i].key, "="), envp[i].value);
+	return (envp_string_form);
+}
+NAME	= exec.a
+
+CC		= cc
+CFLAGS	= -Wall -Wextra -Werror -g3
+
+SRCS	= \
+	command_executor.c \
+	executor_utils.c \
+	structure_manipulations.c
+
+OBJS	= $(SRCS:.c=.o)
+
+AR		= ar rcs
+
+all: $(NAME)
+
+$(NAME): $(OBJS)
+	$(AR) $(NAME) $(OBJS)
+
+clean:
+	rm -f $(OBJS)
+
+fclean: clean
+	rm -f $(NAME)
+
+re: fclean all
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   structure_manipulations.c                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/06/22 16:57:03 by flebrun           #+#    #+#             */
+/*   Updated: 2025/07/10 16:30:57 by flebrun          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "../includes/exec.h"
+#include <unistd.h>
+
+int	free_args(char **args)
+{
+	int	i;
+
+	i = 0;
+	if (!args)
+		return (1);
+	while (args[i])
+		free(args[i++]);
+	return (free(args), 1);
+}
+
+t_cmd	*free_cmd_and_advance(t_cmd **cmd)
+{
+	int		i;
+	t_cmd	*pipe_cmd;
+
+	pipe_cmd = NULL;
+	if (!(*cmd))
+		return (pipe_cmd);
+	if ((*cmd)->args)
+	{
+		i = 0;
+		while ((*cmd)->args[i])
+		{
+			free((*cmd)->args[i]);
+			(*cmd)->args[i++] = NULL;
+		}
+		free((*cmd)->args);
+		(*cmd)->args = NULL;
+	}
+	if ((*cmd)->infile)
+	{
+		free((*cmd)->infile);
+		(*cmd)->infile = NULL;
+	}
+	if ((*cmd)->outfile)
+	{
+		free((*cmd)->outfile);
+		(*cmd)->outfile = NULL;
+	}
+	pipe_cmd = (*cmd)->pipe_cmd;
+	free(*cmd);
+	return (pipe_cmd);
+}
+
+int	manage_outfile(t_pipex *px)
+{
+	if (px->cmd->outfile && px->cmd->open_options)
+	{
+		if (px->cmd->open_options == (O_WRONLY | O_CREAT | O_TRUNC))
+			px->outfile = open(px->cmd->outfile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		else if (px->cmd->open_options == (O_WRONLY | O_CREAT | O_APPEND))
+			px->outfile = open(px->cmd->outfile, O_WRONLY | O_CREAT | O_APPEND, 0644);
+		if (px->outfile < 0 && error_printer(px->cmd->outfile))
+			return (fd_std_handler(px), close_fd(&px->infile), 1);
+	}
+	if (dup2(px->outfile, 1) == -1 && error_printer("dup2: error"))
+		return (close_fd(&px->outfile), close_pipe(px), 1);
+	if (close_fd(&px->outfile) == -1)
+		return (close_pipe(px), 1);
+	return (0);
+}
+
+int	fd_std_handler(t_pipex *px)
+{
+	if (px->stdin_backup == -1 && px->stdout_backup == -1)
+	{
+		px->stdin_backup = dup(STDIN_FILENO);
+		if (px->stdin_backup < 0)
+			return (error_printer("dup: stdin"));
+		px->stdout_backup = dup(STDOUT_FILENO);
+		if (px->stdout_backup < 0)
+			return (dup2(px->stdin_backup, STDIN_FILENO), px->stdin_backup = -1, \
+			error_printer("dup: stdout"));
+	}
+	else
+	{
+		if (dup2(px->stdin_backup, STDIN_FILENO) == -1)
+			error_printer("dup2: stdin");
+		if (dup2(px->stdout_backup, STDOUT_FILENO) == -1)
+			error_printer("dup2: stdout");
+		close_fd(&px->stdin_backup);
+		close_fd(&px->stdout_backup);
+	}
+	return (0);
+}
+
+pid_t	*pid_array_builder(t_cmd *cmd)
+{
+	pid_t	*pids;
+	int		i;
+
+	i = 0;
+	while (cmd)
+	{
+		i++;
+		cmd = cmd->pipe_cmd;
+	}
+	if (!i)
+		return (NULL);
+	pids = (pid_t *)ft_calloc(i + 1, sizeof(pid_t));
+	if (!pids)
+		return (NULL);
+	return (pids);
+}
+
+int	init_px(t_cmd **cmd, t_pipex *px)
+{
+	if (!cmd || !(*cmd) || !(*cmd)->args)
+		return (fprintf(stderr, "\n\ninit_px : cmd is NULL\n\n"));
+	px->n_pids = 0;
+	px->infile = 0;
+	px->cmd = *cmd;
+	px->pids = NULL;
+	px->outfile = 0;
+	px->here_doc_fd = 0;
+	px->pipe_fd[0] = -1;
+	px->pipe_fd[1] = -1;
+	px->stdin_backup = -1;
+	px->stdout_backup = -1;
+	px->args = (*cmd)->args;
+	//if (fd_std_handler(px))
+	//	return (1);
+	//px->stdin_backup = dup(STDIN_FILENO);
+	//if (px->stdin_backup < 0)
+	//	return (error_printer("dup: stdin"));
+	px->pids = pid_array_builder(*cmd);
+	if (!px->pids)
+		return(error_printer("malloc: pid_t array"), fd_std_handler(px));
+	if ((*cmd)->here_doc_fd)
+		px->infile = (*cmd)->here_doc_fd;
+	else if (!(*cmd)->here_doc_fd && (*cmd)->infile)
+		px->infile = open((*cmd)->infile, O_RDONLY);
+	if (px->infile < 0)
+		return (error_printer((*cmd)->infile), fd_std_handler(px), 1);
+	px->prev_fd = px->infile;
+	//fprintf(stderr, "		px->here_doc_fd = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n\
+	//	px->outfile = %i || px->prev_fd = %i || px->infile = %i\n\
+	//	args[0] = %s || t_cmd = %p || pid = %i\n", px->here_doc_fd, \
+	//	px->pipe_fd[0], px->pipe_fd[1], px->outfile, px->prev_fd, \
+	//	px->infile, px->args[0], px->cmd, px->pids[0]);
+	return (0);
+}
+
+int	update_px(t_pipex *px)
+{
+	if (!px->cmd->pipe_cmd)
+		return (px->cmd = NULL, 0);
+	px->args = px->cmd->pipe_cmd->args;
+	if (px->cmd->pipe_cmd->here_doc_fd)
+	{
+		if (px->prev_fd && close_fd(&px->prev_fd))
+			return (error_printer("pipe_fd[0]"), fd_std_handler(px), 1);
+		px->prev_fd = px->cmd->pipe_cmd->here_doc_fd;
+		if (px->prev_fd < 0)
+			return (error_printer("here_doc_fd"), fd_std_handler(px), 1);
+	}
+	px->cmd = /*free_cmd_and_advance(&px->cmd)*/px->cmd->pipe_cmd;
+	return (0);
+}

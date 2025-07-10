@@ -6,7 +6,6 @@ void	executor(char **envp, t_pipex *px)
 	char	*path;
 	int		i;
 
-	close_fd(&px->pipe_fd[0]);
 	if ((!px->args || !px->args[0]) && write(2, "Pipex : Empty command\n", 22)
 		&& free_args(px->args))
 	{
@@ -53,24 +52,19 @@ int	child_process(t_env **envp, t_pipex *px)
 {
 	char	**envp_string_form;
 
-	if (px->prev_fd > 0)
-	{
-		if ((dup2(px->prev_fd, 0) == -1 && error_printer("dup2: error")
-				&& close_pipe(px) < 2) || close_fd(&px->prev_fd) == -1)
-			return (exit(1), 1);
-	}
-	if (!px->outfile)
-	{
-		if ((dup2(px->pipe_fd[1], 1) == -1 && error_printer("dup2: error")
-				&& close_pipe(px) < 2) || close_fd(&px->pipe_fd[1]) == -1)
-			return (exit(1), 1);
-	}
+	if (manage_infile(px) || manage_outfile(px))
+		return (exit(1), 1);
+	close_fd(&px->pipe_fd[0]);
 	if (is_built_ins(envp, px->args) != -1)
+	{
+		close_fd(&px->pipe_fd[1]);
+		free_args(px->args);
 		return (ft_exit(envp, NULL));
+	}
 	envp_string_form = env_create(*envp);
 	if (envp_string_form)
 		executor(envp_string_form, px);
-	exit(1);
+	exit(ft_exit(envp, NULL));
 }
 
 int	pipex(t_env **envp, t_pipex *px)
@@ -90,23 +84,16 @@ int	pipex(t_env **envp, t_pipex *px)
 	px->pids[px->n_pids++] = pid;
 	if (close_fd(&px->pipe_fd[1]) == -1)
 		return (-1);
-	if (px->infile == px->prev_fd)
-		px->infile = -1;
-	if (close_fd(&px->prev_fd) == -1)
-		return (1);
-	return (px->prev_fd = px->pipe_fd[0], px->pipe_fd[0] = -1, 0);
+	return (px->infile = px->pipe_fd[0], px->pipe_fd[0] = -1, 0);
 }
 
 int	cmd_executor(t_env **envp, t_cmd **cmd)
 {
 	t_pipex	px;
 	int		exit_status;
-	char	*exit_code;
 
 	if (!envp || !(*cmd))
 		return (1);
-	px.stdin_backup = 0;
-	px.stdout_backup = 0;
 	if (init_px(cmd, &px))
 		return (1);
 	while (px.cmd)
@@ -121,12 +108,9 @@ int	cmd_executor(t_env **envp, t_cmd **cmd)
 	//	args[0] = %s || t_cmd = %p || pid = %i || n_pid = %i\n", px.here_doc_fd, \
 	//	px.pipe_fd[0], px.pipe_fd[1], px.outfile, px.prev_fd, \
 	//	px.infile, px.args[0], px.cmd, px.pids[0], px.n_pids);
-	exit_status = wait_execs(px.pids, px.n_pids);
-	exit_code = ft_strjoin("EXIT_CODE=", ft_itoa(exit_status));
-	ft_export(envp, exit_code);
+	exit_status = wait_execs(envp, &px);
+	//if (dup2(px.stdin_backup, STDIN_FILENO) == -1)
+	//	error_printer("dup2: stdin");
 	close_pipe(&px);
-	if (px.outfile >= 0)
-		close_fd(&px.outfile);
-	fd_std_handler(&px); 
 	return (exit_status);
 }

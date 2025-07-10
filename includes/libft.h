@@ -20,7 +20,7 @@ int     ft_isalpha(int a);
 //void	*ft_memchr(const void *memoryblock, int searchedchar, size_t size);
 //int		ft_memcmp(const void *p1, const void *p2, size_t size);
 void	*ft_memcpy(void *dest, const void *source, size_t size);
-//void	*ft_memmove(void *dst, const void *src, size_t size);
+void	*ft_memmove(void *dst, const void *src, size_t size);
 void	*ft_memset(void *p, int value, size_t count);
 //void	ft_putchar_fd(char c, int fd);
 //void	ft_putstr_fd(char *s, int fd);

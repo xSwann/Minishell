@@ -18,7 +18,6 @@
 ==============================*/
 
 int		close_fd(int *fd);
-int		wait_execs(pid_t *pids, int n_pids);
 int		free_args(char **args);
 int		close_pipe(t_pipex *px);
 char	**env_create(t_env *envp);
@@ -26,6 +25,7 @@ int		error_printer(char *path);
 int		manage_outfile(t_pipex *px);
 int		ft_argv_updater(char **av, int ac);
 char	*path_parser(char *envp, char *cmd);
+int		wait_execs(t_env **envp, t_pipex *px);
 char	*ft_strndup(const char *src, int len);
 int		cmd_executor(t_env **env, t_cmd **cmd);
 int		child_process(t_env **envp, t_pipex *px);
@@ -36,7 +36,9 @@ int		child_process(t_env **envp, t_pipex *px);
 
 t_cmd	*free_cmd_and_advance(t_cmd **cmd);
 int		init_px(t_cmd **cmd, t_pipex *px);
+int		manage_outfile(t_pipex *px);
 int		fd_std_handler(t_pipex *px);
+int		manage_infile(t_pipex *px);
 int		update_px(t_pipex *px);
 
 #endif

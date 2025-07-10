@@ -26,9 +26,9 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	i = 0;
 	s1len = 0;
 	s2len = 0;
-	while (s1[s1len])
+	while (s1 && s1[s1len])
 		s1len++;
-	while (s2[s2len])
+	while (s2 && s2[s2len])
 		s2len++;
 	ttlen = (s1len + s2len);
 	nvl = malloc(sizeof(char) * ttlen + 1);
