@@ -5,6 +5,12 @@ int ft_exit(t_env **env, char **arg)
 {
     char *join;
     int arg_n;
+    if (!arg || !arg[1])
+    {
+        arg_n = ft_atoi(get_env(*env, "EXIT_CODE"));
+        exit(arg_n);
+        return (0);
+    }   
     if (ft_strslen(arg) > 2)
     {
         fprintf(stderr, "exit: too many arguments");

@@ -46,7 +46,7 @@ int	is_built_ins(t_env **envp, char **cmd)
 		return (ft_unset(envp, cmd[1]), 1);
 	else if (!ft_strcmp("exit", cmd[0]))
 		return (ft_exit(envp, cmd), 1);
-	return (0);
+	return (-1);
 }
 
 int	child_process(t_env **envp, t_pipex *px)
@@ -66,15 +66,12 @@ int	child_process(t_env **envp, t_pipex *px)
 			return (exit(1), 1);
 	}
 	if (is_built_ins(envp, px->args) != -1)
-		exit(1);
+		return (ft_exit(envp, NULL));
 	envp_string_form = env_create(*envp);
 	if (envp_string_form)
 		executor(envp_string_form, px);
 	exit(1);
 }
-
-
-
 
 int	pipex(t_env **envp, t_pipex *px)
 {
@@ -104,6 +101,7 @@ int	cmd_executor(t_env **envp, t_cmd **cmd)
 {
 	t_pipex	px;
 	int		exit_status;
+	char	*exit_code;
 
 	if (!envp || !(*cmd))
 		return (1);
@@ -124,6 +122,8 @@ int	cmd_executor(t_env **envp, t_cmd **cmd)
 	//	px.pipe_fd[0], px.pipe_fd[1], px.outfile, px.prev_fd, \
 	//	px.infile, px.args[0], px.cmd, px.pids[0], px.n_pids);
 	exit_status = wait_execs(px.pids, px.n_pids);
+	exit_code = ft_strjoin("EXIT_CODE=", ft_itoa(exit_status));
+	ft_export(envp, exit_code);
 	close_pipe(&px);
 	if (px.outfile >= 0)
 		close_fd(&px.outfile);

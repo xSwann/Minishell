@@ -27,7 +27,7 @@ char    *ft_itoa(int nbr)
         len++;
     }
     result = malloc(sizeof(char) * len + 1);
-    result[len + 1] = '\n';
+    result[len + 1] = '\0';
     if (signe == 1)
         result[0] = '-';
     while (len >= signe)
