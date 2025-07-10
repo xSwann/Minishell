@@ -33,13 +33,13 @@ t_type	find_type(t_token token)
 		return (END);
 	if (token.word[0] == '|')
 		return (PIPE);
-	else if (token.word[0] == '<' && token.word[1] == '<')
+	else if (token.word[0] == '<' && token.word[1] == '<' && ft_strlen(token.word) == 2)
 		return (HEREDOC);
-	else if (token.word[0] == '>' && token.word[1] == '>')
+	else if (token.word[0] == '>' && token.word[1] == '>' && ft_strlen(token.word) == 2)
 		return (APPEND);
-	else if (token.word[0] == '<')
+	else if (token.word[0] == '<' && ft_strlen(token.word) == 1)
 		return (REDIN);
-	else if (token.word[0] == '>')
+	else if (token.word[0] == '>' && ft_strlen(token.word) == 1)
 		return (REDOUT);
 	return (WORD);
 }

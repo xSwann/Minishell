@@ -13,14 +13,19 @@ int    ft_export(t_env **env, char *arg)
 
     i = 0;
     count = 0;
+    if (!arg)
+    {
+        ft_env(env);
+        return (0);
+    }
     while((*env)[count].value)
         count++;
-    while (arg[i] != '=')
+    while (arg[i] && arg[i] != '=')
         i++;
     identifier = ft_substr(arg, 0, i);
     if (!is_exportable(arg))
     {
-        printf("export: `%s': not a valid identifier\n", identifier);
+        fprintf(stderr, "export: `%s': not a valid identifier\n", identifier);
         free(identifier);
         return (ft_export(env, "EXIT_CODE=1"));
     }

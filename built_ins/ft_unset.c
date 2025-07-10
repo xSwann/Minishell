@@ -13,6 +13,11 @@ int ft_unset(t_env **env, char *arg)
     i = 0;
     j = 0;
     count = 0;
+    if (!arg)
+    {
+        ft_export(env, "EXIT_CODE=0");
+        return (0);
+    }
     while ((*env)[count].key)
         count++;
     already_in_env = count;
