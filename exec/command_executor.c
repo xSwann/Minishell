@@ -33,18 +33,20 @@ int	is_built_ins(t_env **envp, char **cmd)
 	if (!envp || !(*envp)->key || !cmd || !*cmd)
 		return (0);
 	else if (!ft_strcmp("cd", cmd[0]))
-		return (ft_cd(cmd[1], envp));
+		return (ft_cd(cmd, envp), 1);
 	else if (!ft_strcmp("env", cmd[0]))
-		return (ft_env(envp));
+		return (ft_env(envp), 1);
 	else if (!ft_strcmp("echo", cmd[0]))
-		return (ft_echo(cmd + 1, 0, envp));
+		return (ft_echo(cmd + 1, 0, envp), 1);
 	else if (!ft_strcmp("export", cmd[0]))
-		return (ft_export(envp, cmd[1]));
+		return (ft_export(envp, cmd[1]), 1);
 	else if (!ft_strcmp("pwd", cmd[0]))
-		return (ft_pwd(envp));
+		return (ft_pwd(envp), 1);
 	else if (!ft_strcmp("unset", cmd[0]))
-		return (ft_unset(envp, cmd[1]));
-	return (-1);
+		return (ft_unset(envp, cmd[1]), 1);
+	else if (!ft_strcmp("exit", cmd[0]))
+		return (ft_exit(envp, cmd), 1);
+	return (0);
 }
 
 int	child_process(t_env **envp, t_pipex *px)
@@ -70,6 +72,9 @@ int	child_process(t_env **envp, t_pipex *px)
 		executor(envp_string_form, px);
 	exit(1);
 }
+
+
+
 
 int	pipex(t_env **envp, t_pipex *px)
 {

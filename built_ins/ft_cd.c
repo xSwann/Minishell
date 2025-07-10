@@ -1,27 +1,34 @@
 
 #include "../includes/built_ins.h"
 
-int ft_cd(char *path, t_env **env)
+int ft_cd(char **path, t_env **env)
 {
     char *path_env;
     char cwd[4097];
     int i;
 
     i = 0;
-    if (!path)
+    
+    if (ft_strslen(path) > 2)
     {
-        path = get_env(*env, "HOME");
+        fprintf(stderr, "cd: too many arguments\n");
+        ft_export(env, "EXIT_CODE=1");
+        return (0);
+    }
+    if (!path[1])
+    {
+        path[1] = get_env(*env, "HOME");
         if (!path)
         {
-            printf("cd: PWD not set\n");
+            fprintf(stderr, "cd: PWD not set\n");
             ft_export(env, "EXIT_CODE=1");
             return (0);
         }
     }
-    else if (ft_strcmp(path, "-") == 0)
+    else if (ft_strcmp(path[1], "-") == 0)
     {
-        path = get_env(*env, "OLDPWD");
-        if (!path)
+        path[1] = get_env(*env, "OLDPWD");
+        if (!path[1])
         {
             printf("minishell: cd: OLDPWD not set\n");
             ft_export(env, "EXIT_CODE=1");
@@ -29,11 +36,11 @@ int ft_cd(char *path, t_env **env)
         }
     }
     else
-        path = ft_strdup(path);
-    if (chdir(path) != 0)
+        path[1] = ft_strdup(path[1]);
+    if (chdir(path[1]) != 0)
     {
-        printf("cd: %s: No such file or directory\n", path);
-        free(path);
+        fprintf(stderr, "cd: %s: No such file or directory\n", path[1]);
+        free(path[1]);
         return (ft_export(env, "EXIT_CODE=1"));
     }
     while((*env)[i].key && ft_strcmp((*env)[i].key, "PWD") != 0)
@@ -45,7 +52,7 @@ int ft_cd(char *path, t_env **env)
     path_env = ft_strjoin("PWD=", cwd);
     ft_export(env, path_env);
     free(path_env);
-    free(path);
+    //free(path[1]);
     ft_export(env, "EXIT_CODE=0");
     return (0);
 }
