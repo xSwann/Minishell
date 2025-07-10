@@ -57,6 +57,7 @@ typedef struct s_pipex
 	char	**args;
 	int		infile;
 	int		outfile;
+	t_cmd	*first_cmd;
 	int		pipe_fd[2];
 	int		here_doc_fd;
 }	t_pipex;

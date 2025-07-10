@@ -34,7 +34,7 @@ int		child_process(t_env **envp, t_pipex *px);
 =   STRUCTURE MANIPULATIONS   =
 ==============================*/
 
-t_cmd	*free_cmd_and_advance(t_cmd **cmd);
+void	free_cmds(t_cmd *cmd);
 int		init_px(t_cmd **cmd, t_pipex *px);
 int		manage_outfile(t_pipex *px);
 int		fd_std_handler(t_pipex *px);

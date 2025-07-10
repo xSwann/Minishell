@@ -6,7 +6,7 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 16:57:03 by flebrun           #+#    #+#             */
-/*   Updated: 2025/07/10 19:35:29 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/07/10 20:06:14 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,38 +25,38 @@ int	free_args(char **args)
 	return (free(args), 1);
 }
 
-t_cmd	*free_cmd_and_advance(t_cmd **cmd)
+void	free_cmds(t_cmd *cmd)
 {
 	int		i;
 	t_cmd	*pipe_cmd;
 
 	pipe_cmd = NULL;
-	if (!(*cmd))
-		return (pipe_cmd);
-	if ((*cmd)->args)
+	if (!cmd)
+		return ;
+	if (cmd->args)
 	{
 		i = 0;
-		while ((*cmd)->args[i])
+		while (cmd->args[i])
 		{
-			free((*cmd)->args[i]);
-			(*cmd)->args[i++] = NULL;
+			free(cmd->args[i]);
+			cmd->args[i++] = NULL;
 		}
-		free((*cmd)->args);
-		(*cmd)->args = NULL;
+		free(cmd->args);
+		cmd->args = NULL;
 	}
-	if ((*cmd)->infile)
+	if (cmd->infile)
 	{
-		free((*cmd)->infile);
-		(*cmd)->infile = NULL;
+		free(cmd->infile);
+		cmd->infile = NULL;
 	}
-	if ((*cmd)->outfile)
+	if (cmd->outfile)
 	{
-		free((*cmd)->outfile);
-		(*cmd)->outfile = NULL;
+		free(cmd->outfile);
+		cmd->outfile = NULL;
 	}
-	pipe_cmd = (*cmd)->pipe_cmd;
-	free(*cmd);
-	return (pipe_cmd);
+	pipe_cmd = cmd->pipe_cmd;
+	free(cmd);
+	return ;
 }
 
 int	manage_outfile(t_pipex *px)
@@ -89,22 +89,6 @@ int	manage_infile(t_pipex *px)
 	if (px->infile && dup2(px->infile, STDIN_FILENO) == -1 
 		&& error_printer("dup2: error"))
 		return (close_fd(&px->infile), close_pipe(px), 1);
-	/*px->stdin_backup = dup(STDIN_FILENO);
-	if (px->stdin_backup < 0)
-		return (error_printer("dup: stdin"));
-	px->stdout_backup = dup(STDOUT_FILENO);
-	if (px->stdout_backup < 0)
-		return (dup2(px->stdin_backup, STDIN_FILENO), px->stdin_backup = -1, \
-		error_printer("dup: stdout"));
-	else
-	{
-		if (dup2(px->stdin_backup, STDIN_FILENO) == -1)
-			error_printer("dup2: stdin");
-		if (dup2(px->stdout_backup, STDOUT_FILENO) == -1)
-			error_printer("dup2: stdout");
-		close_fd(&px->stdin_backup);
-		close_fd(&px->stdout_backup);
-	}*/
 	return (0);
 }
 
@@ -139,12 +123,8 @@ int	init_px(t_cmd **cmd, t_pipex *px)
 	px->here_doc_fd = 0;
 	px->pipe_fd[0] = -1;
 	px->pipe_fd[1] = -1;
+	px->first_cmd = *cmd;
 	px->args = (*cmd)->args;
-	//if (fd_std_handler(px))
-	//	return (1);
-	//px->stdin_backup = dup(STDIN_FILENO);
-	//if (px->stdin_backup < 0)
-	//	return (error_printer("dup: stdin"));
 	px->pids = pid_array_builder(*cmd);
 	if (!px->pids)
 		return(error_printer("malloc: pid_t array"));
@@ -171,6 +151,6 @@ int	update_px(t_pipex *px)
 	}
 	else
 		px->here_doc_fd = 0;
-	px->cmd = /*free_cmd_and_advance(&px->cmd)*/px->cmd->pipe_cmd;
+	px->cmd = px->cmd->pipe_cmd;
 	return (0);
 }

@@ -76,8 +76,8 @@ int	wait_execs(t_env **envp, t_pipex *px)
 		if (WIFEXITED(status))
 			status = WEXITSTATUS(status);
 	}
+	free_cmds(px->first_cmd);
 	free(px->pids);
-	//fd_std_handler(px);
 	status_code = ft_itoa(status);
 	if (status_code)
 	{
@@ -93,7 +93,12 @@ void	*free_envp(char **envp, int j)
 {
 	while (j >= 0 && envp && envp[j])
 		free(envp[j--]);
-	return (NULL);
+	if (j == -2)
+	{
+		while (envp[++j])
+			free(envp[j]);
+	}
+	return (free (envp), NULL);
 }
 
 char	**env_create(t_env *envp)
