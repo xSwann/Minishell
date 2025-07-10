@@ -56,12 +56,10 @@ typedef struct s_pipex
 	int		n_pids;
 	char	**args;
 	int		infile;
-	int		prev_fd;
 	int		outfile;
+	t_cmd	*first_cmd;
 	int		pipe_fd[2];
 	int		here_doc_fd;
-	int		stdin_backup;
-	int		stdout_backup;
 }	t_pipex;
 
 /*==============================

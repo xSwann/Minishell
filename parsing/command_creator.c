@@ -36,9 +36,10 @@ t_cmd	*init_command(t_token *tokens)
 	cmd = (t_cmd *)ft_calloc(1, sizeof(t_cmd));
 	if (!cmd)
 		return (NULL);
-	cmd->here_doc_fd = 0;
 	cmd->pipe_cmd = 0;
+	cmd->here_doc_fd = 0;
 	cmd->args = cmd_init(tokens);
+	cmd->open_options = O_WRONLY | O_CREAT | O_TRUNC;
 	return (cmd);
 }
 

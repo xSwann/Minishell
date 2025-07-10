@@ -1,40 +1,56 @@
 
 #include "../includes/libft.h"
 
-char    *ft_itoa(int nbr)
+static size_t	ft_intlen(int n)
 {
-    int len;
-    int tmp;
-    char *result;
-    int i;
-    int signe;
+	size_t	i;
 
-    signe = 0;
-    len = 0;
-    i = 0;
-    if (nbr == -2147483648)
-        return ("-2147483648");
-    if (nbr < 0)
-    {
-        nbr = nbr * -1;
-        signe = 1;
-        len = 1;
-    }
-    tmp = nbr;
-    while(tmp >= 10)
-    {
-        tmp = tmp / 10;
-        len++;
-    }
-    result = malloc(sizeof(char) * len + 1);
-    result[len + 1] = '\0';
-    if (signe == 1)
-        result[0] = '-';
-    while (len >= signe)
-    {
-        result[len] = nbr % 10 + '0';
-        nbr = nbr / 10;
-        len--;
-    }
-    return (result);
+	i = 0;
+	if (n < 0)
+	{
+		n *= -1;
+		i++;
+	}
+	while (n > 9)
+	{
+		n = n / 10;
+		i++;
+	}
+	i++;
+	return (i);
 }
+
+char	*ft_itoa(int nbr)
+{
+	char	*str;
+	size_t	i;
+
+	if (nbr == -2147483648)
+	{
+		str = (char *)ft_calloc(12, sizeof(char));
+		if (!str)
+			return (NULL);
+		return (ft_memmove(str, "-2147483648", 12));
+	}
+	i = ft_intlen(nbr) + 1;
+	str = (char *)ft_calloc(i, sizeof(char));
+	if (!str)
+		return (NULL);
+	if (nbr < 0)
+	{
+		str[0] = '-';
+		nbr *= -1;
+	}
+	while (i--, i > 0 && str[i - 1] != '-')
+	{
+		str[i - 1] = (nbr % 10) + 48;
+		nbr = nbr / 10;
+	}
+	return (str);
+}
+/*
+int main()
+{
+  int n = -2147483648;
+  printf("%s\n", ft_itoa(n));
+}*/
