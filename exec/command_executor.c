@@ -56,7 +56,7 @@ int	is_built_ins(t_env **envp, char **cmd)
 	if (!envp || !(*envp)->key || !cmd || !*cmd)
 		return (0);
 	else if (!ft_strcmp("cd", cmd[0]))
-		return (ft_cd(cmd[1], envp), 1);
+		return (ft_cd(cmd, envp), 1);
 	else if (!ft_strcmp("env", cmd[0]))
 		return (ft_env(envp), 1);
 	else if (!ft_strcmp("echo", cmd[0]))
@@ -68,7 +68,7 @@ int	is_built_ins(t_env **envp, char **cmd)
 	else if (!ft_strcmp("unset", cmd[0]))
 		return (ft_unset(envp, cmd[1]), 1);
 	else if (!ft_strcmp("exit", cmd[0]))
-		return (ft_exit(envp, cmd[1]), 1);
+		return (ft_exit(envp, cmd), 1);
 	return (0);
 }
 
