@@ -10,7 +10,7 @@
 
 //FUNCTIONS
 int     ft_pwd(t_env **env);
-int     ft_echo(char **str, int param, t_env **env);
+int     ft_echo(char **str, t_env **env);
 int     ft_export(t_env **env, char *arg);
 int     is_exportable(char *arg);
 int     ft_cd(char **path, t_env **env);
