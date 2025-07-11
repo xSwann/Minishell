@@ -37,7 +37,7 @@ int	call_built_ins(t_env **envp, char **cmd)
 	else if (!ft_strcmp("env", cmd[0]))
 		return (ft_env(envp));
 	else if (!ft_strcmp("echo", cmd[0]))
-		return (ft_echo(cmd + 1, 0, envp));
+		return (ft_echo(cmd + 1, envp), 1);
 	else if (!ft_strcmp("export", cmd[0]))
 		return (ft_export(envp, cmd[1]));
 	else if (!ft_strcmp("pwd", cmd[0]))
@@ -103,14 +103,16 @@ int	pipex(t_env **envp, t_pipex *px)
 		pid = fork();
 		if (pid == 0)
 		{
+      close_fd(&px->pipe_fd[0]);
 			child_process(envp, px);
-			return (1);
+			exit (EXIT_FAILURE);
 		}
 		else if (pid < 0)
 			return (close_pipe(px), error_printer("fork: error"), 1);
 		px->pids[px->n_pids++] = pid;
 	}
-	if (close_fd(&px->pipe_fd[1]) == -1)
+	if (close_fd(&px->pipe_fd[1]) == -1
+		|| (px->infile > 0 && close_fd(&px->infile) == -1))
 		return (-1);
 	return (px->infile = px->pipe_fd[0], px->pipe_fd[0] = -1, 0);
 }

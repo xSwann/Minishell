@@ -1,6 +1,35 @@
 #include "./includes/structs.h"
 #include "./includes/libft.h"
 #include "./includes/exec.h"
+#include "./gnl/get_next_line.h"
+#include <signal.h>
+#include <aio.h>
+#include <termios.h>
+
+struct termios term;
+
+char *get_input(void)
+{
+    char *line;
+
+    if (isatty(STDIN_FILENO))
+        return readline("Minishell: ");
+    line = get_next_line(STDIN_FILENO);
+    if (line && line[ft_strlen(line) - 1] == '\n')
+        line[ft_strlen(line) - 1] = '\0';
+    return line;
+}
+
+void	signalhandler(int signal)
+{
+    if (signal == SIGINT)
+        {
+            rl_replace_line("", 0);
+            write(1, "\n", 1);
+            rl_on_new_line();
+            rl_redisplay();
+        }
+}
 
 int	read_terminal(t_env **env)
 {
@@ -10,9 +39,17 @@ int	read_terminal(t_env **env)
 	t_token	*tokens_struct;
 	t_cmd	*cmd;
 
+    //desactive l'affichage de ^C quqnd la touche est pressee
+    tcgetattr(STDIN_FILENO, &term);
+    term.c_lflag &= ~ECHOCTL;
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+    
+    signal(SIGINT, signalhandler);
+    signal(SIGQUIT, SIG_IGN);
+
 	while (1)
 	{
-		line = readline("Minishell: ");
+        line = get_input();
 		if (!line)
 			break ;
 		if (*line)
@@ -36,12 +73,12 @@ int	read_terminal(t_env **env)
 			exit(EXIT_FAILURE);
 		//print_cmd(cmd);
 		cmd_executor(env, &cmd);
-		free(tokens_struct);
 		if (line)
 			free(line);
 		tokens = NULL;
 		line = NULL;
 	}
+    free(tokens_struct);
 	if (line)
 		free(line);
 	return (rl_clear_history(), 0);

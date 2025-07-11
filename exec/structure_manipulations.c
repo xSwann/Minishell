@@ -1,14 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   structure_manipulations.c                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/22 16:57:03 by flebrun           #+#    #+#             */
-/*   Updated: 2025/07/11 15:04:30 by flebrun          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #include "../includes/exec.h"
 #include <unistd.h>
@@ -85,8 +74,8 @@ int	manage_infile(t_pipex *px, int fd_stdin)
 	else if (px->cmd->infile)
 		px->infile = open(px->cmd->infile, O_RDONLY);
 	if (px->infile < 0)
-		return (error_printer(px->cmd->infile), 1);
-	if (px->infile && dup2(px->infile, fd_stdin) == -1 
+		return (write(2, " No such file or directory\n", 26), 1);
+	if (px->infile && dup2(px->infile, STDIN_FILENO) == -1 
 		&& error_printer("dup2: error"))
 		return (close_fd(&px->infile), close_pipe(px), 1);
 	return (0);
