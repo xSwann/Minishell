@@ -103,7 +103,7 @@ int	pipex(t_env **envp, t_pipex *px)
 		pid = fork();
 		if (pid == 0)
 		{
-      close_fd(&px->pipe_fd[0]);
+			close_fd(&px->pipe_fd[0]);
 			child_process(envp, px);
 			exit (EXIT_FAILURE);
 		}

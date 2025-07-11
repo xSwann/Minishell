@@ -75,7 +75,7 @@ int	manage_infile(t_pipex *px, int fd_stdin)
 		px->infile = open(px->cmd->infile, O_RDONLY);
 	if (px->infile < 0)
 		return (write(2, " No such file or directory\n", 26), 1);
-	if (px->infile && dup2(px->infile, STDIN_FILENO) == -1 
+	if (px->infile && dup2(px->infile, fd_stdin) == -1 
 		&& error_printer("dup2: error"))
 		return (close_fd(&px->infile), close_pipe(px), 1);
 	return (0);
