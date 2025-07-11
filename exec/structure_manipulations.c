@@ -1,14 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   structure_manipulations.c                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/06/22 16:57:03 by flebrun           #+#    #+#             */
-/*   Updated: 2025/07/11 11:21:50 by flebrun          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
 
 #include "../includes/exec.h"
 #include <unistd.h>
@@ -59,7 +48,7 @@ void	free_cmds(t_cmd *cmd)
 	return ;
 }
 
-int	manage_outfile(t_pipex *px)
+int	manage_outfile(t_pipex *px, int fd_stdout)
 {
 	if (px->cmd->outfile && px->cmd->open_options)
 	{
@@ -72,13 +61,13 @@ int	manage_outfile(t_pipex *px)
 		px->outfile = px->pipe_fd[1];
 	if (px->outfile < 0 && error_printer(px->cmd->outfile))
 		return (close_fd(&px->infile), close_pipe(px), 1);
-	if (px->outfile && dup2(px->outfile, STDOUT_FILENO) == -1 
+	if (px->outfile && dup2(px->outfile, fd_stdout) == -1 
 		&& error_printer("dup2: error"))
 		return (close_fd(&px->outfile), close_pipe(px), 1);
 	return (0);
 }
 
-int	manage_infile(t_pipex *px)
+int	manage_infile(t_pipex *px, int fd_stdin)
 {
 	if (px->cmd->here_doc_fd)
 		px->infile = px->cmd->here_doc_fd;
