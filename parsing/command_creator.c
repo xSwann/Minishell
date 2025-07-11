@@ -13,8 +13,7 @@ char	**cmd_init(t_token *tokens)
 	prev_type = INVALID;
 	while (tokens[i].type != END)
 	{
-		if (tokens[i].type == PIPE || tokens[i].type == REDOUT
-			|| tokens[i].type == APPEND)
+		if (tokens[i].type == PIPE || tokens[i].type == APPEND)
 			break ;
 		if (tokens[i].type == WORD
 			&& (!(prev_type == HEREDOC || prev_type == REDIN)))
@@ -92,6 +91,7 @@ int	cmd_creator(t_cmd **cmd, t_token *tokens)
 		handle_token(*cmd, tokens[i], &n_args, prev_type);
 		prev_type = tokens[i++].type;
 	}
+	//print_cmd(*cmd);
 	return (0);
 }
 

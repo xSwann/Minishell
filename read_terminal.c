@@ -30,10 +30,8 @@ int	read_terminal(t_env **env)
     tcgetattr(STDIN_FILENO, &term);
     term.c_lflag &= ~ECHOCTL;
     tcsetattr(STDIN_FILENO, TCSANOW, &term);
-    
     signal(SIGINT, signalhandler);
     signal(SIGQUIT, SIG_IGN);
-
 	while (1)
 	{
 		line = readline("Minishell: ");

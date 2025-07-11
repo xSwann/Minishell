@@ -54,7 +54,6 @@ int	child_process(t_env **envp, t_pipex *px)
 
 	if (manage_infile(px) || manage_outfile(px))
 		return (exit(1), 1);
-	close_fd(&px->pipe_fd[0]);
 	if (is_built_ins(envp, px->args) != -1)
 	{
 		close_fd(&px->pipe_fd[1]);
@@ -76,13 +75,15 @@ int	pipex(t_env **envp, t_pipex *px)
 	pid = fork();
 	if (pid == 0)
 	{
+		close_fd(&px->pipe_fd[0]);
 		child_process(envp, px);
-		return (1);
+		exit (EXIT_FAILURE);
 	}
 	else if (pid < 0)
 		return (close_pipe(px), error_printer("fork: error"), 1);
 	px->pids[px->n_pids++] = pid;
-	if (close_fd(&px->pipe_fd[1]) == -1)
+	if (close_fd(&px->pipe_fd[1]) == -1
+		|| (px->infile > 0 && close_fd(&px->infile) == -1))
 		return (-1);
 	return (px->infile = px->pipe_fd[0], px->pipe_fd[0] = -1, 0);
 }
