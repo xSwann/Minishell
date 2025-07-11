@@ -1,6 +1,22 @@
 #include "./includes/structs.h"
 #include "./includes/libft.h"
 #include "./includes/exec.h"
+#include <signal.h>
+#include <aio.h>
+#include <termios.h>
+
+struct termios term;
+
+void	signalhandler(int signal)
+{
+    if (signal == SIGINT)
+        {
+            rl_replace_line("", 0);
+            write(1, "\n", 1);
+            rl_on_new_line();
+            rl_redisplay();
+        }
+}
 
 int	read_terminal(t_env **env)
 {
@@ -9,6 +25,14 @@ int	read_terminal(t_env **env)
 	char	**tokens;
 	t_token	*tokens_struct;
 	t_cmd	*cmd;
+
+    //desactive l'affichage de ^C quqnd la touche est pressee
+    tcgetattr(STDIN_FILENO, &term);
+    term.c_lflag &= ~ECHOCTL;
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+    
+    signal(SIGINT, signalhandler);
+    signal(SIGQUIT, SIG_IGN);
 
 	while (1)
 	{
