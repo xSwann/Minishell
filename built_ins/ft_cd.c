@@ -15,7 +15,7 @@ int ft_cd(char **path, t_env **env)
         ft_export(env, "EXIT_CODE=1");
         return (0);
     }
-    if (!path[1])
+    if (!path[1] || ft_strcmp(path[1], "~") == 0)
     {
         path[1] = get_env(*env, "HOME");
         if (!path)

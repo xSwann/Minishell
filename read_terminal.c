@@ -49,7 +49,7 @@ int	read_terminal(t_env **env)
 
 	while (1)
 	{
-        line = readline("Minishell: ");
+        line = get_input();
 		if (!line)
 			break ;
 		if (*line)
