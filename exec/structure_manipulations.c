@@ -6,7 +6,7 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 16:57:03 by flebrun           #+#    #+#             */
-/*   Updated: 2025/07/10 20:06:14 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/07/11 15:04:30 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void	free_cmds(t_cmd *cmd)
 	return ;
 }
 
-int	manage_outfile(t_pipex *px)
+int	manage_outfile(t_pipex *px, int fd_stdout)
 {
 	if (px->cmd->outfile && px->cmd->open_options)
 	{
@@ -72,13 +72,13 @@ int	manage_outfile(t_pipex *px)
 		px->outfile = px->pipe_fd[1];
 	if (px->outfile < 0 && error_printer(px->cmd->outfile))
 		return (close_fd(&px->infile), close_pipe(px), 1);
-	if (px->outfile && dup2(px->outfile, STDOUT_FILENO) == -1 
+	if (px->outfile && dup2(px->outfile, fd_stdout) == -1 
 		&& error_printer("dup2: error"))
 		return (close_fd(&px->outfile), close_pipe(px), 1);
 	return (0);
 }
 
-int	manage_infile(t_pipex *px)
+int	manage_infile(t_pipex *px, int fd_stdin)
 {
 	if (px->cmd->here_doc_fd)
 		px->infile = px->cmd->here_doc_fd;
@@ -86,7 +86,7 @@ int	manage_infile(t_pipex *px)
 		px->infile = open(px->cmd->infile, O_RDONLY);
 	if (px->infile < 0)
 		return (error_printer(px->cmd->infile), 1);
-	if (px->infile && dup2(px->infile, STDIN_FILENO) == -1 
+	if (px->infile && dup2(px->infile, fd_stdin) == -1 
 		&& error_printer("dup2: error"))
 		return (close_fd(&px->infile), close_pipe(px), 1);
 	return (0);

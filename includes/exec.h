@@ -22,7 +22,6 @@ int		free_args(char **args);
 int		close_pipe(t_pipex *px);
 char	**env_create(t_env *envp);
 int		error_printer(char *path);
-int		manage_outfile(t_pipex *px);
 int		ft_argv_updater(char **av, int ac);
 char	*path_parser(char *envp, char *cmd);
 int		wait_execs(t_env **envp, t_pipex *px);
@@ -35,10 +34,10 @@ int		child_process(t_env **envp, t_pipex *px);
 ==============================*/
 
 void	free_cmds(t_cmd *cmd);
-int		init_px(t_cmd **cmd, t_pipex *px);
-int		manage_outfile(t_pipex *px);
-int		fd_std_handler(t_pipex *px);
-int		manage_infile(t_pipex *px);
 int		update_px(t_pipex *px);
+int		fd_std_handler(t_pipex *px);
+int		init_px(t_cmd **cmd, t_pipex *px);
+int		manage_infile(t_pipex *px, int fd_stdin);
+int		manage_outfile(t_pipex *px, int fd_stdout);
 
 #endif
