@@ -8,7 +8,7 @@ LIBFT_DIR = libft/
 LIBFT = $(LIBFT_DIR)libft.a
 
 # Libft functions
-GNL_DIR = get_next_line/
+GNL_DIR = gnl/
 GNL = $(GNL_DIR)gnl.a
 
 # Parsing functions

@@ -1,7 +1,7 @@
 #include "./includes/structs.h"
 #include "./includes/libft.h"
 #include "./includes/exec.h"
-#include "./get_next_line/get_next_line.h"
+#include "./gnl/get_next_line.h"
 #include <signal.h>
 #include <aio.h>
 #include <termios.h>
