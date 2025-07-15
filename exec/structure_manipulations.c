@@ -89,7 +89,12 @@ pid_t	*pid_array_builder(t_cmd *cmd)
 	i = 0;
 	while (cmd)
 	{
-		i++;
+		if (cmd->args && cmd->args[0]
+		&& (!(!ft_strcmp("cd", cmd->args[0]) || !ft_strcmp("env", cmd->args[0])
+		|| !ft_strcmp("echo", cmd->args[0]) || !ft_strcmp("export", cmd->args[0])
+		|| !ft_strcmp("pwd", cmd->args[0]) || !ft_strcmp("unset", cmd->args[0])
+		|| !ft_strcmp("exit", cmd->args[0]))))
+			i++;
 		cmd = cmd->pipe_cmd;
 	}
 	if (!i)
@@ -115,8 +120,8 @@ int	init_px(t_cmd **cmd, t_pipex *px)
 	px->first_cmd = *cmd;
 	px->args = (*cmd)->args;
 	px->pids = pid_array_builder(*cmd);
-	if (!px->pids)
-		return(error_printer("malloc: pid_t array"));
+	//px->stdin_backup = dup(STDIN_FILENO);
+	//px->stdout_backup = dup(STDOUT_FILENO);
 	//fprintf(stderr, "		px->here_doc_fd = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n\
 	//	px->outfile = %i || px->infile = %i || px->infile = %i\n\
 	//	args[0] = %s || t_cmd = %p || pid = %i\n", px->here_doc_fd, \
@@ -130,6 +135,7 @@ int	update_px(t_pipex *px)
 	if (!px->cmd->pipe_cmd)
 		return (px->cmd = NULL, 0);
 	px->args = px->cmd->pipe_cmd->args;
+	px->outfile = 0;
 	if (px->cmd->pipe_cmd->here_doc_fd)
 	{
 		if (px->infile && close_fd(&px->infile))

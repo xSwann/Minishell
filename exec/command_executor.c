@@ -55,11 +55,10 @@ int	child_process(t_env **envp, t_pipex *px)
 
 	if (manage_infile(px, STDIN_FILENO) || manage_outfile(px, STDOUT_FILENO))
 		return (exit(1), 1);
-	if (call_built_ins(envp, px->args) == 1)
+	if (call_built_ins(envp, px->args) != -1)
 	{
 		close_fd(&px->pipe_fd[1]);
 		free_args(px->args);
-		ft_env(envp);
 		return (ft_exit(envp, NULL));
 	}
 	envp_string_form = env_create(*envp);
@@ -70,20 +69,22 @@ int	child_process(t_env **envp, t_pipex *px)
 
 int	ft_built_ins(t_env **envp, t_pipex *px)
 {
-	int	stdin_backup;
-	int	stdout_backup;
+	int stdin_backup = dup(STDIN_FILENO);
+	int stdout_backup = dup(STDOUT_FILENO);
 
-	stdin_backup = dup(STDIN_FILENO);
-	stdout_backup = dup(STDOUT_FILENO);
-	if (manage_infile(px, stdin_backup) || manage_outfile(px, stdout_backup))
-		return (exit(1), 1);
+	if (stdin_backup < 0 || stdout_backup < 0)
+		return (error_printer("dup: backup failed"), 1);
+	if (manage_infile(px, STDIN_FILENO) || manage_outfile(px, STDOUT_FILENO))
+	{
+		close_fd(&stdin_backup);
+		close_fd(&stdout_backup);
+		return (1);
+	}
 	call_built_ins(envp, px->args);
-	if (px->infile && dup2(stdin_backup, px->infile) == -1 
-		&& error_printer("dup2: error"))
-		return (close_pipe(px), 1);
-	if (px->outfile && dup2(stdout_backup, px->outfile) == -1 
-		&& error_printer("dup2: error"))
-		return (close_pipe(px), 1);
+	dup2(stdin_backup, STDIN_FILENO);
+	dup2(stdout_backup, STDOUT_FILENO);
+	close_fd(&stdin_backup);
+	close_fd(&stdout_backup);
 	return (0);
 }
 
@@ -131,19 +132,17 @@ int	cmd_executor(t_env **envp, t_cmd **cmd)
 	{
 		if (pipex(envp, &px))
 			return (close_pipe(&px), 1);
+		//fprintf(stderr, "		px->here_doc_fd = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n\
+		//px->outfile = %i || px->infile = %i\n\
+		//args[0] = %s || t_cmd = %p || pid = %i || n_pid = %i\n", px.here_doc_fd, \
+		//px.pipe_fd[0], px.pipe_fd[1], px.outfile, \
+		//px.infile, px.args[0], px.cmd, px.pids[0], px.n_pids);
 		if (update_px(&px))
 			return (1);
 	}
-	//fprintf(stderr, "		px->here_doc_fd = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n\
-	//	px->outfile = %i || px->prev_fd = %i || px->infile = %i\n\
-	//	args[0] = %s || t_cmd = %p || pid = %i || n_pid = %i\n", px.here_doc_fd, \
-	//	px.pipe_fd[0], px.pipe_fd[1], px.outfile, px.prev_fd, \
-	//	px.infile, px.args[0], px.cmd, px.pids[0], px.n_pids);
 	exit_status = 0;
-	if (px.pids && px.pids[0])
+	if (px.n_pids)
 		exit_status = wait_execs(envp, &px);
-	//if (dup2(px.stdin_backup, STDIN_FILENO) == -1)
-	//	error_printer("dup2: stdin");
 	close_pipe(&px);
 	return (exit_status);
 }
