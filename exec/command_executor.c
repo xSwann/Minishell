@@ -37,7 +37,7 @@ int	call_built_ins(t_env **envp, char **cmd)
 	else if (!ft_strcmp("env", cmd[0]))
 		return (ft_env(envp));
 	else if (!ft_strcmp("echo", cmd[0]))
-		return (ft_echo(cmd + 1, envp), 1);
+		return (ft_echo(cmd + 1, envp));
 	else if (!ft_strcmp("export", cmd[0]))
 		return (ft_export(envp, cmd[1]));
 	else if (!ft_strcmp("pwd", cmd[0]))
@@ -55,10 +55,11 @@ int	child_process(t_env **envp, t_pipex *px)
 
 	if (manage_infile(px, STDIN_FILENO) || manage_outfile(px, STDOUT_FILENO))
 		return (exit(1), 1);
-	if (call_built_ins(envp, px->args) != -1)
+	if (call_built_ins(envp, px->args) == 1)
 	{
 		close_fd(&px->pipe_fd[1]);
 		free_args(px->args);
+		ft_env(envp);
 		return (ft_exit(envp, NULL));
 	}
 	envp_string_form = env_create(*envp);
@@ -138,7 +139,9 @@ int	cmd_executor(t_env **envp, t_cmd **cmd)
 	//	args[0] = %s || t_cmd = %p || pid = %i || n_pid = %i\n", px.here_doc_fd, \
 	//	px.pipe_fd[0], px.pipe_fd[1], px.outfile, px.prev_fd, \
 	//	px.infile, px.args[0], px.cmd, px.pids[0], px.n_pids);
-	exit_status = wait_execs(envp, &px);
+	exit_status = 0;
+	if (px.pids && px.pids[0])
+		exit_status = wait_execs(envp, &px);
 	//if (dup2(px.stdin_backup, STDIN_FILENO) == -1)
 	//	error_printer("dup2: stdin");
 	close_pipe(&px);

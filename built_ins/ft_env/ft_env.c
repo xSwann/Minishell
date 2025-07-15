@@ -15,6 +15,5 @@ int    ft_env(t_env **env)
         }
         i++;
     }
-    ft_export(env, "EXIT_CODE=0");
     return (0);
 }

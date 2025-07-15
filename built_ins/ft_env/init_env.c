@@ -11,7 +11,7 @@ int init_env(char **envp, t_env **env)
     count = 0;
     while (envp[count])
         count++;
-    *env = malloc(sizeof **env * (count + 2));
+    *env = malloc(sizeof **env * (count + 1));
     if (!*env)
         exit(EXIT_FAILURE);
     i = 0;
@@ -25,10 +25,8 @@ int init_env(char **envp, t_env **env)
         (*env)[i].value = ft_substr(envp[i], j + 1, len);
         i++;
     }
-    (*env)[i].key   = ft_strdup("EXIT_CODE");
-    (*env)[i].value = ft_strdup("0");
-    count++;
     (*env)[count].key   = NULL;
     (*env)[count].value = NULL;
+    ft_export(env, "EXIT_CODE=0");
     return (0);
 }

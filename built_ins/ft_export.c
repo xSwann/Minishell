@@ -55,7 +55,7 @@ int    ft_export(t_env **env, char *arg)
     i = 0;
     while(i < count - 1)
     {
-        if (already_in_env != 0 && i == already_in_env)
+		if (already_in_env != 0 && i == already_in_env)
         {
             arg_malloc = ft_substr(arg, 0, j);
             new_env[i].key = ft_strdup(arg_malloc);
@@ -68,9 +68,12 @@ int    ft_export(t_env **env, char *arg)
             free(arg_malloc);
             i++;
         }
-        new_env[i].key = ft_strdup((*env)[i].key);
-        new_env[i].value = ft_strdup((*env)[i].value);
-        i++;
+		else
+		{
+			new_env[i].key = ft_strdup((*env)[i].key);
+			new_env[i].value = ft_strdup((*env)[i].value);
+			i++;
+		}
     }
     if (!already_in_env)
     {

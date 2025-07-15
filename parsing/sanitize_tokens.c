@@ -100,7 +100,7 @@ void    erase_expand(char **str, int len)
     *str = new;
 }
 
-void    expand_var(char **str, t_env *env)
+void    expand_var(char **str, t_env **env)
 {
     int i;
     int len;
@@ -128,7 +128,7 @@ void    expand_var(char **str, t_env *env)
         to_expand = ft_substr(*str, start + 1, i - (start + 1));
         len = ft_strlen(to_expand);
     }
-    expanded = get_env(env, to_expand);
+    expanded = get_env(*env, to_expand);
     if (!expanded)
         erase_expand(str, ft_strlen(*str) - ft_strlen(to_expand));
     else
@@ -136,7 +136,7 @@ void    expand_var(char **str, t_env *env)
 }
 
 
-void sanitize_tokens(char **tokens, t_env *env)
+void sanitize_tokens(char **tokens, t_env **env)
 {
     int  i;
     int j;
