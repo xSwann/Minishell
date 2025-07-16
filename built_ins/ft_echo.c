@@ -30,29 +30,31 @@ int ft_echo(char **str, t_env **env)
 
     i = 0;
     n = 0;
-    if (!str[0])
+    if (!str || !str[0])
     {
         ft_export(env, "EXIT_CODE=0");
         printf("\n");
         return (0);
     }
-    while (is_n(str[i]) == 1)
+    while (str[i] && is_n(str[i]) == 1)
     {
         n = 1;
         i++;
     }
-    if (str[i] && n == 0)
-        printf("%s", str[i]);
-    else
-        printf("%s", str[i]);
-    i++;
-    while (str[i])
+    if (i >= ft_strslen(str))
     {
-        printf(" %s", str[i]);
+        ft_export(env, "EXIT_CODE=0");
+        return (0);
+    }
+    while (str && str[i] && i <= ft_strslen(str) - 2)
+    {
+		if (str[i][0]) 
+        	printf("%s ", str[i]);
         i++;
     }
+	printf("%s", str[i]);
     if (n == 0)
-        printf("\n");
+        printf("\n");	
     ft_export(env, "EXIT_CODE=0");
     return (0);
 }

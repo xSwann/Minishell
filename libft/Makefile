@@ -19,6 +19,8 @@ SRCS	= \
 	ft_atoi.c \
 	str_is_num.c \
 	ft_isalpha.c \
+	ft_isalnum.c \
+	ft_isdigit.c \
 	ft_strslen.c \
 
 OBJS	= $(SRCS:.c=.o)
