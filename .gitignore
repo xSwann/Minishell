@@ -7,6 +7,9 @@ minishell
 # Archives statiques
 *.a
 
+# Fichiers de texte
+*.txt
+
 # Fichiers de compilation
 *.out
 *.log

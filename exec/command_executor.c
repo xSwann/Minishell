@@ -1,5 +1,4 @@
 #include "../includes/exec.h"
-#include <unistd.h>
 
 void	executor(char **envp, t_pipex *px)
 {
@@ -28,27 +27,6 @@ void	executor(char **envp, t_pipex *px)
 	return (free(path), exit(126));
 }
 
-int	call_built_ins(t_env **envp, char **cmd)
-{
-	if (!envp || !(*envp)->key || !cmd || !*cmd)
-		return (0);
-	else if (!ft_strcmp("cd", cmd[0]))
-		return (ft_cd(cmd, envp));
-	else if (!ft_strcmp("env", cmd[0]))
-		return (ft_env(envp));
-	else if (!ft_strcmp("echo", cmd[0]))
-		return (ft_echo(cmd + 1, envp));
-	else if (!ft_strcmp("export", cmd[0]))
-		return (ft_export(envp, cmd[1]));
-	else if (!ft_strcmp("pwd", cmd[0]))
-		return (ft_pwd(envp));
-	else if (!ft_strcmp("unset", cmd[0]))
-		return (ft_unset(envp, cmd[1]));
-	else if (!ft_strcmp("exit", cmd[0]))
-		return (ft_exit(envp, cmd));
-	return (-1);
-}
-
 int	child_process(t_env **envp, t_pipex *px)
 {
 	char	**envp_string_form;
@@ -69,9 +47,11 @@ int	child_process(t_env **envp, t_pipex *px)
 
 int	ft_built_ins(t_env **envp, t_pipex *px)
 {
-	int stdin_backup = dup(STDIN_FILENO);
-	int stdout_backup = dup(STDOUT_FILENO);
+	int stdin_backup;
+	int stdout_backup;
 
+	stdin_backup = dup(STDIN_FILENO);
+	stdout_backup = dup(STDOUT_FILENO);
 	if (stdin_backup < 0 || stdout_backup < 0)
 		return (error_printer("dup: backup failed"), 1);
 	if (manage_infile(px, STDIN_FILENO) || manage_outfile(px, STDOUT_FILENO))
@@ -94,6 +74,8 @@ int	pipex(t_env **envp, t_pipex *px)
 
 	if (pipe(px->pipe_fd) == -1)
 		return (perror("pipe: error"), 1);
+	if (px->args && px->args[0] && px->args[0][0] && px->args[0][0] == '/')
+		split_cmd(&px->args[0]);
 	if (px->n_pids == 0 && !px->cmd->pipe_cmd
 		&& (!ft_strcmp("cd", px->args[0]) || !ft_strcmp("env", px->args[0])
 		|| !ft_strcmp("echo", px->args[0]) || !ft_strcmp("export", px->args[0])

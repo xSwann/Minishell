@@ -1,52 +1,5 @@
 
 #include "../includes/exec.h"
-#include <unistd.h>
-
-int	free_args(char **args)
-{
-	int	i;
-
-	i = 0;
-	if (!args)
-		return (1);
-	while (args[i])
-		free(args[i++]);
-	return (free(args), 1);
-}
-
-void	free_cmds(t_cmd *cmd)
-{
-	int		i;
-	t_cmd	*pipe_cmd;
-
-	pipe_cmd = NULL;
-	if (!cmd)
-		return ;
-	if (cmd->args)
-	{
-		i = 0;
-		while (cmd->args[i])
-		{
-			free(cmd->args[i]);
-			cmd->args[i++] = NULL;
-		}
-		free(cmd->args);
-		cmd->args = NULL;
-	}
-	if (cmd->infile)
-	{
-		free(cmd->infile);
-		cmd->infile = NULL;
-	}
-	if (cmd->outfile)
-	{
-		free(cmd->outfile);
-		cmd->outfile = NULL;
-	}
-	pipe_cmd = cmd->pipe_cmd;
-	free(cmd);
-	return ;
-}
 
 int	manage_outfile(t_pipex *px, int fd_stdout)
 {
