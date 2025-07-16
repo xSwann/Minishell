@@ -33,6 +33,7 @@ int ft_echo(char **str, t_env **env)
     if (!str[0])
     {
         ft_export(env, "EXIT_CODE=0");
+        printf("\n");
         return (0);
     }
     while (is_n(str[i]) == 1)
