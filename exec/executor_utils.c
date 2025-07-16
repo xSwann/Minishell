@@ -42,7 +42,7 @@ char	*path_parser(char *envp, char *cmd)
 		if (*envp == ':')
 			envp++;
 	}
-	return (error_printer(cmd), NULL);
+	return (error_printer(" command not found"), NULL);
 }
 
 int	close_pipe(t_pipex *px)
@@ -105,27 +105,33 @@ char	**env_create(t_env *envp)
 {
 	char	**envp_string_form;
 	char	*string_key;
+	int		is_exit_code;
 	int		i;
-	int		j;
 
 	i = 0;
+	is_exit_code = 0;
 	if (!envp || !(*envp->key))
 		return (NULL);
-	while (envp[i].key)
-		i++;
-	envp_string_form = malloc(sizeof (char *) * (i + 1));
+	while (envp[i].key && ft_strcmp(envp[i++].key, "EXIT_CODE"))
+		is_exit_code++;
+	envp_string_form = malloc(sizeof (char *) * (i - is_exit_code + 2));
 	if (!envp_string_form)
 		return (NULL);
-	j = -1;
-	while (++j <= i && envp[j].key)
+	i = -1;
+	is_exit_code = 0;
+	while (envp[++i].key)
 	{
-		string_key = ft_strjoin(envp[j].key, "=");
-		if (!string_key)
-			return (free_envp(envp_string_form, j));
-		envp_string_form[j] = ft_strjoin(string_key, envp[j].value);
-		if (!envp_string_form[j])
-			return (free(string_key), free_envp(envp_string_form, j - 1));
-		//fprintf(stderr, "%s\n", envp_string_form[i]);
+        if (!ft_strcmp(envp[i].key, "EXIT_CODE"))
+			is_exit_code++;
+		else
+		{
+			string_key = ft_strjoin(envp[i].key, "=");
+			if (!string_key)
+				return (free_envp(envp_string_form, i - is_exit_code));
+			envp_string_form[i - is_exit_code] = ft_strjoin(string_key, envp[i].value);
+			if (!envp_string_form[i - is_exit_code])
+				return (free(string_key), free_envp(envp_string_form, i - is_exit_code - 1));
+		}
 	}
-	return (envp_string_form[j] = NULL, envp_string_form);
+	return (envp_string_form[i - is_exit_code] = NULL, envp_string_form);
 }
