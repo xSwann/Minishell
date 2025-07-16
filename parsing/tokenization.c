@@ -2,7 +2,7 @@
 
 int	is_space(char chr)
 {
-	if (chr == 32 || chr == 4)
+	if (chr == 32 || chr == 4 || chr == 9)
 		return (1);
 	return (0);
 }
