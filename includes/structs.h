@@ -27,12 +27,14 @@ typedef struct s_cmd	t_cmd;
 
 struct	s_cmd
 {
-	char	**args;
-	char	*outfile;
-	char	*infile;
+	t_cmd	*pipe_cmd;
+	t_type	prev_type;
 	int		here_doc_fd;
 	int		open_options;
-	t_cmd	*pipe_cmd;
+	int		counters[3];
+	char	**outfiles;
+	char	**infiles;
+	char	**args;
 };
 
 /*==============================
