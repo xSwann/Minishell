@@ -74,45 +74,48 @@ char	**env_create(t_env *envp)
 	return (envp_string_form[i - is_exit_code] = NULL, envp_string_form);
 }
 
-int	call_built_ins(t_env **envp, char **cmd)
+int	call_built_ins(t_env **envp, char **cmd, int i)
 {
 	if (!envp || !(*envp)->key || !cmd || !*cmd)
 		return (0);
-	else if (!ft_strcmp("cd", cmd[0]))
+	else if (i == 1)
 		return (ft_cd(cmd, envp));
-	else if (!ft_strcmp("env", cmd[0]))
+	else if (i == 2)
 		return (ft_env(envp));
-	else if (!ft_strcmp("echo", cmd[0]))
+	else if (i == 3)
 		return (ft_echo(cmd + 1, envp));
-	else if (!ft_strcmp("export", cmd[0]))
+	else if (i == 4)
 		return (export_loop(envp, cmd));
-	else if (!ft_strcmp("pwd", cmd[0]))
+	else if (i == 5)
 		return (ft_pwd(envp));
-	else if (!ft_strcmp("unset", cmd[0]))
+	else if (i == 6)
 		return (ft_unset(envp, cmd[1]));
-	else if (!ft_strcmp("exit", cmd[0]))
+	else if (i == 7)
 		return (ft_exit(envp, cmd));
 	return (-1);
 }
 
 int	check_built_ins(char *cmd)
 {
+	int	i;
+
+	i = find_last_slash_in_str(cmd);
 	if (!cmd || !*cmd)
 		return (-1);
-	if (!ft_strcmp("cd", cmd))
+	if (!ft_strcmp("cd", cmd + i))
 		return (1);
-	if (!ft_strcmp("env", cmd))
+	if (!ft_strcmp("env", cmd + i))
 		return (2);
-	if (!ft_strcmp("echo", cmd))
+	if (!ft_strcmp("echo", cmd + i))
 		return (3);
-	if (!ft_strcmp("export", cmd))
+	if (!ft_strcmp("export", cmd + i))
 		return (4);
-	if (!ft_strcmp("pwd", cmd))
-		return (4);
-	if (!ft_strcmp("unset", cmd))
+	if (!ft_strcmp("pwd", cmd + i))
 		return (5);
-	if (!ft_strcmp("exit",cmd))
+	if (!ft_strcmp("unset", cmd + i))
 		return (6);
+	if (!ft_strcmp("exit",cmd + i))
+		return (7);
 	return (0);
 }
 

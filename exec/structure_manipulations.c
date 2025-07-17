@@ -4,26 +4,29 @@ int	manage_outfile(t_pipex *px, int fd_stdout)
 {
 	int	i;
 
-	i = 0;
+	i = -1;
 	if (px->cmd->outfiles && px->cmd->outfiles[0] && px->cmd->open_options)
 	{
-		while (px->cmd->outfiles[i])
+		while (px->cmd->outfiles[++i])
 		{
-			if (px->outfile < 0)
-				return (write(2, " No such file or directory\n", 27), 1);
 			if (px->outfile > 0 && close_fd(&px->outfile))
 				return (1);
 			if (px->cmd->open_options == (O_WRONLY | O_CREAT | O_TRUNC))
-				px->outfile = open(px->cmd->outfiles[i++], \
+				px->outfile = open(px->cmd->outfiles[i], \
 				O_WRONLY | O_CREAT | O_TRUNC, 0644);
 			else if (px->cmd->open_options == (O_WRONLY | O_CREAT | O_APPEND))
-				px->outfile = open(px->cmd->outfiles[i++], \
+				px->outfile = open(px->cmd->outfiles[i], \
 				O_WRONLY | O_CREAT | O_APPEND, 0644);
+			if (px->outfile < 0)
+				return (error_printer(px->cmd->outfiles[i]));
 		}
 	}
 	else if (px->cmd->pipe_cmd)
+	{
 		px->outfile = px->pipe_fd[1];
-	if (px->outfile < 0 && error_printer(" No such file or directory"))
+		px->pipe_fd[1] = -1;
+	}
+	if (px->outfile < 0 && error_printer(px->cmd->outfiles[i]))
 		return (close_fd(&px->infile), close_pipe(px), 1);
 	if (px->outfile && (dup2(px->outfile, fd_stdout) == -1
 		|| close_fd(&px->outfile)) && error_printer("dup2: error"))
@@ -36,22 +39,22 @@ int	manage_infile(t_pipex *px, int fd_stdin)
 {
 	int	i;
 
-	i = 0;
+	i = -1;
 	if (px->cmd->here_doc_fd)
 		px->infile = px->cmd->here_doc_fd;
-	else if (px->cmd->infiles && px->cmd->infiles[i])
+	else if (px->cmd->infiles && px->cmd->infiles[0])
 	{
-		while (px->cmd->infiles[i])
+		while (px->cmd->infiles[++i])
 		{
 			if (px->infile > 0 && close_fd(&px->infile))
 				return (1);
-			px->infile = open(px->cmd->infiles[i++], O_RDONLY);
+			px->infile = open(px->cmd->infiles[i], O_RDONLY);
 			if (px->infile < 0)
-				return (write(2, " No such file or directory\n", 27), 1);
+				return (error_printer(px->cmd->infiles[i]));
 		}
 	}
 	if (px->infile < 0)
-		return (write(2, " No such file or directory\n", 26), 1);
+		return (error_printer(px->cmd->infiles[i]));
 	if (px->infile && (dup2(px->infile, fd_stdin) == -1
 		|| close_fd(&px->infile)) && error_printer("dup2: error"))
 		return (close_fd(&px->infile), close_pipe(px), 1);
@@ -68,7 +71,7 @@ pid_t	*pid_array_builder(t_cmd *cmd)
 	while (cmd)
 	{
 		if (!(i == 0 && !cmd->pipe_cmd && cmd->args && cmd->args[0]
-			&& check_built_ins > 0))
+			&& check_built_ins(cmd->args[0]) > 0))
 			i++;
 		cmd = cmd->pipe_cmd;
 	}

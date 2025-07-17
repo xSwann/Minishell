@@ -6,17 +6,26 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:00:26 by flebrun           #+#    #+#             */
-/*   Updated: 2025/07/17 15:33:04 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/07/17 19:16:44 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/parsing.h"
+#include <errno.h>
 
 int	error_printer(char *path)
 {
-	write(2, strerror(errno), strlen(strerror(errno)));
-	write(2, ": ", 2);
+	int	errno_backup;
+
+	errno_backup = errno;
+	write(2, "minishell: ", 11);
 	write(2, path, strlen(path));
+	write(2, ": ", 2);
+	if (errno_backup == ENOENT)
+		return (write(2, " No such file or directory\n", 27));
+	else if (errno_backup == EACCES)
+		return (write(2, " Permission denied\n", 19));
+	write(2, strerror(errno_backup), strlen(strerror(errno_backup)));
 	return (write(2, "\n", 1));
 }
 
@@ -25,10 +34,7 @@ int	close_fd(int *fd)
 	if (fd && *fd >= 0)
 	{
 		if (close(*fd) == -1)
-		{
-			fprintf(stderr, "fd qui foire = %i\n", *fd);
 			return (*fd = -1, error_printer("close: failed closing fd"), 1);
-		}
 		*fd = -1;
 	}
 	return (0);
