@@ -1,63 +1,5 @@
 #include "../includes/exec.h"
 
-void	path_builder(char *envp, char *cmd, char *path, int len)
-{
-	int	i;
-
-	i = 0;
-	while (envp && envp[i] && i < len)
-	{
-		path[i] = envp[i];
-		i++;
-	}
-	path[i] = '/';
-	i++;
-	while (cmd && *cmd)
-	{
-		path[i] = *cmd++;
-		i++;
-	}
-	path[i] = '\0';
-}
-
-char	*path_parser(char *envp, char *cmd)
-{
-	char	*path;
-	int		len;
-
-	path = NULL;
-	while (*envp)
-	{
-		len = 0;
-		while (envp[len] && envp[len] != ':')
-			len++;
-		path = malloc(len + ft_strlen(cmd) + 2);
-		if (!path)
-			return (write(2, "pipex: malloc failed\n", 22), NULL);
-		path_builder(envp, cmd, path, len);
-		if (access(path, X_OK) == 0)
-			return (path);
-		free(path);
-		envp += len;
-		if (*envp == ':')
-			envp++;
-	}
-	return (error_printer(" command not found"), NULL);
-}
-
-int	close_pipe(t_pipex *px)
-{
-	//if (px->infile && px->infile >= 0 && close(px->infile) == -1)
-	//	return (px->infile = -1, error_printer("close: infile"), 1);
-	if (px->pipe_fd[0] && px->pipe_fd[0] >= 0 && close(px->pipe_fd[0]) == -1)
-		return (px->pipe_fd[0] = -1, error_printer("close: pipe_fd[0]"), 1);
-	px->pipe_fd[0] = -1;
-	if (px->pipe_fd[1] && px->pipe_fd[1] >= 0 && close(px->pipe_fd[1]) == -1)
-		return (px->pipe_fd[1] = -1, error_printer("close: pipe_fd[1]"), 1);
-	px->pipe_fd[1] = -1;
-	return (0);
-}
-
 int	wait_execs(t_env **envp, t_pipex *px)
 {
 	int		i;
@@ -89,18 +31,6 @@ int	wait_execs(t_env **envp, t_pipex *px)
 	return (status);
 }
 
-void	*free_envp(char **envp, int j)
-{
-	while (j >= 0 && envp && envp[j])
-		free(envp[j--]);
-	if (j == -2)
-	{
-		while (envp[++j])
-			free(envp[j]);
-	}
-	return (free (envp), NULL);
-}
-
 char	**env_create(t_env *envp)
 {
 	char	**envp_string_form;
@@ -121,17 +51,35 @@ char	**env_create(t_env *envp)
 	is_exit_code = 0;
 	while (envp[++i].key)
 	{
-        if (!ft_strcmp(envp[i].key, "EXIT_CODE"))
-			is_exit_code++;
-		else
-		{
-			string_key = ft_strjoin(envp[i].key, "=");
-			if (!string_key)
-				return (free_envp(envp_string_form, i - is_exit_code));
-			envp_string_form[i - is_exit_code] = ft_strjoin(string_key, envp[i].value);
-			if (!envp_string_form[i - is_exit_code])
-				return (free(string_key), free_envp(envp_string_form, i - is_exit_code - 1));
-		}
+        if (!ft_strcmp(envp[i].key, "EXIT_CODE") && ++is_exit_code)
+			continue ;
+		string_key = ft_strjoin(envp[i].key, "=");
+		if (!string_key)
+			return (free_envp(envp_string_form, i - is_exit_code));
+		envp_string_form[i - is_exit_code] = ft_strjoin(string_key, envp[i].value);
+		if (!envp_string_form[i - is_exit_code])
+			return (free(string_key), free_envp(envp_string_form, i - is_exit_code - 1));
 	}
 	return (envp_string_form[i - is_exit_code] = NULL, envp_string_form);
+}
+
+int	call_built_ins(t_env **envp, char **cmd)
+{
+	if (!envp || !(*envp)->key || !cmd || !*cmd)
+		return (0);
+	else if (!ft_strcmp("cd", cmd[0]))
+		return (ft_cd(cmd, envp));
+	else if (!ft_strcmp("env", cmd[0]))
+		return (ft_env(envp));
+	else if (!ft_strcmp("echo", cmd[0]))
+		return (ft_echo(cmd + 1, envp));
+	else if (!ft_strcmp("export", cmd[0]))
+		return (ft_export(envp, cmd[1]));
+	else if (!ft_strcmp("pwd", cmd[0]))
+		return (ft_pwd(envp));
+	else if (!ft_strcmp("unset", cmd[0]))
+		return (ft_unset(envp, cmd[1]));
+	else if (!ft_strcmp("exit", cmd[0]))
+		return (ft_exit(envp, cmd));
+	return (-1);
 }

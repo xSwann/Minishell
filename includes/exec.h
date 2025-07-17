@@ -27,17 +27,36 @@ char	*path_parser(char *envp, char *cmd);
 int		wait_execs(t_env **envp, t_pipex *px);
 char	*ft_strndup(const char *src, int len);
 int		cmd_executor(t_env **env, t_cmd **cmd);
+int		call_built_ins(t_env **envp, char **cmd);
 int		child_process(t_env **envp, t_pipex *px);
 
 /*==============================
 =   STRUCTURE MANIPULATIONS   =
 ==============================*/
 
+int		split_cmd(char **cmd);
 void	free_cmds(t_cmd *cmd);
 int		update_px(t_pipex *px);
 int		fd_std_handler(t_pipex *px);
 int		init_px(t_cmd **cmd, t_pipex *px);
 int		manage_infile(t_pipex *px, int fd_stdin);
 int		manage_outfile(t_pipex *px, int fd_stdout);
+
+/*==============================
+=       FREE FUNCTIONS        =
+==============================*/
+
+void	free_cmds(t_cmd *cmd);
+int		free_args(char **args);
+int		close_pipe(t_pipex *px);
+void	*free_envp(char **envp, int j);
+
+/*==============================
+=        PATH MODIFIERS        =
+==============================*/
+
+int		split_cmd(char **cmd);
+char	*path_parser(char *envp, char *cmd);
+void	path_builder(char *envp, char *cmd, char *path, int len);
 
 #endif
