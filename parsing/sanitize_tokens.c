@@ -63,7 +63,7 @@ void	replace_expanded_value(char **str, char *expanded, int len)
 	i++;
 	if ((*str)[i] != '?')
 	{
-		while ((*str)[i] && ft_isalpha((*str)[i]))
+		while ((*str)[i] && ft_isalnum((*str)[i]))
 			i++;
 	}
 	else
@@ -93,8 +93,13 @@ void	erase_expand(char **str, int len)
 	while ((*str)[i] && (*str)[i] != '$')
 		new[j++] = (*str)[i++];
 	i++;
-	while ((*str)[i] && ft_isalpha((*str)[i]))
-		i++;
+	if (ft_isdigit((*str)[i]))
+		i = 2;
+	else
+	{
+		while ((*str)[i] && ft_isalnum((*str)[i]))
+			i++;
+	}
 	while ((*str)[i])
 		new[j++] = (*str)[i++];
 	new[j] = '\0';
@@ -117,11 +122,16 @@ void	expand_var(char **str, t_env *env)
 	while ((*str)[i] && (*str)[i] != '$')
 		i++;
 	start = i++;
-	while ((*str)[i] && ft_isalpha((*str)[i]))
+	while ((*str)[i] && ft_isalnum((*str)[i]))
 		i++;
 	if ((*str)[start + 1] == '?')
 	{
 		to_expand = ft_strdup("EXIT_CODE");
+		len = 1;
+	}
+	else if (ft_isdigit((*str)[start + 1]) || is_quote((*str)[start + 1]))
+	{
+		to_expand = ft_strdup("9");
 		len = 1;
 	}
 	else
@@ -150,13 +160,15 @@ void	sanitize_tokens(char **tokens, t_env *env)
 		quote = '\0';
 		while (tokens[i][j])
 		{
-			if (tokens[i][j] == '$'
-				&& tokens[i][j + 1]
-				&& (ft_isalpha(tokens[i][j + 1]) || tokens[i][j + 1] == '?')
-				&& (quote == '\0' || quote == '"'))
+			if (tokens[i][j] == '$')
 			{
-				expand_var(&tokens[i], env);
-				continue ;
+				if (tokens[i][j + 1]
+				&& ((ft_isalnum(tokens[i][j + 1]) || tokens[i][j + 1] == '?'|| (is_quote(tokens[i][j+1]) && quote == '\0')))
+				&& (((quote == '\0' || quote == '"'))))
+				{
+					expand_var(&tokens[i], env);
+					continue ;
+				}
 			}
 			else if (quote == '\0' && is_quote(tokens[i][j]))
 			{
