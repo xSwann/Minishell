@@ -1,4 +1,3 @@
-
 #include "../includes/exec.h"
 
 int	manage_outfile(t_pipex *px, int fd_stdout)
@@ -54,7 +53,7 @@ int	manage_infile(t_pipex *px, int fd_stdin)
 	if (px->infile < 0)
 		return (write(2, " No such file or directory\n", 26), 1);
 	if (px->infile && (dup2(px->infile, fd_stdin) == -1
-		|| close_fd(&px->outfile)) && error_printer("dup2: error"))
+		|| close_fd(&px->infile)) && error_printer("dup2: error"))
 		return (close_fd(&px->infile), close_pipe(px), 1);
 	close_fd(&px->pipe_fd[0]);
 	return (0);
@@ -68,11 +67,8 @@ pid_t	*pid_array_builder(t_cmd *cmd)
 	i = 0;
 	while (cmd)
 	{
-		if (cmd->args && cmd->args[0]
-		&& (!(!ft_strcmp("cd", cmd->args[0]) || !ft_strcmp("env", cmd->args[0])
-		|| !ft_strcmp("echo", cmd->args[0]) || !ft_strcmp("export", cmd->args[0])
-		|| !ft_strcmp("pwd", cmd->args[0]) || !ft_strcmp("unset", cmd->args[0])
-		|| !ft_strcmp("exit", cmd->args[0]))))
+		if (!(i == 0 && !cmd->pipe_cmd && cmd->args && cmd->args[0]
+			&& check_built_ins > 0))
 			i++;
 		cmd = cmd->pipe_cmd;
 	}

@@ -6,7 +6,7 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:00:26 by flebrun           #+#    #+#             */
-/*   Updated: 2025/07/08 14:30:24 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/07/17 15:33:04 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 
 int	error_printer(char *path)
 {
-	write(2, "minishell: ", 11);
 	write(2, strerror(errno), strlen(strerror(errno)));
 	write(2, ": ", 2);
 	write(2, path, strlen(path));
@@ -26,7 +25,10 @@ int	close_fd(int *fd)
 	if (fd && *fd >= 0)
 	{
 		if (close(*fd) == -1)
+		{
+			fprintf(stderr, "fd qui foire = %i\n", *fd);
 			return (*fd = -1, error_printer("close: failed closing fd"), 1);
+		}
 		*fd = -1;
 	}
 	return (0);

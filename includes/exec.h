@@ -56,6 +56,7 @@ void	*free_envp(char **envp, int j);
 ==============================*/
 
 int		split_cmd(char **cmd);
+int		check_built_ins(char *cmd);
 char	*path_parser(char *envp, char *cmd);
 void	path_builder(char *envp, char *cmd, char *path, int len);
 

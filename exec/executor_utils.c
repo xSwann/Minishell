@@ -94,3 +94,26 @@ int	call_built_ins(t_env **envp, char **cmd)
 		return (ft_exit(envp, cmd));
 	return (-1);
 }
+
+int	check_built_ins(char *cmd)
+{
+	if (!cmd || !*cmd)
+		return (-1);
+	if (!ft_strcmp("cd", cmd))
+		return (1);
+	if (!ft_strcmp("env", cmd))
+		return (2);
+	if (!ft_strcmp("echo", cmd))
+		return (3);
+	if (!ft_strcmp("export", cmd))
+		return (4);
+	if (!ft_strcmp("pwd", cmd))
+		return (4);
+	if (!ft_strcmp("unset", cmd))
+		return (5);
+	if (!ft_strcmp("exit",cmd))
+		return (6);
+	return (0);
+}
+
+
