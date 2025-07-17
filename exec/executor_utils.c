@@ -42,9 +42,12 @@ char	**env_create(t_env *envp)
 	is_exit_code = 0;
 	if (!envp || !(*envp->key))
 		return (NULL);
-	while (envp[i].key && ft_strcmp(envp[i++].key, "EXIT_CODE"))
-		is_exit_code++;
-	envp_string_form = malloc(sizeof (char *) * (i - is_exit_code + 2));
+	while (envp[i].key)
+	{
+		if (!ft_strcmp(envp[i++].key, "EXIT_CODE"))
+			is_exit_code++;
+	}
+	envp_string_form = malloc(sizeof (char *) * (i - is_exit_code + 1));
 	if (!envp_string_form)
 		return (NULL);
 	i = -1;
@@ -56,10 +59,18 @@ char	**env_create(t_env *envp)
 		string_key = ft_strjoin(envp[i].key, "=");
 		if (!string_key)
 			return (free_envp(envp_string_form, i - is_exit_code));
+		free(envp[i].key);
+		envp[i].key = NULL;
 		envp_string_form[i - is_exit_code] = ft_strjoin(string_key, envp[i].value);
 		if (!envp_string_form[i - is_exit_code])
 			return (free(string_key), free_envp(envp_string_form, i - is_exit_code - 1));
+		free(string_key);
+		string_key = NULL;
+		free(envp[i].value);
+		envp[i].value = NULL;
 	}
+	free(envp);
+	envp = NULL;
 	return (envp_string_form[i - is_exit_code] = NULL, envp_string_form);
 }
 

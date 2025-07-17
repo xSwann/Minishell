@@ -31,15 +31,15 @@ void	free_cmds(t_cmd *cmd)
 		free(cmd->args);
 		cmd->args = NULL;
 	}
-	if (cmd->infile)
+	while (cmd->infiles && *(cmd->infiles))
 	{
-		free(cmd->infile);
-		cmd->infile = NULL;
+		free(*(cmd->infiles));
+		*(cmd->infiles)++ = NULL;
 	}
-	if (cmd->outfile)
+	while (cmd->outfiles && *(cmd->outfiles))
 	{
-		free(cmd->outfile);
-		cmd->outfile = NULL;
+		free(*(cmd->outfiles));
+		*(cmd->outfiles)++ = NULL;
 	}
 	pipe_cmd = cmd->pipe_cmd;
 	free(cmd);
@@ -48,8 +48,6 @@ void	free_cmds(t_cmd *cmd)
 
 int	close_pipe(t_pipex *px)
 {
-	//if (px->infile && px->infile >= 0 && close(px->infile) == -1)
-	//	return (px->infile = -1, error_printer("close: infile"), 1);
 	if (px->pipe_fd[0] && px->pipe_fd[0] >= 0 && close(px->pipe_fd[0]) == -1)
 		return (px->pipe_fd[0] = -1, error_printer("close: pipe_fd[0]"), 1);
 	px->pipe_fd[0] = -1;

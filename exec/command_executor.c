@@ -8,10 +8,7 @@ void	executor(char **envp, t_pipex *px)
 
 	if ((!px->args || !px->args[0]) && write(2, "Pipex : Empty command\n", 22)
 		&& free_args(px->args))
-	{
-		close_fd(&px->pipe_fd[1]);
 		exit(1);
-	}
 	path = NULL;
 	i = 0;
 	while (envp[i] && ft_strncmp("PATH=", envp[i], 4))
@@ -20,7 +17,6 @@ void	executor(char **envp, t_pipex *px)
 		path = path_parser(envp[i] + 5, px->args[0]);
 	if (path)
 		execve(path, px->args, envp);
-	close_fd(&px->pipe_fd[1]);
 	free_args(px->args);
 	if (!path)
 		exit(127);
@@ -36,7 +32,6 @@ int	child_process(t_env **envp, t_pipex *px)
 		return (exit(1), 1);
 	if (call_built_ins(envp, px->args) != -1)
 	{
-		close_fd(&px->pipe_fd[1]);
 		free_args(px->args);
 		return (ft_exit(envp, NULL));
 	}
@@ -84,7 +79,6 @@ int	pipex(t_env **envp, t_pipex *px)
 		pid = fork();
 		if (pid == 0)
 		{
-			close_fd(&px->pipe_fd[0]);
 			child_process(envp, px);
 			exit (EXIT_FAILURE);
 		}
