@@ -74,7 +74,7 @@ int	call_built_ins(t_env **envp, char **cmd)
 	else if (!ft_strcmp("echo", cmd[0]))
 		return (ft_echo(cmd + 1, envp));
 	else if (!ft_strcmp("export", cmd[0]))
-		return (ft_export(envp, cmd[1]));
+		return (export_loop(envp, cmd));
 	else if (!ft_strcmp("pwd", cmd[0]))
 		return (ft_pwd(envp));
 	else if (!ft_strcmp("unset", cmd[0]))
