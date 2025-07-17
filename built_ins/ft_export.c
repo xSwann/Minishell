@@ -1,5 +1,21 @@
 #include "../includes/built_ins.h"
 
+int     export_loop(t_env **env, char **arg)
+{
+    int i;
+
+    i = 1;
+    while (arg[i])
+    {
+        ft_export(env, arg[i]);
+        if (ft_strcmp(get_env(*env, "EXIT_CODE"), "0"))
+            return (0);
+        i++;
+    }
+    return (0);
+}
+
+
 int    ft_export(t_env **env, char *arg)
 {
     int     i;
@@ -25,10 +41,12 @@ int    ft_export(t_env **env, char *arg)
     identifier = ft_substr(arg, 0, i);
     if (!is_exportable(arg))
     {
-        fprintf(stderr, "export: `%s': not a valid identifier\n", identifier);
+        fprintf(stderr, "export: `%s': not a valid identifier\n", arg);
         free(identifier);
         return (ft_export(env, "EXIT_CODE=1"));
     }
+    if (ft_strcmp(identifier, "EXIT_CODE") != 0)
+        ft_export(env, "EXIT_CODE=0");
     free(identifier);
     i = 0;
     j = 0;

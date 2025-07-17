@@ -27,6 +27,28 @@ void	executor(char **envp, t_pipex *px)
 	return (free(path), exit(126));
 }
 
+
+int	call_built_ins(t_env **envp, char **cmd)
+{
+	if (!envp || !(*envp)->key || !cmd || !*cmd)
+		return (0);
+	else if (!ft_strcmp("cd", cmd[0]))
+		return (ft_cd(cmd, envp));
+	else if (!ft_strcmp("env", cmd[0]))
+		return (ft_env(envp));
+	else if (!ft_strcmp("echo", cmd[0]))
+		return (ft_echo(cmd + 1, envp));
+	else if (!ft_strcmp("export", cmd[0]))
+		return (export_loop(envp, cmd));
+	else if (!ft_strcmp("pwd", cmd[0]))
+		return (ft_pwd(envp));
+	else if (!ft_strcmp("unset", cmd[0]))
+		return (ft_unset(envp, cmd[1]));
+	else if (!ft_strcmp("exit", cmd[0]))
+		return (ft_exit(envp, cmd));
+	return (-1);
+}
+
 int	child_process(t_env **envp, t_pipex *px)
 {
 	char	**envp_string_form;
