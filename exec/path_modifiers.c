@@ -26,6 +26,8 @@ char	*path_parser(char *envp, char *cmd)
 	int		len;
 
 	path = NULL;
+	if (cmd && *cmd && *cmd == '/' && access(cmd, X_OK) == 0)
+		return (cmd);
 	while (*envp)
 	{
 		len = 0;
@@ -45,24 +47,17 @@ char	*path_parser(char *envp, char *cmd)
 	return (error_printer(" command not found"), NULL);
 }
 
-int	split_cmd(char **cmd)
+int	find_last_slash_in_str(char *cmd)
 {
-	char	*cmd_old;
 	int		i;
 	int		j;
 
 	i = 0;
-	j = -1;
-	cmd_old = *cmd;
-	while (cmd_old && cmd_old[i])
+	j = 0;
+	while (cmd && cmd[i])
 	{
-		if (cmd_old[i++] == '/')
+		if (cmd[i++] == '/')
 			j = i;
 	}
-	if (j == -1)
-		return (0);
-	*cmd = ft_strdup(cmd_old + j);
-	if (!*cmd)
-		return (*cmd = cmd_old, 1);
-	return (free(cmd_old), 0);
+	return (j);
 }

@@ -27,13 +27,14 @@ void	executor(char **envp, t_pipex *px)
 int	child_process(t_env **envp, t_pipex *px)
 {
 	char	**envp_string_form;
+	int		i;
 
-	if (manage_infile(px, STDIN_FILENO) || manage_outfile(px, STDOUT_FILENO))
+	if (manage_outfile(px, STDOUT_FILENO) || manage_infile(px, STDIN_FILENO))
 		return (exit(1), 1);
-	if (call_built_ins(envp, px->args) != -1)
+	if ((i = check_built_ins(px->args[0])) > 0)
 	{
-		free_args(px->args);
-		return (ft_exit(envp, NULL));
+		call_built_ins(envp, px->args, i);
+		return (free_args(px->args), ft_exit(envp, NULL));
 	}
 	envp_string_form = env_create(*envp);
 	if (envp_string_form)
@@ -41,24 +42,26 @@ int	child_process(t_env **envp, t_pipex *px)
 	exit(ft_exit(envp, NULL));
 }
 
-int	ft_built_ins(t_env **envp, t_pipex *px)
+int	ft_built_ins(t_env **envp, t_pipex *px, int i)
 {
-	int stdin_backup = dup(STDIN_FILENO);
-	int stdout_backup = dup(STDOUT_FILENO);
+	int stdin_backup;
+	int stdout_backup;
 
+	stdin_backup = dup(STDIN_FILENO);
+	stdout_backup = dup(STDOUT_FILENO);
 	if (stdin_backup < 0 || stdout_backup < 0)
 		return (error_printer("dup: backup failed"), 1);
-	if (manage_infile(px, STDIN_FILENO) || manage_outfile(px, STDOUT_FILENO))
+	if (manage_outfile(px, STDOUT_FILENO) || manage_infile(px, STDIN_FILENO))
 	{
 		close_fd(&stdin_backup);
 		close_fd(&stdout_backup);
-		return (1);
+		return (ft_export(envp, "EXIT_CODE=1"));
 	}
-	call_built_ins(envp, px->args);
-	dup2(stdin_backup, STDIN_FILENO);
-	dup2(stdout_backup, STDOUT_FILENO);
-	close_fd(&stdin_backup);
-	close_fd(&stdout_backup);
+	call_built_ins(envp, px->args, i);
+	if (dup2(stdin_backup, STDIN_FILENO) == -1
+		|| dup2(stdout_backup, STDOUT_FILENO) == -1
+		|| close_fd(&stdin_backup) || close_fd(&stdout_backup))
+		return (error_printer("dup2: restore failed"));
 	return (0);
 }
 
@@ -69,11 +72,8 @@ int	pipex(t_env **envp, t_pipex *px)
 	if (pipe(px->pipe_fd) == -1)
 		return (perror("pipe: error"), 1);
 	if (px->n_pids == 0 && !px->cmd->pipe_cmd
-		&& (!ft_strcmp("cd", px->args[0]) || !ft_strcmp("env", px->args[0])
-		|| !ft_strcmp("echo", px->args[0]) || !ft_strcmp("export", px->args[0])
-		|| !ft_strcmp("pwd", px->args[0]) || !ft_strcmp("unset", px->args[0])
-		|| !ft_strcmp("exit", px->args[0])))
-		ft_built_ins(envp, px);
+		&& px->args && px->args[0] && (pid = check_built_ins(px->args[0])) > 0)
+		ft_built_ins(envp, px, pid);
 	else
 	{
 		pid = fork();

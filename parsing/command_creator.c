@@ -35,7 +35,7 @@ int	arrays_init(t_token *tokens, t_cmd *cmd)
 			cmd->counters[2]++;
 		else if (tokens[i].type == WORD && !(cmd->prev_type == HEREDOC))
 			cmd->counters[0]++;
-		else if (tokens[i].type == PIPE || tokens[i].type == APPEND)
+		else if ((tokens[i].type == PIPE && cmd->counters[0]) || tokens[i].type == APPEND)
 			break ;
 		cmd->prev_type = tokens[i].type;
 		i++;
@@ -67,7 +67,7 @@ t_cmd	*init_command(t_token *tokens)
 	return (cmd);
 }
 
-void	handle_token(t_cmd *cmd, t_token token, int *n_args)
+void	handle_token(t_cmd *cmd, t_token token)
 {
 	t_type	curr_type;
 
@@ -81,23 +81,21 @@ void	handle_token(t_cmd *cmd, t_token token, int *n_args)
 		else if (cmd->prev_type == REDOUT || cmd->prev_type == APPEND)
 			cmd->outfiles[cmd->counters[2]++] = ft_strdup(token.word);
 		else
-			cmd->args[(*n_args)++] = ft_strdup(token.word);
-		free(token.word);
-		token.word = NULL;
+			cmd->args[cmd->counters[0]++] = ft_strdup(token.word);
 	}
 	if (cmd->prev_type == REDOUT)
 		cmd->open_options = O_WRONLY | O_CREAT | O_TRUNC;
 	if (cmd->prev_type == APPEND)
 		cmd->open_options = O_WRONLY | O_CREAT | O_APPEND;
+	free(token.word);
+	token.word = NULL;
 }
 
 int	cmd_creator(t_cmd **cmd, t_token *tokens)
 {
 	int			i;
-	int			n_args;
 
 	i = 0;
-	n_args = 0;
 	if (!tokens || tokens[i].type == END)
 		return ((*cmd) = NULL, 0);
 	*cmd = init_command(tokens);
@@ -105,13 +103,13 @@ int	cmd_creator(t_cmd **cmd, t_token *tokens)
 		return (1);
 	while (tokens[i].type != END)
 	{
-		if ((*cmd)->prev_type == PIPE)
+		if ((*cmd)->prev_type == PIPE && (*cmd)->counters[0] > 0)
 		{
 			if (cmd_creator(&(*cmd)->pipe_cmd, tokens + i))
 				return (1);
 			return (0);
 		}
-		handle_token(*cmd, tokens[i], &n_args);
+		handle_token(*cmd, tokens[i]);
 		(*cmd)->prev_type = tokens[i++].type;
 	}
 	//print_cmd(*cmd);
