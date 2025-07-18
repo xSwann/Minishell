@@ -41,6 +41,12 @@ struct	s_cmd
 =       TOKEN STRUCTURE        =
 ==============================*/
 
+typedef struct s_tab
+{
+	char	*str;
+	int		quoted;
+}	t_tab;
+
 typedef struct s_token
 {
 	char	*word;

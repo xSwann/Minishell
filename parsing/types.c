@@ -1,4 +1,3 @@
-
 #include "../includes/parsing.h"
 
 void	print_tokens(int nb_of_tokens, t_token *tokens)
@@ -44,21 +43,20 @@ t_type	find_type(t_token token)
 	return (WORD);
 }
 
-void	put_tokens_in_struct(char **tab, int nb_of_tokens, t_token *tokens)
+void	put_tokens_in_struct(t_tab *tab, int nb_of_tokens, t_token *tokens)
 {
-	int		i;
+	int	i;
 
 	i = 0;
 	while (i < nb_of_tokens)
 	{
-		tokens[i].word = strdup(tab[i]);
-		free(tab[i]);
-		tab[i] = NULL;
-		tokens[i].type = find_type(tokens[i]);
+		tokens[i].word = strdup(tab[i].str);
+		if(tab[i].quoted == 0)
+			tokens[i].type = find_type(tokens[i]);
+		else
+			tokens[i].type = WORD;
 		i++;
 	}
-	free(tab);
-	tab = NULL;
 	tokens[i].word = NULL;
 	tokens[i].type = find_type(tokens[i]);
 }

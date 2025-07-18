@@ -1,4 +1,3 @@
-// parsing/put_tokens_in_tab.c
 #include "../includes/parsing.h"
 
 static void	skip_spaces(char *line, int *i)
@@ -22,7 +21,7 @@ static void	skip_quoted_segment(char *line, int *i)
 void	symbol_handler(int *i, char *line)
 {
 	if (is_double_symbol(line, *i))
-			*i += 2;
+		*i += 2;
 	else
 		(*i)++;
 }
@@ -54,29 +53,33 @@ static void	skip_token(char *line, int *i)
 	}
 }
 
-void	put_tokens_in_tab(int nb_of_token, char *line, char **tab)
+void put_tokens_in_tab(int nb_of_token, char *line, t_tab *tab)
 {
-	int	i;
-	int	j;
-	int	start;
-	int	len;
+    int i = 0, j = 0;
+    int start, len;
 
-	i = 0;
-	j = 0;
-	while (line[i] && j < nb_of_token)
-	{
-		skip_spaces(line, &i);
-		if (!line[i])
-			break ;
-		start = i;
-		skip_token(line, &i);
-		len = i - start;
-		tab[j] = malloc(len + 1);
-		if (!tab[j])
-			exit(EXIT_FAILURE);
-		fill_line(tab[j], line, start, i);
-		j++;
-	}
-	if (j < nb_of_token)
-		tab[j] = NULL;
+    while (line[i] && j < nb_of_token)
+    {
+        skip_spaces(line, &i);
+        if (!line[i])
+            break ;
+        start = i;
+        skip_token(line, &i);
+        len = i - start;
+
+        tab[j].str = malloc(len + 1);
+        if (!tab[j].str)
+            exit(EXIT_FAILURE);
+        fill_line(tab[j].str, line, start, i);
+
+        if ((tab[j].str[0] == '\'' && tab[j].str[len - 1] == '\'') ||
+            (tab[j].str[0] == '"'  && tab[j].str[len - 1] == '"'))
+            tab[j].quoted = 1;
+		else if ((tab[j].str[0] == '\'' && tab[j].str[len - 1] == '\'') ||
+            (tab[j].str[0] == 39  && tab[j].str[len - 1] == 39))
+            tab[j].quoted = 2;
+        else
+            tab[j].quoted = 0;
+        j++;
+    }
 }
