@@ -137,7 +137,10 @@ void expand_var(char **str, t_env *env)
     if (!expanded)
         erase_expand(str, ft_strlen(*str) - len);
     else
+	{
         replace_expanded_value(str, expanded, ft_strlen(*str) - len);
+	}
+	free(expanded);
 }
 
 void sanitize_tokens(t_tab *tokens, t_env *env)

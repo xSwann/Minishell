@@ -6,7 +6,7 @@
 #include <aio.h>
 #include <termios.h>
 
-struct termios term;
+volatile sig_atomic_t g_receive_sig;
 
 char *get_input(void)
 {
@@ -24,6 +24,7 @@ void	signalhandler(int signal)
 {
 	if (signal == SIGINT)
 	{
+		g_receive_sig = 1;
 		rl_replace_line("", 0);
 		write(1, "\n", 1);
 		rl_on_new_line();
@@ -40,15 +41,17 @@ int	read_terminal(t_env **env)
 	t_cmd	*cmd;
 	int i;
 
-	tcgetattr(STDIN_FILENO, &term);
-	term.c_lflag &= ~ECHOCTL;
-	tcsetattr(STDIN_FILENO, TCSANOW, &term);
 	signal(SIGINT, signalhandler);
 	signal(SIGQUIT, SIG_IGN);
 	while (1)
 	{
-		line = readline("Minishell: ");
-		//line = get_input();
+		//line = readline("Minishell: ");
+		line = get_input();
+		if (g_receive_sig == 1)
+		{
+			ft_export(env, "EXIT_CODE=130");
+			g_receive_sig = 0;
+		}
 		if (!line)
 			break;
 		if (*line)
@@ -82,7 +85,6 @@ int	read_terminal(t_env **env)
 		tokens_struct = NULL;
 		cmd_executor(env, &cmd);
 	}
-	free(tokens_struct);
 	free(line);
 	return (rl_clear_history(), 0);
 }
