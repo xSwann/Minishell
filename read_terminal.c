@@ -38,6 +38,7 @@ int	read_terminal(t_env **env)
 	t_tab	*tokens;
 	t_token	*tokens_struct;
 	t_cmd	*cmd;
+	int i;
 
 	tcgetattr(STDIN_FILENO, &term);
 	term.c_lflag &= ~ECHOCTL;
@@ -65,6 +66,13 @@ int	read_terminal(t_env **env)
 			exit(EXIT_FAILURE);
 		ft_memset(tokens_struct, 0, sizeof(t_token) * (nb_of_token + 1));
 		put_tokens_in_struct(tokens, nb_of_token, tokens_struct);
+		i = 0;
+		while(tokens[i].str)
+		{
+			free(tokens[i].str);
+			i++;
+		}
+		free(tokens);
 		//print_tokens(nb_of_token, tokens_struct);
 		cmd = NULL;
 		if (cmd_creator(&cmd, tokens_struct))
