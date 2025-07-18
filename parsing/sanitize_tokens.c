@@ -42,7 +42,7 @@ void replace_expanded_value(char **str, char *expanded, int len)
         return;
     while ((*str)[i] && (*str)[i] != '$')
         new[j++] = (*str)[i++];
-    i++; // skip '$'
+    i++;
     if ((*str)[i] == '?')
         i++;
     else
