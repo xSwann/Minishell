@@ -89,7 +89,7 @@ int	call_built_ins(t_env **envp, char **cmd, int i)
 	else if (i == 5)
 		return (ft_pwd(envp));
 	else if (i == 6)
-		return (ft_unset(envp, cmd[1]));
+		return (unset_loop(envp, cmd));
 	else if (i == 7)
 		return (ft_exit(envp, cmd));
 	return (-1);
