@@ -46,7 +46,8 @@ int	read_terminal(t_env **env)
 	signal(SIGQUIT, SIG_IGN);
 	while (1)
 	{
-		line = get_input();
+		line = readline("Minishell: ");
+		//line = get_input();
 		if (!line)
 			break;
 		if (*line)

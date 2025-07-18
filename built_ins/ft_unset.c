@@ -2,6 +2,21 @@
 
 #include "../includes/built_ins.h"
 
+int     unset_loop(t_env **env, char **arg)
+{
+    int i;
+
+    i = 1;
+    while (arg[i])
+    {
+        ft_unset(env, arg[i]);
+        if (ft_strcmp(get_env(*env, "EXIT_CODE"), "0"))
+            return (0);
+        i++;
+    }
+    return (0);
+}
+
 int ft_unset(t_env **env, char *arg)
 {
     int i;

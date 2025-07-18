@@ -16,6 +16,7 @@ int     export_loop(t_env **env, char **arg);
 int     is_exportable(char *arg);
 int     ft_cd(char **path, t_env **env);
 int     ft_unset(t_env **env, char *arg);
+int     unset_loop(t_env **env, char **arg);
 int     ft_env(t_env **env);
 int     ft_exit(t_env **env, char **arg);
 
