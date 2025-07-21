@@ -49,10 +49,10 @@ void	free_cmds(t_cmd *cmd)
 int	close_pipe(t_pipex *px)
 {
 	if (px->pipe_fd[0] && px->pipe_fd[0] >= 0 && close(px->pipe_fd[0]) == -1)
-		return (px->pipe_fd[0] = -1, error_printer("close: pipe_fd[0]"), 1);
+		return (px->pipe_fd[0] = -1, error_printer("close", "pipe_fd[0]"), 1);
 	px->pipe_fd[0] = -1;
 	if (px->pipe_fd[1] && px->pipe_fd[1] >= 0 && close(px->pipe_fd[1]) == -1)
-		return (px->pipe_fd[1] = -1, error_printer("close: pipe_fd[1]"), 1);
+		return (px->pipe_fd[1] = -1, error_printer("close", "pipe_fd[1]"), 1);
 	px->pipe_fd[1] = -1;
 	return (0);
 }

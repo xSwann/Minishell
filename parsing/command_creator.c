@@ -3,10 +3,9 @@
 
 int	arrays_malloc(t_cmd *cmd)
 {
-	if (!cmd->counters[0])
-		return (0);
-	cmd->args = (char **)ft_calloc(cmd->counters[0] + 1, sizeof(char *));
-	if (!cmd->args)
+	if (cmd->counters[0])
+		cmd->args = (char **)ft_calloc(cmd->counters[0] + 1, sizeof(char *));
+	if (cmd->counters[0] && !cmd->args)
 		return (1);
 	cmd->counters[0] = 0;
 	if (cmd->counters[1])
@@ -31,11 +30,12 @@ int	arrays_init(t_token *tokens, t_cmd *cmd)
 	{
 		if (tokens[i].type == WORD && cmd->prev_type == REDIN)
 			cmd->counters[1]++;
-		else if (tokens[i].type == WORD && cmd->prev_type == REDOUT)
+		else if (tokens[i].type == WORD &&
+			(cmd->prev_type == REDOUT || cmd->prev_type == APPEND))
 			cmd->counters[2]++;
 		else if (tokens[i].type == WORD && !(cmd->prev_type == HEREDOC))
 			cmd->counters[0]++;
-		else if ((tokens[i].type == PIPE && cmd->counters[0]) || tokens[i].type == APPEND)
+		else if (tokens[i].type == PIPE && cmd->counters[0])
 			break ;
 		cmd->prev_type = tokens[i].type;
 		i++;
@@ -67,15 +67,16 @@ t_cmd	*init_command(t_token *tokens)
 	return (cmd);
 }
 
-void	handle_token(t_cmd *cmd, t_token token)
+void	handle_token(t_env *env, t_cmd *cmd, t_token token)
 {
 	t_type	curr_type;
 
 	curr_type = token.type;
+	//fprintf(stderr, "handle_token with word = %s & type = %d\n", token.word, token.type);
 	if (curr_type == WORD)
 	{
 		if (cmd->prev_type == HEREDOC)
-			cmd->here_doc_fd = ft_here_doc(ft_strdup(token.word));
+			cmd->here_doc_fd = ft_here_doc(env, ft_strdup(token.word));
 		else if (cmd->prev_type == REDIN)
 			cmd->infiles[cmd->counters[1]++] = ft_strdup(token.word);
 		else if (cmd->prev_type == REDOUT || cmd->prev_type == APPEND)
@@ -91,9 +92,10 @@ void	handle_token(t_cmd *cmd, t_token token)
 	token.word = NULL;
 }
 
-int	cmd_creator(t_cmd **cmd, t_token *tokens)
+int	cmd_creator(t_env *env, t_cmd **cmd, t_token *tokens)
 {
-	int			i;
+	t_cmd	*curr_cmd;
+	int		i;
 
 	i = 0;
 	if (!tokens || tokens[i].type == END)
@@ -101,16 +103,19 @@ int	cmd_creator(t_cmd **cmd, t_token *tokens)
 	*cmd = init_command(tokens);
 	if (!*cmd)
 		return (1);
+	curr_cmd = *cmd;
 	while (tokens[i].type != END)
 	{
-		if ((*cmd)->prev_type == PIPE && (*cmd)->counters[0] > 0)
+		if (curr_cmd->prev_type == PIPE)
 		{
-			if (cmd_creator(&(*cmd)->pipe_cmd, tokens + i))
+			curr_cmd->pipe_cmd = init_command(tokens + i);
+			if (!curr_cmd->pipe_cmd)
 				return (1);
-			return (0);
+			curr_cmd = curr_cmd->pipe_cmd;
+			curr_cmd->prev_type = tokens[i].type;
 		}
-		handle_token(*cmd, tokens[i]);
-		(*cmd)->prev_type = tokens[i++].type;
+		handle_token(env, curr_cmd, tokens[i]);
+		curr_cmd->prev_type = tokens[i++].type;
 	}
 	//print_cmd(*cmd);
 	return (0);
@@ -128,10 +133,10 @@ void	print_cmd(t_cmd *cmd)
 		fprintf(stderr, "		|||  print_cmd  |||\n");
 		while (++i >= 0 && cmd->args && cmd->args[i])
 			fprintf(stderr, "cmd->args[%i] = %s\n", i, cmd->args[i]);
-		fprintf(stderr, "cmd->infiles[0] = %s\ncmd->outfiles[0] = %s\n\
-		cmd->open_options = %i\ncmd->fd_here_doc = %i\ncmd->pipe_cmd = %p\n", \
-		cmd->infiles[0], cmd->outfiles[0], cmd->open_options, cmd->here_doc_fd, \
-		cmd->pipe_cmd);
+		//fprintf(stderr, "cmd->infiles[0] = %s\ncmd->outfiles[0] = %s\n\
+		//cmd->open_options = %i\ncmd->fd_here_doc = %i\ncmd->pipe_cmd = %p\n", \
+		//cmd->infiles[0], cmd->outfiles[0], cmd->open_options, cmd->here_doc_fd, \
+		//cmd->pipe_cmd);
 	}
 }
 

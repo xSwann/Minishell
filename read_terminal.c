@@ -13,7 +13,7 @@ char *get_input(void)
 	char *line;
 
 	if (isatty(STDIN_FILENO))
-		return readline("Minishell: ");
+		return readline("minishell$ ");
 	line = get_next_line(STDIN_FILENO);
 	if (line && line[ft_strlen(line) - 1] == '\n')
 		line[ft_strlen(line) - 1] = '\0';
@@ -39,7 +39,6 @@ int	read_terminal(t_env **env)
 	t_tab	*tokens;
 	t_token	*tokens_struct;
 	t_cmd	*cmd;
-	int i;
 
 	signal(SIGINT, signalhandler);
 	signal(SIGQUIT, SIG_IGN);
@@ -61,26 +60,16 @@ int	read_terminal(t_env **env)
 		if (!tokens)
 			exit(EXIT_FAILURE);
 		put_tokens_in_tab(nb_of_token, line, tokens);
-		free(line);
-		line = NULL;
 		sanitize_tokens(tokens, *env);
 		tokens_struct = malloc(sizeof(t_token) * (nb_of_token + 1));
 		if (!tokens_struct)
 			exit(EXIT_FAILURE);
 		ft_memset(tokens_struct, 0, sizeof(t_token) * (nb_of_token + 1));
-		put_tokens_in_struct(tokens, nb_of_token, tokens_struct);
-		i = 0;
-		while(tokens[i].str)
-		{
-			free(tokens[i].str);
-			i++;
-		}
-		free(tokens);
+		put_tokens_in_struct(env, tokens, nb_of_token, &tokens_struct);
 		//print_tokens(nb_of_token, tokens_struct);
 		cmd = NULL;
-		if (cmd_creator(&cmd, tokens_struct))
+		if (cmd_creator(*env, &cmd, tokens_struct))
 			exit(EXIT_FAILURE);
-
 		free(tokens_struct);
 		tokens_struct = NULL;
 		cmd_executor(env, &cmd);

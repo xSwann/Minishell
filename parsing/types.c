@@ -1,4 +1,6 @@
 #include "../includes/parsing.h"
+#include "../includes/built_ins.h"
+#include "../includes/exec.h"
 
 void	print_tokens(int nb_of_tokens, t_token *tokens)
 {
@@ -43,20 +45,67 @@ t_type	find_type(t_token token)
 	return (WORD);
 }
 
-void	put_tokens_in_struct(t_tab *tab, int nb_of_tokens, t_token *tokens)
+int	error_parser_printer(t_env **env, char *word)
+{
+	write(2, "minishell: syntax error near unexpected token `", 47);
+	if (word && *word)
+		write(2, word, ft_strlen(word));
+	else
+		write(2, "newline", 7);
+	write(2, "'\n", 2);
+	ft_export(env, "EXIT_CODE=2");
+	return (2);
+}
+
+int	validate_tokens(t_env **env, t_token *tokens)
+{
+	int	i;
+
+	i = 0;
+
+	while (tokens && tokens[i].type && tokens[i].type != END)
+	{
+		if (tokens[i].type == PIPE)
+		{
+			if (i == 0 || tokens[i + 1].type == END || tokens[i + 1].type == PIPE)
+				return (error_parser_printer(env, tokens[i].word));
+		}
+		else if (tokens[i].type == REDIN || tokens[i].type == REDOUT
+			|| tokens[i].type == APPEND || tokens[i].type == HEREDOC)
+		{
+			if (tokens[i + 1].type == END)
+				return (error_parser_printer(env, tokens[i + 1].word));
+			if (tokens[i + 1].type != WORD)
+				return (error_parser_printer(env, tokens[i + 1].word));
+		}
+		i++;
+	}
+	return (0);
+}
+
+void	put_tokens_in_struct(t_env **env, t_tab *tab, int nb_of_tokens, t_token **tokens)
 {
 	int	i;
 
 	i = 0;
 	while (i < nb_of_tokens)
 	{
-		tokens[i].word = strdup(tab[i].str);
-		if(tab[i].quoted == 0)
-			tokens[i].type = find_type(tokens[i]);
+		(*tokens)[i].word = strdup(tab[i].str);
+		free(tab[i].str);
+		if (tab[i].quoted == 0)
+			(*tokens)[i].type = find_type((*tokens)[i]);
 		else
-			tokens[i].type = WORD;
+			(*tokens)[i].type = WORD;
 		i++;
 	}
-	tokens[i].word = NULL;
-	tokens[i].type = find_type(tokens[i]);
+	(*tokens)[i].word = NULL;
+	(*tokens)[i].type = find_type((*tokens)[i]);
+	if (validate_tokens(env, *tokens))
+	{
+		while (--i >= 0)
+			free((*tokens)[i].word);
+		free(*tokens);
+		*tokens = NULL;
+	}
+	//print_tokens(nb_of_tokens, tokens);
 }
