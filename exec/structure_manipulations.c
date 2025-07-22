@@ -18,7 +18,7 @@ int	manage_outfile(t_pipex *px, int fd_stdout)
 				px->outfile = open(px->cmd->outfiles[i], \
 				O_WRONLY | O_CREAT | O_APPEND, 0644);
 			if (px->outfile < 0)
-				return (error_printer(px->cmd->outfiles[i]));
+				return (error_printer("open", px->cmd->outfiles[i]));
 		}
 	}
 	else if (px->cmd->pipe_cmd)
@@ -26,10 +26,10 @@ int	manage_outfile(t_pipex *px, int fd_stdout)
 		px->outfile = px->pipe_fd[1];
 		px->pipe_fd[1] = -1;
 	}
-	if (px->outfile < 0 && error_printer(px->cmd->outfiles[i]))
+	if (px->outfile < 0 && error_printer("open", px->cmd->outfiles[i]))
 		return (close_fd(&px->infile), close_pipe(px), 1);
 	if (px->outfile && (dup2(px->outfile, fd_stdout) == -1
-		|| close_fd(&px->outfile)) && error_printer("dup2: error"))
+		|| close_fd(&px->outfile)) && error_printer("dup2", "error"))
 		return (close_fd(&px->outfile), close_pipe(px), 1);
 	close_fd(&px->pipe_fd[1]);
 	return (0);
@@ -50,13 +50,13 @@ int	manage_infile(t_pipex *px, int fd_stdin)
 				return (1);
 			px->infile = open(px->cmd->infiles[i], O_RDONLY);
 			if (px->infile < 0)
-				return (error_printer(px->cmd->infiles[i]));
+				return (error_printer("open", px->cmd->infiles[i]));
 		}
 	}
 	if (px->infile < 0)
-		return (error_printer(px->cmd->infiles[i]));
+		return (error_printer("open", px->cmd->infiles[i]));
 	if (px->infile && (dup2(px->infile, fd_stdin) == -1
-		|| close_fd(&px->infile)) && error_printer("dup2: error"))
+		|| close_fd(&px->infile)) && error_printer("dup2", "error"))
 		return (close_fd(&px->infile), close_pipe(px), 1);
 	close_fd(&px->pipe_fd[0]);
 	return (0);
@@ -115,10 +115,10 @@ int	update_px(t_pipex *px)
 	if (px->cmd->pipe_cmd->here_doc_fd)
 	{
 		if (px->infile && close_fd(&px->infile))
-			return (error_printer("pipe_fd[0]"), 1);
+			return (error_printer("pipe", "pipe_fd[0]"), 1);
 		px->infile = px->cmd->pipe_cmd->here_doc_fd;
 		if (px->infile < 0)
-			return (error_printer("here_doc_fd"), 1);
+			return (error_printer("open", "here_doc_fd"), 1);
 	}
 	else
 		px->here_doc_fd = 0;

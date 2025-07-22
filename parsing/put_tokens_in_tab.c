@@ -66,20 +66,20 @@ void put_tokens_in_tab(int nb_of_token, char *line, t_tab *tab)
         start = i;
         skip_token(line, &i);
         len = i - start;
-
         tab[j].str = malloc(len + 1);
         if (!tab[j].str)
             exit(EXIT_FAILURE);
         fill_line(tab[j].str, line, start, i);
-
         if ((tab[j].str[0] == '\'' && tab[j].str[len - 1] == '\'') ||
-            (tab[j].str[0] == '"'  && tab[j].str[len - 1] == '"'))
-            tab[j].quoted = 1;
-		else if ((tab[j].str[0] == '\'' && tab[j].str[len - 1] == '\'') ||
-            (tab[j].str[0] == 39  && tab[j].str[len - 1] == 39))
-            tab[j].quoted = 2;
+			(tab[j].str[0] == '"'  && tab[j].str[len - 1] == '"'))
+			tab[j].quoted = 1;
+			else if ((tab[j].str[0] == '\'' && tab[j].str[len - 1] == '\'') ||
+			(tab[j].str[0] == 39  && tab[j].str[len - 1] == 39))
+			tab[j].quoted = 2;
         else
             tab[j].quoted = 0;
         j++;
     }
+	free(line);
+	line = NULL;
 }

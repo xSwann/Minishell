@@ -4,31 +4,31 @@ int	wait_execs(t_env **envp, t_pipex *px)
 {
 	int		i;
 	int		status;
-	char	*status_code;
-	char	*exit_code;
+	int		exit_code;
+	char	*status_str;
+	char	*exit_str;
 
 	i = -1;
 	status = 0;
 	while (++i < px->n_pids && px->pids[i])
 	{
 		if (px->pids[i] <= 0)
-			break ;
+			continue ;
 		if (waitpid(px->pids[i], &status, 0) == -1)
-			error_printer("waitpid failed");
+			error_printer("waitpid failed", NULL);
 		if (WIFEXITED(status))
-			status = WEXITSTATUS(status);
+			exit_code = WEXITSTATUS(status);
 	}
 	free_cmds(px->first_cmd);
 	free(px->pids);
-	status_code = ft_itoa(status);
-	if (status_code)
-	{
-		exit_code = ft_strjoin("EXIT_CODE=", status_code);
-		free(status_code);
-		if (exit_code)
-			return (ft_export(envp, exit_code), free(exit_code), 0);
-	}
-	return (status);
+	status_str = ft_itoa(exit_code);
+	if (!status_str)
+		return (exit_code);
+	exit_str = ft_strjoin("EXIT_CODE=", status_str);
+	free(status_str);
+	if (!exit_str)
+		return (exit_code);
+	return (ft_export(envp, exit_str), free(exit_str), 0);
 }
 
 char	**env_create(t_env *envp)

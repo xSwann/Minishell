@@ -24,7 +24,7 @@
 int		count_tokens(char *line);
 void	put_tokens_in_tab(int nb_of_token, char *line, t_tab *tab);
 void	sanitize_tokens(t_tab *tokens, t_env *env);
-void	put_tokens_in_struct(t_tab *tab, int nb_of_tokens, t_token *tokens);
+void	put_tokens_in_struct(t_env **env, t_tab *tab, int nb_of_tokens, t_token **tokens);
 void	print_tokens(int nb_of_tokens, t_token *tokens);
 
 /*==============================
@@ -32,23 +32,24 @@ void	print_tokens(int nb_of_tokens, t_token *tokens);
 ==============================*/
 
 int		is_space(char chr);
+int		is_quote(char chr);
 int		is_symbol(char chr);
 int		is_double_symbol(char *str, int i);
-int		is_quote(char chr);
-void	fill_line(char *tab, char *line, int start, int end);
 void	symbol_handler(int *i, char *line);
+void	expand_var(char **str, t_env *env);
+void	fill_line(char *tab, char *line, int start, int end);
 
 /*==============================
 =      COMMAND_FUNCTIONS      =
 ==============================*/
 
-int		cmd_creator(t_cmd **cmd, t_token *tokens);
+int		cmd_creator(t_env *env, t_cmd **cmd, t_token *tokens);
 void	print_cmd(t_cmd *cmd);
 
 /*==============================
 =    HERE_DOC MANIPULATIONS    =
 ==============================*/
 
-int		ft_here_doc(char *limiter);
+int		ft_here_doc(t_env *env, char *limiter);
 
 #endif

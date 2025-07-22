@@ -11,7 +11,6 @@ int ft_cd(char **path, t_env **env)
     
     if (ft_strslen(path) > 2)
     {
-        fprintf(stderr, "cd: too many arguments\n");
         ft_export(env, "EXIT_CODE=1");
         return (0);
     }
@@ -39,7 +38,7 @@ int ft_cd(char **path, t_env **env)
         path[1] = ft_strdup(path[1]);
     if (chdir(path[1]) != 0)
     {
-        fprintf(stderr, "cd: %s: No such file or directory\n", path[1]);
+        fprintf(stderr, "minishell: cd: %s: No such file or directory\n", path[1]);
         free(path[1]);
         return (ft_export(env, "EXIT_CODE=1"));
     }

@@ -6,7 +6,7 @@ void	executor(char **envp, t_pipex *px)
 	char	*path;
 	int		i;
 
-	if ((!px->args || !px->args[0]) && write(2, "Pipex : Empty command\n", 22)
+	if ((!px->args || !px->args[0]) && error_printer("empty command", NULL)
 		&& free_args(px->args))
 		exit(1);
 	path = NULL;
@@ -15,12 +15,12 @@ void	executor(char **envp, t_pipex *px)
 		i++;
 	if (px->args)
 		path = path_parser(envp[i] + 5, px->args[0]);
-	if (path)
-		execve(path, px->args, envp);
+	if (path && execve(path, px->args, envp) == -1)
+		return (error_printer(path, "Is a directory"), free(path), exit(126));
 	free_args(px->args);
 	if (!path)
 		exit(127);
-	error_printer(path);
+	error_printer(path, "command not found");
 	return (free(path), exit(126));
 }
 
@@ -50,7 +50,7 @@ int	ft_built_ins(t_env **envp, t_pipex *px, int i)
 	stdin_backup = dup(STDIN_FILENO);
 	stdout_backup = dup(STDOUT_FILENO);
 	if (stdin_backup < 0 || stdout_backup < 0)
-		return (error_printer("dup: backup failed"), 1);
+		return (error_printer("dup", "backup failed"), 1);
 	if (manage_outfile(px, STDOUT_FILENO) || manage_infile(px, STDIN_FILENO))
 	{
 		close_fd(&stdin_backup);
@@ -61,7 +61,7 @@ int	ft_built_ins(t_env **envp, t_pipex *px, int i)
 	if (dup2(stdin_backup, STDIN_FILENO) == -1
 		|| dup2(stdout_backup, STDOUT_FILENO) == -1
 		|| close_fd(&stdin_backup) || close_fd(&stdout_backup))
-		return (error_printer("dup2: restore failed"));
+		return (error_printer("dup2", "restore failed"));
 	return (0);
 }
 
@@ -83,7 +83,7 @@ int	pipex(t_env **envp, t_pipex *px)
 			exit (EXIT_FAILURE);
 		}
 		else if (pid < 0)
-			return (close_pipe(px), error_printer("fork: error"), 1);
+			return (close_pipe(px), error_printer("fork", "error"), 1);
 		px->pids[px->n_pids++] = pid;
 	}
 	if (close_fd(&px->pipe_fd[1]) == -1
@@ -103,13 +103,8 @@ int	cmd_executor(t_env **envp, t_cmd **cmd)
 		return (1);
 	while (px.cmd)
 	{
-		if (pipex(envp, &px))
+		if (px.args && px.args[0] && pipex(envp, &px))
 			return (close_pipe(&px), 1);
-		//fprintf(stderr, "		px->here_doc_fd = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n\
-		//px->outfile = %i || px->infile = %i\n\
-		//args[0] = %s || t_cmd = %p || pid = %i || n_pid = %i\n", px.here_doc_fd, \
-		//px.pipe_fd[0], px.pipe_fd[1], px.outfile, \
-		//px.infile, px.args[0], px.cmd, px.pids[0], px.n_pids);
 		if (update_px(&px))
 			return (1);
 	}
@@ -119,3 +114,8 @@ int	cmd_executor(t_env **envp, t_cmd **cmd)
 	close_pipe(&px);
 	return (exit_status);
 }
+		//fprintf(stderr, "		px->here_doc_fd = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n\
+		//px->outfile = %i || px->infile = %i\n\
+		//args[0] = %s || t_cmd = %p || pid = %i || n_pid = %i\n", px.here_doc_fd, \
+		//px.pipe_fd[0], px.pipe_fd[1], px.outfile, \
+		//px.infile, px.args[0], px.cmd, px.pids[0], px.n_pids);

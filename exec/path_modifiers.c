@@ -35,7 +35,7 @@ char	*path_parser(char *envp, char *cmd)
 			len++;
 		path = malloc(len + ft_strlen(cmd) + 2);
 		if (!path)
-			return (write(2, "pipex: malloc failed\n", 22), NULL);
+			return (error_printer("malloc", "failed"), NULL);
 		path_builder(envp, cmd, path, len);
 		if (access(path, X_OK) == 0)
 			return (path);
@@ -44,7 +44,7 @@ char	*path_parser(char *envp, char *cmd)
 		if (*envp == ':')
 			envp++;
 	}
-	return (error_printer(" command not found"), NULL);
+	return (error_printer(cmd, "command not found"), NULL);
 }
 
 int	find_last_slash_in_str(char *cmd)
