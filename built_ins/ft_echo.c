@@ -52,9 +52,10 @@ int ft_echo(char **str, t_env **env)
         	printf("%s ", str[i]);
         i++;
     }
-	printf("%s", str[i]);
+	if (str[i])
+		printf("%s", str[i]);
     if (n == 0)
-        printf("\n");	
+        printf("\n");
     ft_export(env, "EXIT_CODE=0");
     return (0);
 }

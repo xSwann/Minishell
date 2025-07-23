@@ -35,23 +35,9 @@ t_cmd	*free_cmd(t_cmd *cmd)
 
 int	close_pipe(t_pipex *px)
 {
-	if (px->pipe_fd[0] && px->pipe_fd[0] >= 0 && close(px->pipe_fd[0]) == -1)
-		return (px->pipe_fd[0] = -1, error_printer("close", "pipe_fd[0]"), 1);
-	px->pipe_fd[0] = -1;
-	if (px->pipe_fd[1] && px->pipe_fd[1] >= 0 && close(px->pipe_fd[1]) == -1)
-		return (px->pipe_fd[1] = -1, error_printer("close", "pipe_fd[1]"), 1);
-	px->pipe_fd[1] = -1;
+	if (close_fd(&px->pipe_fd[0]))
+		return (close_fd(&px->pipe_fd[1]), error_printer("close", "pipe_fd[0]"));
+	if (close_fd(&px->pipe_fd[1]))
+		return (error_printer("close", "pipe_fd[1]"));
 	return (0);
-}
-
-void	*free_envp(char **envp, int j)
-{
-	while (j >= 0 && envp && envp[j])
-		free(envp[j--]);
-	if (j == -2)
-	{
-		while (envp[++j])
-			free(envp[j]);
-	}
-	return (free (envp), NULL);
 }

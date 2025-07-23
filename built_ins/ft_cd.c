@@ -34,12 +34,10 @@ int ft_cd(char **path, t_env **env)
             return (0);
         }
     }
-    else
-        path[1] = ft_strdup(path[1]);
     if (chdir(path[1]) != 0)
     {
         fprintf(stderr, "minishell: cd: %s: No such file or directory\n", path[1]);
-        free(path[1]);
+        //free(path[1]);
         return (ft_export(env, "EXIT_CODE=1"));
     }
     while((*env)[i].key && ft_strcmp((*env)[i].key, "PWD") != 0)

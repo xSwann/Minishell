@@ -19,9 +19,10 @@ void	executor(char **envp, char **args)
 	if (path && execve(path, args, envp) == -1)
 	{
 		error_printer(path, "Is a directory");
-		return (free_array(args), free(path), exit(126));
+		return (free_array(envp), free_array(args), free(path), exit(126));
 	}
 	free_array(args);
+	free_array(envp);
 	if (!path)
 		exit(127);
 	error_printer(path, "command not found");
@@ -53,6 +54,7 @@ int	child_process(t_env **envp, t_pipex *px)
 		if (envp_string_form)
 			executor(envp_string_form, args_ptr);
 	}
+	close_fd(&px->outfile);
 	exit_code = ft_exit(envp, NULL);
 	free_env(envp);
 	exit(exit_code);
@@ -131,6 +133,8 @@ int	cmd_executor(t_env **envp, t_cmd **cmd)
 		exit_status = wait_execs(envp, &px);
 	free_cmd(px.cmd);
 	close_pipe(&px);
+	close_fd(&px.infile);
+	//close_fd(&px.outfile);
 	return (exit_status);
 }
 		//fprintf(stderr, "		px->here_doc_fd = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n\

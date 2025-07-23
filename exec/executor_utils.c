@@ -57,10 +57,10 @@ char	**env_create(t_env **envp)
 			continue ;
 		string_key = ft_strjoin((*envp)[i].key, "=");
 		if (!string_key)
-			return (free_envp(envp_string_form, i - is_exit_code));
+			return (free_array(envp_string_form));
 		envp_string_form[i - is_exit_code] = ft_strjoin(string_key, (*envp)[i].value);
 		if (!envp_string_form[i - is_exit_code])
-			return (free(string_key), free_envp(envp_string_form, i - is_exit_code - 1));
+			return (free(string_key), free_array(envp_string_form));
 		free(string_key);
 		string_key = NULL;
 	}

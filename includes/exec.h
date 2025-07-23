@@ -48,7 +48,6 @@ int		manage_outfile(t_pipex *px, int fd_stdout);
 t_cmd	*free_cmd(t_cmd *cmd);
 int		close_pipe(t_pipex *px);
 char	**free_array(char **array);
-void	*free_envp(char **envp, int j);
 
 /*==============================
 =        PATH MODIFIERS        =

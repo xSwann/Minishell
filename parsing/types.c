@@ -1,6 +1,5 @@
 #include "../includes/parsing.h"
 #include "../includes/built_ins.h"
-#include "../includes/exec.h"
 
 void	print_tokens(int nb_of_tokens, t_token *tokens)
 {
