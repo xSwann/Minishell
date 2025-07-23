@@ -62,7 +62,6 @@ typedef struct s_pipex
 	t_cmd	*cmd;
 	pid_t	*pids;
 	int		n_pids;
-	char	**args;
 	int		infile;
 	int		outfile;
 	t_cmd	*first_cmd;

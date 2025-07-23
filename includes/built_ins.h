@@ -22,7 +22,7 @@ int     ft_exit(t_env **env, char **arg);
 
 //env_utils
 int     init_env(char **envp, t_env **env);
-void    free_env(t_env *env);
+void    free_env(t_env **env);
 char    *get_env(t_env *env, char *arg);
 
 #endif

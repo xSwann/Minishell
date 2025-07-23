@@ -86,6 +86,6 @@ int	main(int argc, char **argv, char **envp)
 	t_env *env = NULL;
 	init_env(envp, &env);
 	read_terminal(&env);
-	free_env(env);
+	free_env(&env);
 	return (0);
 }

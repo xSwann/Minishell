@@ -20,7 +20,7 @@
 int		close_fd(int *fd);
 int		free_args(char **args);
 int		close_pipe(t_pipex *px);
-char	**env_create(t_env *envp);
+char	**env_create(t_env **envp);
 int		ft_argv_updater(char **av, int ac);
 char	*path_parser(char *envp, char *cmd);
 int		error_printer(char *str, char *str2);
@@ -45,9 +45,9 @@ int		manage_outfile(t_pipex *px, int fd_stdout);
 =       FREE FUNCTIONS        =
 ==============================*/
 
-void	free_cmds(t_cmd *cmd);
-int		free_args(char **args);
+t_cmd	*free_cmd(t_cmd *cmd);
 int		close_pipe(t_pipex *px);
+char	**free_array(char **array);
 void	*free_envp(char **envp, int j);
 
 /*==============================

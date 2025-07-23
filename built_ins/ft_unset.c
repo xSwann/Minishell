@@ -65,7 +65,7 @@ int ft_unset(t_env **env, char *arg)
     }
     new_env[count].key   = NULL;
     new_env[count].value = NULL;
-    free_env(*env);
+    free_env(env);
     *env = new_env;
     ft_export(env, "EXIT_CODE=0");
     return(0);

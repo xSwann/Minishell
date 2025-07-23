@@ -107,7 +107,7 @@ int    ft_export(t_env **env, char *arg)
         count--;
     new_env[count].key   = NULL;
     new_env[count].value = NULL;
-    free_env(*env);
+    free_env(env);
     *env = new_env;
     return(0);
 }

@@ -96,7 +96,6 @@ int	init_px(t_cmd **cmd, t_pipex *px)
 	px->pipe_fd[0] = -1;
 	px->pipe_fd[1] = -1;
 	px->first_cmd = *cmd;
-	px->args = (*cmd)->args;
 	px->pids = pid_array_builder(*cmd);
 	//fprintf(stderr, "		px->here_doc_fd = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n\
 	//	px->outfile = %i || px->infile = %i || px->infile = %i\n\
@@ -108,20 +107,17 @@ int	init_px(t_cmd **cmd, t_pipex *px)
 
 int	update_px(t_pipex *px)
 {
-	if (!px->cmd->pipe_cmd)
-		return (px->cmd = NULL, 0);
-	px->args = px->cmd->pipe_cmd->args;
+	px->cmd = free_cmd(px->cmd);
 	px->outfile = 0;
-	if (px->cmd->pipe_cmd->here_doc_fd)
+	if (px->cmd->here_doc_fd)
 	{
 		if (px->infile && close_fd(&px->infile))
 			return (error_printer("pipe", "pipe_fd[0]"), 1);
-		px->infile = px->cmd->pipe_cmd->here_doc_fd;
+		px->infile = px->cmd->here_doc_fd;
 		if (px->infile < 0)
 			return (error_printer("open", "here_doc_fd"), 1);
 	}
 	else
 		px->here_doc_fd = 0;
-	px->cmd = px->cmd->pipe_cmd;
 	return (0);
 }
