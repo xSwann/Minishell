@@ -64,6 +64,7 @@ char	**env_create(t_env **envp)
 		free(str_key);
 		str_key = NULL;
 	}
+	free_env(envp);
 	free(*envp);
 	*envp = NULL;
 	return (env_str[i - is_exit_code] = NULL, env_str);
@@ -80,13 +81,13 @@ int	call_built_ins(t_env **envp, char **cmd, int i)
 	else if (i == 3)
 		return (ft_echo(cmd + 1, envp));
 	else if (i == 4)
-		return (export_loop(envp, cmd));
+		return (export_loop(envp, cmd + 1));
 	else if (i == 5)
 		return (ft_pwd(envp));
 	else if (i == 6)
-		return (unset_loop(envp, cmd));
+		return (unset_loop(envp, cmd + 1));
 	else if (i == 7)
-		return (ft_exit(envp, cmd));
+		return (ft_exit(envp, cmd + 1));
 	return (-1);
 }
 

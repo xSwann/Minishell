@@ -85,8 +85,6 @@ pid_t	*pid_array_builder(t_cmd *cmd)
 
 int	init_px(char *shell_name, t_cmd **cmd, t_pipex *px)
 {
-	if (!cmd || !(*cmd) || !(*cmd)->args)
-		return (fprintf(stderr, "\n\ninit_px : cmd is NULL\n\n"));
 	px->n_pids = 0;
 	px->infile = 0;
 	px->cmd = *cmd;

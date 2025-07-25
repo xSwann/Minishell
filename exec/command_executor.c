@@ -71,6 +71,8 @@ int	ft_built_ins(t_env **envp, t_pipex *px, int i)
 		|| dup2(stdout_backup, STDOUT_FILENO) == -1
 		|| close_fd(&stdin_backup) || close_fd(&stdout_backup))
 		return (error_printer("dup2", "restore failed"));
+	if (i == 7)
+		exit_without_childs(envp, px);
 	return (0);
 }
 
@@ -112,7 +114,7 @@ int	cmd_executor(char *shell_name, t_env **envp, t_cmd **cmd)
 		return (1);
 	while (px.cmd)
 	{
-		if (px.cmd->args && px.cmd->args[0] && pipex(envp, &px))
+		if (pipex(envp, &px))
 			return (close_pipe(&px), 1);
 		if (!px.cmd->pipe_cmd)
 			break ;

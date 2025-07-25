@@ -74,7 +74,7 @@ char	*path_parser(char *shell_name, t_env **env, char *cmd)
 	path = NULL;
 	if (cmd && *cmd && check_path_value(shell_name, env, cmd))
 		return (cmd);
-	path_value = get_env(*env, "path_value");
+	path_value = get_env(*env, "PATH");
 	if (!path_value)
 		return (error_printer(cmd, "PATH not found"), NULL);
 	while (cmd && path_value[i])

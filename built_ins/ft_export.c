@@ -4,7 +4,7 @@ int     export_loop(t_env **env, char **arg)
 {
     int i;
 
-    i = 1;
+    i = 0;
     while (arg[i])
     {
         ft_export(env, arg[i]);

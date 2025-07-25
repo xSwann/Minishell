@@ -32,7 +32,7 @@ void	signalhandler(int signal)
 	}
 }
 
-int	read_terminal(t_env **env, char *shell_infos[2])
+int	read_terminal(t_env **env, char *shell_name)
 {
 	char	*line;
 	int		nb_of_token;
@@ -44,7 +44,7 @@ int	read_terminal(t_env **env, char *shell_infos[2])
 	signal(SIGQUIT, SIG_IGN);
 	while (1)
 	{
-		//line = readline("Minishell: ");
+		//line = readline("minishell$ ");
 		line = get_input();
 		if (g_receive_sig == 1)
 		{
@@ -53,15 +53,7 @@ int	read_terminal(t_env **env, char *shell_infos[2])
 		}
 		if (!line)
 		{
-			line = get_env(*env, "SHLVL");
-			if (!line)
-				return (1);
-			if (!ft_strcmp(shell_infos[1], line))
-			{
-				free(line);
-				break ;
-			}
-			free(line);
+			break ;
 		}
 		if (*line)
 			add_history(line);
@@ -82,25 +74,33 @@ int	read_terminal(t_env **env, char *shell_infos[2])
 			exit(EXIT_FAILURE);
 		free(tokens_struct);
 		tokens_struct = NULL;
-		cmd_executor(shell_infos[0], env, &cmd);
+		cmd_executor(shell_name, env, &cmd);
 	}
 	return (rl_clear_history(), 0);
 }
 
 int	main(int argc, char **argv, char **envp)
 {
-	char	*shell_infos[2];
+	char	*shell_name;
+	char	*exit_str;
+	int		exit_code;
 
 	(void)argc;
-	shell_infos[0] = argv[0] + 2;
+	exit_code = 1;
+	shell_name = argv[0] + 2;
+	if (!shell_name)
+		return (1);
 	t_env *env = NULL;
 	init_env(envp, &env);
 	if (!env)
 		return (1);
-	shell_infos[1] = get_env(env, "SHLVL");
-	if (!shell_infos[1])
-		return (free_env(&env), 1);
-	read_terminal(&env, shell_infos);
+	read_terminal(&env, shell_name);
+	exit_str = get_env(env, "EXIT_CODE");
+	if (exit_str)
+	{
+		exit_code = atoi(exit_str);
+		free(exit_str);
+	}
 	free_env(&env);
-	return (0);
+	exit (exit_code);
 }
