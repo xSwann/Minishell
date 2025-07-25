@@ -22,13 +22,12 @@ int		free_args(char **args);
 int		close_pipe(t_pipex *px);
 char	**env_create(t_env **envp);
 int		ft_argv_updater(char **av, int ac);
-char	*path_parser(char *envp, char *cmd);
 int		error_printer(char *str, char *str2);
 int		wait_execs(t_env **envp, t_pipex *px);
 char	*ft_strndup(const char *src, int len);
-int		cmd_executor(t_env **env, t_cmd **cmd);
-int		call_built_ins(t_env **envp, char **cmd, int i);
 int		child_process(t_env **envp, t_pipex *px);
+int		call_built_ins(t_env **envp, char **cmd, int i);
+int		cmd_executor(char *shell_name, t_env **env, t_cmd **cmd);
 
 /*==============================
 =   STRUCTURE MANIPULATIONS   =
@@ -37,9 +36,9 @@ int		child_process(t_env **envp, t_pipex *px);
 void	free_cmds(t_cmd *cmd);
 int		update_px(t_pipex *px);
 int		fd_std_handler(t_pipex *px);
-int		init_px(t_cmd **cmd, t_pipex *px);
 int		manage_infile(t_pipex *px, int fd_stdin);
 int		manage_outfile(t_pipex *px, int fd_stdout);
+int		init_px(char *shell_name, t_cmd **cmd, t_pipex *px);
 
 /*==============================
 =       FREE FUNCTIONS        =
@@ -56,6 +55,6 @@ char	**free_array(char **array);
 int		split_cmd(char **cmd);
 int		check_built_ins(char *cmd);
 int		find_last_slash_in_str(char *cmd);
-char	*path_parser(char *envp, char *cmd);
+char	*path_parser(char *shell_name, t_env **env, char *cmd);
 
 #endif

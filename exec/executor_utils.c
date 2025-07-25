@@ -32,8 +32,8 @@ int	wait_execs(t_env **envp, t_pipex *px)
 
 char	**env_create(t_env **envp)
 {
-	char	**envp_string_form;
-	char	*string_key;
+	char	*str_key;
+	char	**env_str;
 	int		is_exit_code;
 	int		i;
 
@@ -46,8 +46,8 @@ char	**env_create(t_env **envp)
 		if (!ft_strcmp((*envp)[i++].key, "EXIT_CODE"))
 			is_exit_code++;
 	}
-	envp_string_form = malloc(sizeof (char *) * (i - is_exit_code + 1));
-	if (!envp_string_form)
+	env_str = malloc(sizeof (char *) * (i - is_exit_code + 1));
+	if (!env_str)
 		return (NULL);
 	i = -1;
 	is_exit_code = 0;
@@ -55,18 +55,18 @@ char	**env_create(t_env **envp)
 	{
         if (!ft_strcmp((*envp)[i].key, "EXIT_CODE") && ++is_exit_code)
 			continue ;
-		string_key = ft_strjoin((*envp)[i].key, "=");
-		if (!string_key)
-			return (free_array(envp_string_form));
-		envp_string_form[i - is_exit_code] = ft_strjoin(string_key, (*envp)[i].value);
-		if (!envp_string_form[i - is_exit_code])
-			return (free(string_key), free_array(envp_string_form));
-		free(string_key);
-		string_key = NULL;
+		str_key = ft_strjoin((*envp)[i].key, "=");
+		if (!str_key)
+			return (free_array(env_str));
+		env_str[i - is_exit_code] = ft_strjoin(str_key, (*envp)[i].value);
+		if (!env_str[i - is_exit_code])
+			return (free(str_key), free_array(env_str));
+		free(str_key);
+		str_key = NULL;
 	}
-	free_env(envp);
-	envp = NULL;
-	return (envp_string_form[i - is_exit_code] = NULL, envp_string_form);
+	free(*envp);
+	*envp = NULL;
+	return (env_str[i - is_exit_code] = NULL, env_str);
 }
 
 int	call_built_ins(t_env **envp, char **cmd, int i)
@@ -74,7 +74,7 @@ int	call_built_ins(t_env **envp, char **cmd, int i)
 	if (!envp || !(*envp)->key || !cmd || !*cmd)
 		return (0);
 	else if (i == 1)
-		return (ft_cd(cmd, envp));
+		return (ft_cd(cmd + 1, envp));
 	else if (i == 2)
 		return (ft_env(envp));
 	else if (i == 3)

@@ -83,7 +83,7 @@ pid_t	*pid_array_builder(t_cmd *cmd)
 	return (pids);
 }
 
-int	init_px(t_cmd **cmd, t_pipex *px)
+int	init_px(char *shell_name, t_cmd **cmd, t_pipex *px)
 {
 	if (!cmd || !(*cmd) || !(*cmd)->args)
 		return (fprintf(stderr, "\n\ninit_px : cmd is NULL\n\n"));
@@ -96,6 +96,7 @@ int	init_px(t_cmd **cmd, t_pipex *px)
 	px->pipe_fd[0] = -1;
 	px->pipe_fd[1] = -1;
 	px->first_cmd = *cmd;
+	px->shell_name = shell_name;
 	px->pids = pid_array_builder(*cmd);
 	return (0);
 }

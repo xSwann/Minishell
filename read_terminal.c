@@ -32,7 +32,7 @@ void	signalhandler(int signal)
 	}
 }
 
-int	read_terminal(t_env **env)
+int	read_terminal(t_env **env, char *shell_infos[2])
 {
 	char	*line;
 	int		nb_of_token;
@@ -52,7 +52,17 @@ int	read_terminal(t_env **env)
 			g_receive_sig = 0;
 		}
 		if (!line)
-			break;
+		{
+			line = get_env(*env, "SHLVL");
+			if (!line)
+				return (1);
+			if (!ft_strcmp(shell_infos[1], line))
+			{
+				free(line);
+				break ;
+			}
+			free(line);
+		}
 		if (*line)
 			add_history(line);
 		nb_of_token = count_tokens(line);
@@ -72,20 +82,25 @@ int	read_terminal(t_env **env)
 			exit(EXIT_FAILURE);
 		free(tokens_struct);
 		tokens_struct = NULL;
-		cmd_executor(env, &cmd);
+		cmd_executor(shell_infos[0], env, &cmd);
 	}
-	free(line);
 	return (rl_clear_history(), 0);
 }
 
 int	main(int argc, char **argv, char **envp)
 {
-	(void)argc;
-	(void)argv;
+	char	*shell_infos[2];
 
+	(void)argc;
+	shell_infos[0] = argv[0] + 2;
 	t_env *env = NULL;
 	init_env(envp, &env);
-	read_terminal(&env);
+	if (!env)
+		return (1);
+	shell_infos[1] = get_env(env, "SHLVL");
+	if (!shell_infos[1])
+		return (free_env(&env), 1);
+	read_terminal(&env, shell_infos);
 	free_env(&env);
 	return (0);
 }

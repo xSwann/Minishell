@@ -66,6 +66,7 @@ typedef struct s_pipex
 	int		outfile;
 	t_cmd	*first_cmd;
 	int		pipe_fd[2];
+	char	*shell_name;
 	int		here_doc_fd;
 	int		stdin_backup;
 	int		stdout_backup;

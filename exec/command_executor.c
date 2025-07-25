@@ -1,28 +1,24 @@
 #include "../includes/exec.h"
 
-void	executor(char **envp, char **args)
+void	executor(char *shell_name, t_env **env, char **args)
 {
+	char	**env_str;
 	char	*path;
-	int		i;
-
-	if ((!args || !args[0]) && error_printer("empty command", NULL))
+	
+	path = path_parser(shell_name, env, args[0]);
+	env_str = env_create(env);
+	if (!env_str && error_printer("envp not found", NULL))
 	{
 		free_array(args);
-		exit(1);
+		exit(126);
 	}
-	path = NULL;
-	i = 0;
-	while (envp[i] && ft_strncmp("PATH=", envp[i], 4))
-		i++;
-	if (args)
-		path = path_parser(envp[i] + 5, args[0]);
-	if (path && execve(path, args, envp) == -1)
+	if (path && execve(path, args, env_str) == -1)
 	{
 		error_printer(path, "Is a directory");
-		return (free_array(envp), free_array(args), free(path), exit(126));
+		return (free_array(env_str), free_array(args), free(path), exit(126));
 	}
 	free_array(args);
-	free_array(envp);
+	free_array(env_str);
 	if (!path)
 		exit(127);
 	error_printer(path, "command not found");
@@ -31,7 +27,6 @@ void	executor(char **envp, char **args)
 
 int	child_process(t_env **envp, t_pipex *px)
 {
-	char	**envp_string_form;
 	char	**args_ptr;
 	int		exit_code;
 	int		i;
@@ -49,11 +44,7 @@ int	child_process(t_env **envp, t_pipex *px)
 		free_array(args_ptr);
 	}
 	else
-	{
-		envp_string_form = env_create(envp);
-		if (envp_string_form)
-			executor(envp_string_form, args_ptr);
-	}
+		executor(px->shell_name, envp, args_ptr);
 	close_fd(&px->outfile);
 	exit_code = ft_exit(envp, NULL);
 	free_env(envp);
@@ -110,14 +101,14 @@ int	pipex(t_env **envp, t_pipex *px)
 	return (px->infile = px->pipe_fd[0], px->pipe_fd[0] = -1, 0);
 }
 
-int	cmd_executor(t_env **envp, t_cmd **cmd)
+int	cmd_executor(char *shell_name, t_env **envp, t_cmd **cmd)
 {
 	t_pipex	px;
 	int		exit_status;
 
 	if (!envp || !(*cmd))
 		return (1);
-	if (init_px(cmd, &px))
+	if (init_px(shell_name, cmd, &px))
 		return (1);
 	while (px.cmd)
 	{
