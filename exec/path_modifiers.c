@@ -45,55 +45,51 @@ int	modify_shell_lvl(t_env **env, int modifier)
 	return (1);
 }
 
-int	check_path_value(char *shell_name, t_env **env, char *cmd)
+int	path_parser(char *shell_name, t_env **env, char *cmd, char **path)
 {
-	int		i;
-
-	if (access(cmd, X_OK) != 0)
-		return (0);
-	i = find_last_slash_in_str(cmd);
-	if (!ft_strcmp(cmd + i, shell_name))
-	{
-		if (modify_shell_lvl(env, 1))
-			return (0);
-		return (1);
-	}
-	if (cmd[0] == '/')
-		return (1);
-	return (0);
-}
-
-char	*path_parser(char *shell_name, t_env **env, char *cmd)
-{
+	struct stat	s;
 	char	*path_value;
-	char	*path;
 	int		len;
 	int		i;
 
 	i = 0;
-	path = NULL;
-	if (cmd && *cmd && check_path_value(shell_name, env, cmd))
-		return (cmd);
+	if (cmd[0] == '/' || (cmd[0] == '.' && cmd[1] == '/'))
+	{
+		if (access(cmd, F_OK) != 0)
+			return (CMD_NOT_FOUND);
+		if (access(cmd, W_OK) == -1)
+			return (CMD_NO_ACCESS);
+		if (stat(cmd, &s) == 0 && S_ISDIR(s.st_mode))
+			return (CMD_IS_DIR);
+		return (*path = ft_strdup(cmd), CMD_OK);
+	}
+	if (!ft_strcmp(cmd + find_last_slash_in_str(cmd), shell_name))
+	{
+		if (modify_shell_lvl(env, 1))
+			return (CMD_NO_ACCESS);
+		return (*path = ft_strdup(cmd), CMD_OK);
+	}
 	path_value = get_env(*env, "PATH");
 	if (!path_value)
-		return (error_printer(cmd, "PATH not found"), NULL);
+		return (CMD_NO_PATH);
 	while (cmd && path_value[i])
 	{
 		len = 0;
 		while (path_value[i + len] && path_value[i + len] != ':')
 			len++;
-		path = malloc(len + ft_strlen(cmd) + 2);
-		if (!path)
-			return (free(path_value), error_printer("malloc", "failed"), NULL);
-		path_builder(path_value + i, cmd, path, len);
-		if (access(path, X_OK) == 0)
-			return (free(path_value), path);
-		free(path);
+		*path = malloc(len + ft_strlen(cmd) + 2);
+		if (!*path)
+			return (free(path_value), error_printer("malloc", "failed"), CMD_NO_ACCESS);
+		path_builder(path_value + i, cmd, *path, len);
+		if (access(*path, X_OK) == 0)
+			return (free(path_value), CMD_OK);
+		free(*path);
+		*path = NULL;
 		i += len;
 		if (path_value[i] == ':')
 			i++;
 	}
-	return (free(path_value), error_printer(cmd, "command not found"), NULL);
+	return (free(path_value), CMD_NOT_FOUND);
 }
 
 int	find_last_slash_in_str(char *cmd)

@@ -18,7 +18,7 @@ int	manage_outfile(t_pipex *px, int fd_stdout)
 				px->outfile = open(px->cmd->outfiles[i], \
 				O_WRONLY | O_CREAT | O_APPEND, 0644);
 			if (px->outfile < 0)
-				return (error_printer("open", px->cmd->outfiles[i]));
+				return (error_printer(NULL, "Permission denied"));
 		}
 	}
 	else if (px->cmd->pipe_cmd)
@@ -26,7 +26,7 @@ int	manage_outfile(t_pipex *px, int fd_stdout)
 		px->outfile = px->pipe_fd[1];
 		px->pipe_fd[1] = -1;
 	}
-	if (px->outfile < 0 && error_printer("open", px->cmd->outfiles[i]))
+	if (px->outfile < 0 && error_printer(NULL, "Permission denied"))
 		return (close_fd(&px->infile), close_pipe(px), 1);
 	if (px->outfile && (dup2(px->outfile, fd_stdout) == -1
 		|| close_fd(&px->outfile)) && error_printer("dup2", "error"))
@@ -50,11 +50,11 @@ int	manage_infile(t_pipex *px, int fd_stdin)
 				return (1);
 			px->infile = open(px->cmd->infiles[i], O_RDONLY);
 			if (px->infile < 0)
-				return (error_printer("open", px->cmd->infiles[i]));
+				return (error_printer(px->cmd->infiles[i], "No such file or directory"));
 		}
 	}
 	if (px->infile < 0)
-		return (error_printer("open", px->cmd->infiles[i]));
+		return (error_printer(px->cmd->infiles[i], "No such file or directory"));
 	if (px->infile && (dup2(px->infile, fd_stdin) == -1
 		|| close_fd(&px->infile)) && error_printer("dup2", "error"))
 		return (close_fd(&px->infile), close_pipe(px), 1);

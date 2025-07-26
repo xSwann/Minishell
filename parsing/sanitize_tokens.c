@@ -59,8 +59,13 @@ void replace_expanded_value(char **str, char *expanded, int len)
 
 void erase_expand(char **str, int len)
 {
-    int i = 0, j = 0;
-    char *new = malloc(len + 1);
+	char	*new;
+    int		i;
+	int		j;
+
+	i = 0;
+	j = 0;
+    new = malloc(len + 1);
     if (!new)
         return;
     while ((*str)[i] && (*str)[i] != '$')

@@ -44,17 +44,12 @@ int	read_terminal(t_env **env, char *shell_name)
 	signal(SIGQUIT, SIG_IGN);
 	while (1)
 	{
-		//line = readline("minishell$ ");
-		line = get_input();
-		if (g_receive_sig == 1)
-		{
+		line = readline("minishell$ ");
+		//line = get_input();
+		if (g_receive_sig == 1 && g_receive_sig--)
 			ft_export(env, "EXIT_CODE=130");
-			g_receive_sig = 0;
-		}
 		if (!line)
-		{
 			break ;
-		}
 		if (*line)
 			add_history(line);
 		nb_of_token = count_tokens(line);

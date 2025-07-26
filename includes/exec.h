@@ -1,9 +1,15 @@
 #ifndef EXEC_H
 # define EXEC_H
+# define CMD_OK          0   // chemin résolu et exécutable
+# define CMD_NOT_FOUND   1   // non trouvé dans PATH
+# define CMD_NO_PATH     2   // pas de $PATH défini
+# define CMD_IS_DIR      3   // chemin pointant vers un répertoire
+# define CMD_NO_ACCESS   4   // permissions refusées
 
 # include <readline/readline.h>
 # include <readline/history.h>
 # include "built_ins.h"
+# include <sys/stat.h>
 # include "parsing.h"
 # include "structs.h"
 # include <stdlib.h>
@@ -54,7 +60,8 @@ char	**free_array(char **array);
 
 int		split_cmd(char **cmd);
 int		check_built_ins(char *cmd);
+int		check_path_value(char *cmd);
 int		find_last_slash_in_str(char *cmd);
-char	*path_parser(char *shell_name, t_env **env, char *cmd);
+int		path_parser(char *shell_name, t_env **env, char *cmd, char **path);
 
 #endif
