@@ -37,6 +37,7 @@ int		is_symbol(char chr);
 int		is_double_symbol(char *str, int i);
 void	symbol_handler(int *i, char *line);
 void	expand_var(char **str, t_env *env);
+int		error_printer(char *str, char *str2);
 void	fill_line(char *tab, char *line, int start, int end);
 
 /*==============================

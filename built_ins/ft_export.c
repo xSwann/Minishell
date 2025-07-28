@@ -4,7 +4,7 @@ int     export_loop(t_env **env, char **arg)
 {
     int i;
 
-    i = 1;
+    i = 0;
     while (arg[i])
     {
         ft_export(env, arg[i]);
@@ -18,96 +18,73 @@ int     export_loop(t_env **env, char **arg)
 
 int    ft_export(t_env **env, char *arg)
 {
-    int     i;
-    int count;
-    int j;
-    int tmp;
+    int		arg_already_in_env;
+    char	*arg_malloc;
     t_env   *new_env;
-    int already_in_env;
-    char *arg_malloc;
-    char *identifier;
+    int		count;
+    int		i;
+    int		j;
 
-    i = 0;
-    count = 0;
     if (!arg)
-    {
-        ft_env(env);
-        return (0);
-    }
-    while((*env)[count].value)
-        count++;
-    while (arg[i] && arg[i] != '=')
-        i++;
-    identifier = ft_substr(arg, 0, i);
+        return (ft_env(env), 0);
     if (!is_exportable(arg))
     {
         fprintf(stderr, "export: `%s': not a valid identifier\n", arg);
-        free(identifier);
         return (ft_export(env, "EXIT_CODE=1"));
     }
-    if (ft_strcmp(identifier, "EXIT_CODE") != 0)
-        ft_export(env, "EXIT_CODE=0");
-    free(identifier);
     i = 0;
-    j = 0;
-    tmp = 0;
-    already_in_env = 0;
-    count++;
-    new_env = malloc((sizeof(t_env)) * (count + 1));
-    while(arg[j] && arg[j] != '=')
-        j++;
-    if (arg[j] != '=')
-    {
-        free(new_env);
-        count--;
-        return (0);
-    }
-    arg_malloc = ft_substr(arg, 0, j);
-    while (i < count - 1)
-    {
-        if (ft_strcmp((*env)[i].key, arg_malloc) == 0)
-            already_in_env = i;
-        i++;
-    }
-    free(arg_malloc);
-    i = 0;
-    while(i < count - 1)
-    {
-		if (already_in_env != 0 && i == already_in_env)
-        {
-            arg_malloc = ft_substr(arg, 0, j);
-            new_env[i].key = ft_strdup(arg_malloc);
-            free(arg_malloc);
-            tmp = j;
-            while(arg[j])
-                j++;
-            arg_malloc = ft_substr(arg, tmp+1, j - tmp);
-            new_env[i].value = ft_strdup(arg_malloc);
-            free(arg_malloc);
-            i++;
-        }
-		else
+    count = -1;
+    arg_already_in_env = -1;
+    while (arg[i] && arg[i] != '=')
+		i++;
+	arg_malloc = ft_substr(arg, 0, i);
+	if (!arg_malloc)
+		return (1);
+    while ((*env)[++count].key)
+	{
+		if (!ft_strcmp((*env)[count].key, arg_malloc))
+			arg_already_in_env = count;
+	}
+	if (arg_already_in_env == -1)
+	{
+		new_env = malloc((sizeof(t_env)) * (count + 2));
+		if (!new_env)
+			return (free(arg_malloc), 1);
+		j = -1;
+		while (++j < count)
 		{
-			new_env[i].key = ft_strdup((*env)[i].key);
-			new_env[i].value = ft_strdup((*env)[i].value);
-			i++;
+			new_env[j].key = ft_strdup((*env)[j].key);
+			if (!new_env[j].key)
+				return (free(arg_malloc), free_env(&new_env), 1);
+			new_env[j].value = ft_strdup((*env)[j].value);
+			if (!new_env[j].value)
+				return (free(arg_malloc), free_env(&new_env), 1);
 		}
-    }
-    if (!already_in_env)
-    {
-        arg_malloc = ft_substr(arg, 0, j);
-        new_env[i].key = ft_strdup(arg_malloc);
-        free(arg_malloc);
-        tmp = j;
-        while(arg[j])
-            j++;
-        new_env[i].value = ft_substr(arg, tmp+1, j - tmp);
-    }
-    else
-        count--;
-    new_env[count].key   = NULL;
-    new_env[count].value = NULL;
-    free_env(*env);
-    *env = new_env;
+		new_env[j].key = arg_malloc;
+		arg_malloc = NULL;
+		new_env[j].value = ft_strdup(arg + i + 1);
+		if (!new_env[j++].value)
+			return (free_env(&new_env), 1);
+		new_env[j].key = NULL;
+		new_env[j].value = NULL;
+		free_env(env);
+		*env = new_env;
+	}
+	else
+	{
+		free(arg_malloc);
+		arg_malloc = NULL;
+		if ((*env)[arg_already_in_env].value)
+		{
+			free((*env)[arg_already_in_env].value);
+			(*env)[arg_already_in_env].value = NULL;
+		}
+		if (arg[i + 1])
+		{
+			(*env)[arg_already_in_env].value = ft_strdup(arg + i + 1);
+			if (!(*env)[arg_already_in_env].value)
+				return (1);
+		}
+	}
     return(0);
 }

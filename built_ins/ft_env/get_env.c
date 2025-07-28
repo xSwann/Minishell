@@ -8,7 +8,7 @@ char *get_env(t_env *env, char *arg)
     while (env[i].value)
     {
         if (ft_strcmp(env[i].key, arg) == 0)
-            return(ft_strdup(env[i].value));
+            return (ft_strdup(env[i].value));
         i++;
     }
     return (NULL);

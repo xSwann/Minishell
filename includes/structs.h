@@ -29,6 +29,7 @@ struct	s_cmd
 {
 	t_cmd	*pipe_cmd;
 	t_type	prev_type;
+	int		open_errors;
 	int		here_doc_fd;
 	int		open_options;
 	int		counters[3];
@@ -62,11 +63,11 @@ typedef struct s_pipex
 	t_cmd	*cmd;
 	pid_t	*pids;
 	int		n_pids;
-	char	**args;
 	int		infile;
 	int		outfile;
 	t_cmd	*first_cmd;
 	int		pipe_fd[2];
+	char	*shell_name;
 	int		here_doc_fd;
 	int		stdin_backup;
 	int		stdout_backup;

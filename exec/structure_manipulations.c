@@ -18,7 +18,7 @@ int	manage_outfile(t_pipex *px, int fd_stdout)
 				px->outfile = open(px->cmd->outfiles[i], \
 				O_WRONLY | O_CREAT | O_APPEND, 0644);
 			if (px->outfile < 0)
-				return (error_printer("open", px->cmd->outfiles[i]));
+				return (error_printer(NULL, "Permission denied"));
 		}
 	}
 	else if (px->cmd->pipe_cmd)
@@ -26,7 +26,7 @@ int	manage_outfile(t_pipex *px, int fd_stdout)
 		px->outfile = px->pipe_fd[1];
 		px->pipe_fd[1] = -1;
 	}
-	if (px->outfile < 0 && error_printer("open", px->cmd->outfiles[i]))
+	if (px->outfile < 0 && error_printer(NULL, "Permission denied"))
 		return (close_fd(&px->infile), close_pipe(px), 1);
 	if (px->outfile && (dup2(px->outfile, fd_stdout) == -1
 		|| close_fd(&px->outfile)) && error_printer("dup2", "error"))
@@ -50,11 +50,11 @@ int	manage_infile(t_pipex *px, int fd_stdin)
 				return (1);
 			px->infile = open(px->cmd->infiles[i], O_RDONLY);
 			if (px->infile < 0)
-				return (error_printer("open", px->cmd->infiles[i]));
+				return (error_printer(px->cmd->infiles[i], "No such file or directory"));
 		}
 	}
 	if (px->infile < 0)
-		return (error_printer("open", px->cmd->infiles[i]));
+		return (error_printer(px->cmd->infiles[i], "No such file or directory"));
 	if (px->infile && (dup2(px->infile, fd_stdin) == -1
 		|| close_fd(&px->infile)) && error_printer("dup2", "error"))
 		return (close_fd(&px->infile), close_pipe(px), 1);
@@ -83,10 +83,8 @@ pid_t	*pid_array_builder(t_cmd *cmd)
 	return (pids);
 }
 
-int	init_px(t_cmd **cmd, t_pipex *px)
+int	init_px(char *shell_name, t_cmd **cmd, t_pipex *px)
 {
-	if (!cmd || !(*cmd) || !(*cmd)->args)
-		return (fprintf(stderr, "\n\ninit_px : cmd is NULL\n\n"));
 	px->n_pids = 0;
 	px->infile = 0;
 	px->cmd = *cmd;
@@ -96,32 +94,25 @@ int	init_px(t_cmd **cmd, t_pipex *px)
 	px->pipe_fd[0] = -1;
 	px->pipe_fd[1] = -1;
 	px->first_cmd = *cmd;
-	px->args = (*cmd)->args;
+	px->shell_name = shell_name;
 	px->pids = pid_array_builder(*cmd);
-	//fprintf(stderr, "		px->here_doc_fd = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n\
-	//	px->outfile = %i || px->infile = %i || px->infile = %i\n\
-	//	args[0] = %s || t_cmd = %p || pid = %i\n", px->here_doc_fd, \
-	//	px->pipe_fd[0], px->pipe_fd[1], px->outfile, px->infile, \
-	//	px->infile, px->args[0], px->cmd, px->pids[0]);
 	return (0);
 }
 
 int	update_px(t_pipex *px)
 {
-	if (!px->cmd->pipe_cmd)
-		return (px->cmd = NULL, 0);
-	px->args = px->cmd->pipe_cmd->args;
-	px->outfile = 0;
-	if (px->cmd->pipe_cmd->here_doc_fd)
+	px->cmd = free_cmd(px->cmd);
+	if (px->outfile && close_fd(&px->outfile))
+		return (error_printer("pipe", "pipe_fd[1]"), 1);
+	if (px->cmd->here_doc_fd)
 	{
 		if (px->infile && close_fd(&px->infile))
 			return (error_printer("pipe", "pipe_fd[0]"), 1);
-		px->infile = px->cmd->pipe_cmd->here_doc_fd;
+		px->infile = px->cmd->here_doc_fd;
 		if (px->infile < 0)
 			return (error_printer("open", "here_doc_fd"), 1);
 	}
 	else
 		px->here_doc_fd = 0;
-	px->cmd = px->cmd->pipe_cmd;
 	return (0);
 }

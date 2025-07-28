@@ -30,7 +30,7 @@ void	*ft_memset(void *p, int value, size_t count);
 //void	ft_putnbr_fd(int n, int fd);
 char	**ft_split(char const *s, char c);
 char	*ft_substr(char const *s, unsigned int start, size_t len);
-//char	*ft_strchr(const char *string, int searchedchar);
+char	*ft_strchr(const char *string, int searchedchar);
 int		ft_strcmp(char *s1, char *s2);
 char	*ft_strdup(const char *src);
 //void	ft_striteri(char *s, void (*f)(unsigned int, char*));

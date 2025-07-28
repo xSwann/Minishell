@@ -6,12 +6,11 @@ int     unset_loop(t_env **env, char **arg)
 {
     int i;
 
-    i = 1;
+    i = 0;
     while (arg[i])
     {
-        ft_unset(env, arg[i]);
-        if (ft_strcmp(get_env(*env, "EXIT_CODE"), "0"))
-            return (0);
+        if (ft_unset(env, arg[i]))
+            return (ft_export(env, "EXIT_CODE=1"), 1);
         i++;
     }
     return (0);
@@ -25,48 +24,47 @@ int ft_unset(t_env **env, char *arg)
     int already_in_env;
     int count;
 
-    i = 0;
+    i = -1;
     j = 0;
     count = 0;
     if (!arg)
     {
-        ft_export(env, "EXIT_CODE=0");
+        if (ft_export(env, "EXIT_CODE=0"))
+			return (1);
         return (0);
     }
     while ((*env)[count].key)
         count++;
     already_in_env = count;
-    while (i < count)
+    while (++i < count)
     {
-        if (ft_strcmp((*env)[i].key, arg) == 0)
-        {
+        if (!ft_strcmp((*env)[i].key, arg) && count--)
             already_in_env = i;
-            count--;
-        }
-        i++;
     }
     new_env = malloc((sizeof(t_env)) * (count + 1));
     i = 0;
     while (i < already_in_env)
     {
         new_env[i].key = ft_strdup((*env)[j].key);
-        new_env[i].value = ft_strdup((*env)[j].value);
-        i++;
-        j++;
+		if (!new_env[i].key)
+			return (free_env(&new_env), 1);
+        new_env[i].value = ft_strdup((*env)[j++].value);
+		if (!new_env[i++].value)
+			return (free_env(&new_env), 1);
     }
-    if(already_in_env != count)
+    if (already_in_env != count)
             j++;
     while (i < count)
     {
         new_env[i].key = ft_strdup((*env)[j].key);
-        new_env[i].value = ft_strdup((*env)[j].value);
-        i++;
-        j++;
+		if (!new_env[i].key)
+			return (free_env(&new_env), 1);
+        new_env[i].value = ft_strdup((*env)[j++].value);
+		if (!new_env[i++].value)
+			return (free_env(&new_env), 1);
     }
     new_env[count].key   = NULL;
     new_env[count].value = NULL;
-    free_env(*env);
-    *env = new_env;
-    ft_export(env, "EXIT_CODE=0");
-    return(0);
+    free_env(env);
+    return (*env = new_env, ft_export(env, "EXIT_CODE=0"), 0);
 }

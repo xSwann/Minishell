@@ -1,45 +1,73 @@
 #include "../includes/exec.h"
-#include <unistd.h>
 
-void	executor(char **envp, t_pipex *px)
+void	executor(char *shell_name, t_env **env, char **args)
 {
+	char	**env_str;
+	int		status;
 	char	*path;
-	int		i;
 
-	if ((!px->args || !px->args[0]) && error_printer("empty command", NULL)
-		&& free_args(px->args))
-		exit(1);
 	path = NULL;
-	i = 0;
-	while (envp[i] && ft_strncmp("PATH=", envp[i], 4))
-		i++;
-	if (px->args)
-		path = path_parser(envp[i] + 5, px->args[0]);
-	if (path && execve(path, px->args, envp) == -1)
-		return (error_printer(path, "Is a directory"), free(path), exit(126));
-	free_args(px->args);
-	if (!path)
-		exit(127);
-	error_printer(path, "command not found");
+	status = path_parser(shell_name, env, args[0], &path);
+	if (status != CMD_OK && path)
+		free(path);
+	env_str = env_create(env);
+	if (!env_str && error_printer("envp not found", NULL))
+	{
+		free_array(args);
+		exit(126);
+	}
+	if (status == CMD_OK && execve(path, args, env_str))
+	{
+		error_printer("Minishell", "execve failed");
+		return (free_array(env_str), free_array(args), free(path), exit(126));
+	}
+	if (status == CMD_NOT_FOUND)
+	{
+		if (ft_strchr(args[0], '/'))
+			error_printer(args[0], "No such file or directory"), exit(127);
+		else
+			error_printer(args[0], "command not found"), exit(127);
+	}
+	if (status == CMD_NOT_FOUND && access(args[0], F_OK) != 0 && !path)
+		error_printer(args[0], "command not found"), exit(127);
+	else if (status == CMD_NO_ACCESS)
+		error_printer(args[0], "Permission denied"), exit(126);
+	else if (status == CMD_IS_DIR)
+		error_printer(args[0], "Is a directory"), exit(126);
+	else if (status == CMD_NO_PATH)
+		error_printer(args[0], "PATH not found"), exit(127);
+	free_array(args);
+	free_array(env_str);
 	return (free(path), exit(126));
 }
 
 int	child_process(t_env **envp, t_pipex *px)
 {
-	char	**envp_string_form;
+	char	**args_ptr;
+	int		exit_code;
 	int		i;
-
-	if (manage_outfile(px, STDOUT_FILENO) || manage_infile(px, STDIN_FILENO))
-		return (exit(1), 1);
-	if ((i = check_built_ins(px->args[0])) > 0)
+	
+	free(px->pids);
+	if (manage_infile(px, STDIN_FILENO) || manage_outfile(px, STDOUT_FILENO))
 	{
-		call_built_ins(envp, px->args, i);
-		return (free_args(px->args), ft_exit(envp, NULL));
+		while (px->cmd)
+			px->cmd = free_cmd(px->cmd);
+		return (free_env(envp), close_pipe(px), exit(1), 0);
 	}
-	envp_string_form = env_create(*envp);
-	if (envp_string_form)
-		executor(envp_string_form, px);
-	exit(ft_exit(envp, NULL));
+	args_ptr = px->cmd->args;
+	px->cmd->args = NULL;
+	while (px->cmd)
+		px->cmd = free_cmd(px->cmd);
+	if ((i = check_built_ins(args_ptr[0])) > 0)
+	{
+		call_built_ins(envp, args_ptr, i);
+		free_array(args_ptr);
+	}
+	else
+		executor(px->shell_name, envp, args_ptr);
+	close_fd(&px->outfile);
+	exit_code = ft_exit(envp, NULL);	
+	return (free_env(envp), exit(exit_code), 0);
 }
 
 int	ft_built_ins(t_env **envp, t_pipex *px, int i)
@@ -51,17 +79,19 @@ int	ft_built_ins(t_env **envp, t_pipex *px, int i)
 	stdout_backup = dup(STDOUT_FILENO);
 	if (stdin_backup < 0 || stdout_backup < 0)
 		return (error_printer("dup", "backup failed"), 1);
-	if (manage_outfile(px, STDOUT_FILENO) || manage_infile(px, STDIN_FILENO))
+	if (manage_infile(px, STDIN_FILENO) || manage_outfile(px, STDOUT_FILENO))
 	{
 		close_fd(&stdin_backup);
 		close_fd(&stdout_backup);
-		return (ft_export(envp, "EXIT_CODE=1"));
+		return (ft_export(envp, "EXIT_CODE=1"), 1);
 	}
-	call_built_ins(envp, px->args, i);
+	call_built_ins(envp, px->cmd->args, i);
 	if (dup2(stdin_backup, STDIN_FILENO) == -1
 		|| dup2(stdout_backup, STDOUT_FILENO) == -1
 		|| close_fd(&stdin_backup) || close_fd(&stdout_backup))
 		return (error_printer("dup2", "restore failed"));
+	if (i == 7)
+		exit_without_childs(envp, px);
 	return (0);
 }
 
@@ -72,7 +102,7 @@ int	pipex(t_env **envp, t_pipex *px)
 	if (pipe(px->pipe_fd) == -1)
 		return (perror("pipe: error"), 1);
 	if (px->n_pids == 0 && !px->cmd->pipe_cmd
-		&& px->args && px->args[0] && (pid = check_built_ins(px->args[0])) > 0)
+		&& px->cmd->args && px->cmd->args[0] && (pid = check_built_ins(px->cmd->args[0])) > 0)
 		ft_built_ins(envp, px, pid);
 	else
 	{
@@ -92,26 +122,31 @@ int	pipex(t_env **envp, t_pipex *px)
 	return (px->infile = px->pipe_fd[0], px->pipe_fd[0] = -1, 0);
 }
 
-int	cmd_executor(t_env **envp, t_cmd **cmd)
+int	cmd_executor(char *shell_name, t_env **envp, t_cmd **cmd)
 {
 	t_pipex	px;
 	int		exit_status;
 
 	if (!envp || !(*cmd))
 		return (1);
-	if (init_px(cmd, &px))
+	if (init_px(shell_name, cmd, &px))
 		return (1);
 	while (px.cmd)
 	{
-		if (px.args && px.args[0] && pipex(envp, &px))
+		if (pipex(envp, &px))
 			return (close_pipe(&px), 1);
+		if (!px.cmd->pipe_cmd)
+			break ;
 		if (update_px(&px))
 			return (1);
 	}
 	exit_status = 0;
 	if (px.n_pids)
 		exit_status = wait_execs(envp, &px);
+	free_cmd(px.cmd);
 	close_pipe(&px);
+	close_fd(&px.infile);
+	//close_fd(&px.outfile);
 	return (exit_status);
 }
 		//fprintf(stderr, "		px->here_doc_fd = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n\

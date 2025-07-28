@@ -1,6 +1,5 @@
 #include "../includes/parsing.h"
 #include "../includes/built_ins.h"
-#include "../includes/exec.h"
 
 void	print_tokens(int nb_of_tokens, t_token *tokens)
 {
@@ -98,6 +97,7 @@ void	put_tokens_in_struct(t_env **env, t_tab *tab, int nb_of_tokens, t_token **t
 			(*tokens)[i].type = WORD;
 		i++;
 	}
+	free(tab);
 	(*tokens)[i].word = NULL;
 	(*tokens)[i].type = find_type((*tokens)[i]);
 	if (validate_tokens(env, *tokens))

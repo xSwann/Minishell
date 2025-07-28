@@ -28,12 +28,16 @@ int	arrays_init(t_token *tokens, t_cmd *cmd)
 	i = 0;
 	while (tokens[i].type != END)
 	{
-		if (tokens[i].type == WORD && cmd->prev_type == REDIN)
+		if (tokens[i].type == WORD && tokens[i].word && tokens[i].word[0] && cmd->prev_type == REDIN && !cmd->open_errors)
 			cmd->counters[1]++;
-		else if (tokens[i].type == WORD &&
-			(cmd->prev_type == REDOUT || cmd->prev_type == APPEND))
+		else if (tokens[i].type == WORD && tokens[i].word && tokens[i].word[0] &&
+			(cmd->prev_type == REDOUT || cmd->prev_type == APPEND) && !cmd->open_errors)
+		{
 			cmd->counters[2]++;
-		else if (tokens[i].type == WORD && !(cmd->prev_type == HEREDOC))
+			if (access(tokens[i].word, F_OK) == 0 && access(tokens[i].word, W_OK) == -1)
+				cmd->open_errors = 1;
+		}
+		else if (tokens[i].type == WORD && tokens[i].word && tokens[i].word[0] && !(cmd->prev_type == HEREDOC))
 			cmd->counters[0]++;
 		else if (tokens[i].type == PIPE && cmd->counters[0])
 			break ;
@@ -53,6 +57,7 @@ t_cmd	*init_command(t_token *tokens)
 	if (!cmd)
 		return (NULL);
 	cmd->pipe_cmd = 0;
+	cmd->open_errors = 0;
 	cmd->here_doc_fd = 0;
 	cmd->args = NULL;
 	cmd->infiles = NULL;
@@ -67,29 +72,28 @@ t_cmd	*init_command(t_token *tokens)
 	return (cmd);
 }
 
-void	handle_token(t_env *env, t_cmd *cmd, t_token token)
+int	handle_token(t_env *env, t_cmd *cmd, char *word, t_type curr_type)
 {
-	t_type	curr_type;
-
-	curr_type = token.type;
-	//fprintf(stderr, "handle_token with word = %s & type = %d\n", token.word, token.type);
-	if (curr_type == WORD)
+	if (curr_type == WORD && word && word[0])
 	{
 		if (cmd->prev_type == HEREDOC)
-			cmd->here_doc_fd = ft_here_doc(env, ft_strdup(token.word));
+			cmd->here_doc_fd = ft_here_doc(env, ft_strdup(word));
 		else if (cmd->prev_type == REDIN)
-			cmd->infiles[cmd->counters[1]++] = ft_strdup(token.word);
+			cmd->infiles[cmd->counters[1]++] = ft_strdup(word);
 		else if (cmd->prev_type == REDOUT || cmd->prev_type == APPEND)
-			cmd->outfiles[cmd->counters[2]++] = ft_strdup(token.word);
+		{
+			cmd->outfiles[cmd->counters[2]++] = ft_strdup(word);
+			if (access(word, F_OK) == 0 && access(word, W_OK) == -1)
+				return (free(word), word = NULL, 1);
+		}
 		else
-			cmd->args[cmd->counters[0]++] = ft_strdup(token.word);
+			cmd->args[cmd->counters[0]++] = ft_strdup(word);
 	}
 	if (cmd->prev_type == REDOUT)
 		cmd->open_options = O_WRONLY | O_CREAT | O_TRUNC;
 	if (cmd->prev_type == APPEND)
 		cmd->open_options = O_WRONLY | O_CREAT | O_APPEND;
-	free(token.word);
-	token.word = NULL;
+	return (free(word), word = NULL, 0);
 }
 
 int	cmd_creator(t_env *env, t_cmd **cmd, t_token *tokens)
@@ -114,7 +118,7 @@ int	cmd_creator(t_env *env, t_cmd **cmd, t_token *tokens)
 			curr_cmd = curr_cmd->pipe_cmd;
 			curr_cmd->prev_type = tokens[i].type;
 		}
-		handle_token(env, curr_cmd, tokens[i]);
+		handle_token(env, curr_cmd, tokens[i].word, tokens[i].type);
 		curr_cmd->prev_type = tokens[i++].type;
 	}
 	//print_cmd(*cmd);
