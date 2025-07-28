@@ -8,11 +8,10 @@ int    ft_env(t_env **env)
     i = 0;
     while ((*env)[i].key)
     {
-        if (ft_strcmp((*env)[i].key, "EXIT_CODE") != 0)
-        {
+
             printf("%s=", (*env)[i].key);
             printf("%s\n", (*env)[i].value);
-        }
+
         i++;
     }
     return (0);

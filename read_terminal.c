@@ -44,8 +44,8 @@ int	read_terminal(t_env **env, char *shell_name)
 	signal(SIGQUIT, SIG_IGN);
 	while (1)
 	{
-		line = readline("minishell$ ");
-		//line = get_input();
+		//line = readline("minishell$ ");
+		line = get_input();
 		if (g_receive_sig == 1 && g_receive_sig--)
 			ft_export(env, "EXIT_CODE=130");
 		if (!line)

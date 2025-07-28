@@ -6,9 +6,9 @@ void    free_env(t_env **env)
     int i;
 
     i = 0;
-	if (!env)
+	if (!env || !*env)
 		return ;
-    while((*env)[i].key)
+    while(env[i] && (*env)[i].key)
     {
 		if ((*env)[i].key)
 		{

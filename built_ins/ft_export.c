@@ -3,13 +3,22 @@
 int     export_loop(t_env **env, char **arg)
 {
     int i;
+	char *str;
 
     i = 0;
     while (arg[i])
     {
         ft_export(env, arg[i]);
-        if (ft_strcmp(get_env(*env, "EXIT_CODE"), "0"))
+		//fprintf(stderr, "get_env = %s\n", get_env(*env, "EXIT_CODE"));
+		str = get_env(*env, "EXIT_CODE");
+        if (ft_strcmp(str, "0"))
+		{
+			if (str)
+				free(str);
             return (0);
+		}
+		if(str)
+			free(str);
         i++;
     }
     return (0);
@@ -24,6 +33,7 @@ int    ft_export(t_env **env, char *arg)
     int		count;
     int		i;
     int		j;
+	char	*has_no_value;
 
     if (!arg)
         return (ft_env(env), 0);
@@ -33,10 +43,10 @@ int    ft_export(t_env **env, char *arg)
         return (ft_export(env, "EXIT_CODE=1"));
     }
     i = 0;
+	while (arg[i] &&arg[i] != '=')
+		i++;
     count = -1;
     arg_already_in_env = -1;
-    while (arg[i] && arg[i] != '=')
-		i++;
 	arg_malloc = ft_substr(arg, 0, i);
 	if (!arg_malloc)
 		return (1);
@@ -62,7 +72,16 @@ int    ft_export(t_env **env, char *arg)
 		}
 		new_env[j].key = arg_malloc;
 		arg_malloc = NULL;
-		new_env[j].value = ft_strdup(arg + i + 1);
+		has_no_value = ft_strchr(arg, '=');
+		if (has_no_value != NULL)
+		{
+			if (ft_strlen(has_no_value) > 1)
+			{
+				new_env[j].value = ft_strdup(arg + i + 1);
+			}
+		}
+		else
+			new_env[j].value = NULL;
 		if (!new_env[j++].value)
 			return (free_env(&new_env), 1);
 		new_env[j].key = NULL;
