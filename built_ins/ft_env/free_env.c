@@ -8,8 +8,9 @@ void    free_env(t_env **env)
     i = 0;
 	if (!env || !*env)
 		return ;
-    while(env[i] && (*env)[i].key)
-    {
+
+	while((*env)[i].key)
+	{
 		if ((*env)[i].key)
 		{
 			free((*env)[i].key);
@@ -20,8 +21,8 @@ void    free_env(t_env **env)
 			free((*env)[i].value);
 			(*env)[i].value = NULL;
 		}
-        i++;
-    }
+		i++;
+	}
     free(*env);
 	*env = NULL;
 }

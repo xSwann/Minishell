@@ -9,7 +9,6 @@ int     export_loop(t_env **env, char **arg)
     while (arg[i])
     {
         ft_export(env, arg[i]);
-		//fprintf(stderr, "get_env = %s\n", get_env(*env, "EXIT_CODE"));
 		str = get_env(*env, "EXIT_CODE");
         if (ft_strcmp(str, "0"))
 		{
@@ -25,15 +24,18 @@ int     export_loop(t_env **env, char **arg)
 }
 
 
+#include <stdlib.h>
+#include <string.h>
+#include "../includes/built_ins.h"
+
 int    ft_export(t_env **env, char *arg)
 {
-    int		arg_already_in_env;
-    char	*arg_malloc;
+    int     arg_already_in_env;
+    char    *arg_malloc;
     t_env   *new_env;
-    int		count;
-    int		i;
-    int		j;
-	char	*has_no_value;
+    int     count;
+    int     i, j;
+    char    *has_no_value;
 
     if (!arg)
         return (ft_env(env), 0);
@@ -43,67 +45,69 @@ int    ft_export(t_env **env, char *arg)
         return (ft_export(env, "EXIT_CODE=1"));
     }
     i = 0;
-	while (arg[i] &&arg[i] != '=')
-		i++;
-    count = -1;
+    while (arg[i] && arg[i] != '=')
+        i++;
+
+    arg_malloc = ft_substr(arg, 0, i);
+    if (!arg_malloc)
+        return (1);
+    count = 0;
     arg_already_in_env = -1;
-	arg_malloc = ft_substr(arg, 0, i);
-	if (!arg_malloc)
-		return (1);
-    while ((*env)[++count].key)
-	{
-		if (!ft_strcmp((*env)[count].key, arg_malloc))
-			arg_already_in_env = count;
-	}
-	if (arg_already_in_env == -1)
-	{
-		new_env = malloc((sizeof(t_env)) * (count + 2));
-		if (!new_env)
-			return (free(arg_malloc), 1);
-		j = -1;
-		while (++j < count)
-		{
-			new_env[j].key = ft_strdup((*env)[j].key);
-			if (!new_env[j].key)
-				return (free(arg_malloc), free_env(&new_env), 1);
-			new_env[j].value = ft_strdup((*env)[j].value);
-			if (!new_env[j].value)
-				return (free(arg_malloc), free_env(&new_env), 1);
-		}
-		new_env[j].key = arg_malloc;
-		arg_malloc = NULL;
-		has_no_value = ft_strchr(arg, '=');
-		if (has_no_value != NULL)
-		{
-			if (ft_strlen(has_no_value) > 1)
-			{
-				new_env[j].value = ft_strdup(arg + i + 1);
-			}
-		}
-		else
-			new_env[j].value = NULL;
-		if (!new_env[j++].value)
-			return (free_env(&new_env), 1);
-		new_env[j].key = NULL;
-		new_env[j].value = NULL;
-		free_env(env);
-		*env = new_env;
-	}
-	else
-	{
-		free(arg_malloc);
-		arg_malloc = NULL;
-		if ((*env)[arg_already_in_env].value)
-		{
-			free((*env)[arg_already_in_env].value);
-			(*env)[arg_already_in_env].value = NULL;
-		}
-		if (arg[i + 1])
-		{
-			(*env)[arg_already_in_env].value = ft_strdup(arg + i + 1);
-			if (!(*env)[arg_already_in_env].value)
-				return (1);
-		}
-	}
-    return(0);
+    while ((*env)[count].key)
+    {
+        if (!ft_strcmp((*env)[count].key, arg_malloc))
+            arg_already_in_env = count;
+        count++;
+    }
+    if (arg_already_in_env == -1)
+    {
+        new_env = malloc((count + 2) * sizeof *new_env);
+        if (!new_env)
+            return (free(arg_malloc), 1);
+        memset(new_env, 0, (count + 2) * sizeof *new_env);
+        j = 0;
+        while (j < count)
+        {
+            new_env[j].key = ft_strdup((*env)[j].key);
+            if (!new_env[j].key)
+                return (free(arg_malloc), free_env(&new_env), 1);
+
+            new_env[j].value = ft_strdup((*env)[j].value);
+            if (!new_env[j].value)
+                return (free(arg_malloc), free_env(&new_env), 1);
+
+            j++;
+        }
+        new_env[j].key = arg_malloc;
+        arg_malloc = NULL;
+        has_no_value = ft_strchr(arg, '=');
+        if (has_no_value && has_no_value[1] != '\0')
+        {
+            new_env[j].value = ft_strdup(arg + i + 1);
+            if (!new_env[j].value)
+            {
+                new_env[j].key = NULL;
+                free_env(&new_env);
+                return (1);
+            }
+        }
+        free_env(env);
+        *env = new_env;
+    }
+    else
+    {
+        free(arg_malloc);
+        arg_malloc = NULL;
+
+        free((*env)[arg_already_in_env].value);
+        (*env)[arg_already_in_env].value = NULL;
+
+        if (arg[i + 1])
+        {
+            (*env)[arg_already_in_env].value = ft_strdup(arg + i + 1);
+            if (!(*env)[arg_already_in_env].value)
+                return (1);
+        }
+    }
+    return (0);
 }

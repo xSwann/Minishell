@@ -51,6 +51,7 @@ int	path_parser(char *shell_name, t_env **env, char *cmd, char **path)
 	char	*path_value;
 	int		len;
 	int		i;
+	//char	cwd[4097];
 
 	i = 0;
 	if (cmd[0] == '/' || (cmd[0] == '.' && cmd[1] == '/'))
@@ -70,6 +71,11 @@ int	path_parser(char *shell_name, t_env **env, char *cmd, char **path)
 		return (*path = ft_strdup(cmd), CMD_OK);
 	}
 	path_value = get_env(*env, "PATH");
+/* 	if (!path_value)
+	{
+		getcwd(cwd, sizeof(cwd));
+		path_value = ft_strdup(cwd);
+	} */
 	if (!path_value)
 		return (CMD_NO_PATH);
 	while (cmd && path_value[i])
