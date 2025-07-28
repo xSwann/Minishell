@@ -47,4 +47,5 @@ valgrind.out
 
 # Testers
 minishell_tester/
+42_minishell_tester/
 grep
