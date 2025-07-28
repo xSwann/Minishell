@@ -1,7 +1,6 @@
 
 #include "../includes/built_ins.h"
-#include "../includes/exec.h"
-
+/*
 void	exit_without_childs(t_env **env, t_pipex *px)
 {
 	char	*exit_str;
@@ -19,9 +18,9 @@ void	exit_without_childs(t_env **env, t_pipex *px)
 	}
 	free_env(env);
 	exit (exit_code);
-}
+}*/
 
-int	ft_exit(t_env **env, char **args)
+void	ft_exit(t_env **env, char **args)
 {
     char	*join;
     int		arg_n;
@@ -33,32 +32,26 @@ int	ft_exit(t_env **env, char **args)
     {
         join = get_env(*env, "EXIT_CODE");
 		if (!join)
-			return (1);
+			return (free_env(env), exit(1));
 		arg_n = ft_atoi(join);
-		return (free(join), join = NULL, arg_n);
+		return (free(join), join = NULL, free_env(env), exit(arg_n));
     }
-    if (args[1] && args[1][0])
-	{
-		fprintf(stderr, "minishell: exit: too many arguments\n");
-        return (ft_export(env, "EXIT_CODE=1"), 0);
-	}
-	if (args[0][0] && args[0][0] == '-')
-		is_negative = 1;
+	free_env(env);
     if (!str_is_num(args[0] + is_negative))
 	{
 		fprintf(stderr, "minishell: exit: %s: numeric argument required\n", args[0]);
-        return (ft_export(env, "EXIT_CODE=2"), 2);
+        return (exit(2));
 	}
+    if (args[1] && args[1][0])
+	{
+		fprintf(stderr, "minishell: exit: too many arguments\n");
+        return (exit(1));
+	}
+	if (args[0][0] && args[0][0] == '-')
+		is_negative = 1;
     arg_n = ft_atoi(args[0] + is_negative) % 256;
 	if (is_negative)
 		arg_n = 256 - arg_n;
 	free(args[0]);
-    args[0] = ft_itoa(arg_n);
-    join = ft_strjoin("EXIT_CODE=", args[0]);
-	if (join)
-	{
-		ft_export(env, join);
-		free(join);
-	}
-    return (arg_n);
+    return (exit(arg_n));
 }

@@ -64,14 +64,18 @@ int	manage_infile(t_pipex *px, int fd_stdin)
 
 pid_t	*pid_array_builder(t_cmd *cmd)
 {
+	int		is_built_in;
 	pid_t	*pids;
 	int		i;
 
 	i = 0;
+	is_built_in = 0;
 	while (cmd)
 	{
+		if (cmd->args && cmd->args[0])
+			is_built_in = check_built_ins(cmd->args);
 		if (!(i == 0 && !cmd->pipe_cmd && cmd->args && cmd->args[0]
-			&& check_built_ins(cmd->args[0]) > 0))
+			&& (is_built_in > 0 && is_built_in < 6)))
 			i++;
 		cmd = cmd->pipe_cmd;
 	}

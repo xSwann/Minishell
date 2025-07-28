@@ -59,9 +59,9 @@ char	**free_array(char **array);
 ==============================*/
 
 int		split_cmd(char **cmd);
-int		check_built_ins(char *cmd);
+int		check_built_ins(char **cmd);
 int		check_path_value(char *cmd);
 int		find_last_slash_in_str(char *cmd);
-int		path_parser(char *shell_name, t_env **env, char *cmd, char **path);
+int		path_parser(char *shell_name, t_env **env, char **cmd, char **path);
 
 #endif

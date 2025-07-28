@@ -79,38 +79,38 @@ int	call_built_ins(t_env **envp, char **cmd, int i)
 	else if (i == 2)
 		return (ft_env(envp));
 	else if (i == 3)
-		return (ft_echo(cmd + 1, envp));
-	else if (i == 4)
 		return (export_loop(envp, cmd + 1));
-	else if (i == 5)
+	else if (i == 4)
 		return (ft_pwd(envp));
-	else if (i == 6)
+	else if (i == 5)
 		return (unset_loop(envp, cmd + 1));
+	else if (i == 6)
+		return (ft_exit(envp, cmd + 1), 1);
 	else if (i == 7)
-		return (ft_exit(envp, cmd + 1));
+		return (ft_echo(cmd + 1, envp));
 	return (-1);
 }
 
-int	check_built_ins(char *cmd)
+int	check_built_ins(char **cmd)
 {
 	int	i;
 
-	i = find_last_slash_in_str(cmd);
 	if (!cmd || !*cmd)
 		return (-1);
-	if (!ft_strcmp("cd", cmd + i))
+	i = find_last_slash_in_str(*cmd);
+	if (!ft_strcmp("cd", *cmd + i))
 		return (1);
-	if (!ft_strcmp("env", cmd + i))
+	if (!ft_strcmp("env", *cmd + i))
 		return (2);
-	if (!ft_strcmp("echo", cmd + i))
+	if (!ft_strcmp("export", *cmd + i))
 		return (3);
-	if (!ft_strcmp("export", cmd + i))
+	if (!ft_strcmp("pwd", *cmd + i))
 		return (4);
-	if (!ft_strcmp("pwd", cmd + i))
+	if (!ft_strcmp("unset", *cmd + i))
 		return (5);
-	if (!ft_strcmp("unset", cmd + i))
+	if (!ft_strcmp("exit",*cmd + i))
 		return (6);
-	if (!ft_strcmp("exit",cmd + i))
+	if (!ft_strcmp("echo", *cmd + i))
 		return (7);
 	return (0);
 }

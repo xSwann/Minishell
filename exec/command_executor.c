@@ -7,44 +7,39 @@ void	executor(char *shell_name, t_env **env, char **args)
 	char	*path;
 
 	path = NULL;
-	status = path_parser(shell_name, env, args[0], &path);
+	status = path_parser(shell_name, env, args, &path);
 	if (status != CMD_OK && path)
+	{
 		free(path);
+		path = NULL;
+	}
 	env_str = env_create(env);
 	if (!env_str && error_printer("envp not found", NULL))
-	{
-		free_array(args);
-		exit(126);
-	}
+		return (free_array(args), exit(126));
 	if (status == CMD_OK && execve(path, args, env_str))
 	{
-		error_printer("Minishell", "execve failed");
-		return (free_array(env_str), free_array(args), free(path), exit(126));
-	}
-	if (status == CMD_NOT_FOUND)
-	{
-		if (ft_strchr(args[0], '/'))
-			error_printer(args[0], "No such file or directory"), exit(127);
+		if (errno == ENOENT)
+		{
+			error_printer(args[0], "No such file or directory");
+			exit(127);
+		}
+		else if (errno == EISDIR)
+			error_printer(args[0], "Is a directory");
+		else if (errno == EACCES)
+			error_printer(args[0], "Permission denied");
 		else
-			error_printer(args[0], "command not found"), exit(127);
+			perror("execve");
 	}
-	if (status == CMD_NOT_FOUND && access(args[0], F_OK) != 0 && !path)
-		error_printer(args[0], "command not found"), exit(127);
-	else if (status == CMD_NO_ACCESS)
-		error_printer(args[0], "Permission denied"), exit(126);
-	else if (status == CMD_IS_DIR)
-		error_printer(args[0], "Is a directory"), exit(126);
-	else if (status == CMD_NO_PATH)
-		error_printer(args[0], "PATH not found"), exit(127);
-	free_array(args);
 	free_array(env_str);
-	return (free(path), exit(126));
+	free_array(args);
+	if (status == CMD_NOT_FOUND)
+		return (exit(127));
+	return (exit(126));
 }
 
 int	child_process(t_env **envp, t_pipex *px)
 {
 	char	**args_ptr;
-	int		exit_code;
 	int		i;
 	
 	free(px->pids);
@@ -58,7 +53,7 @@ int	child_process(t_env **envp, t_pipex *px)
 	px->cmd->args = NULL;
 	while (px->cmd)
 		px->cmd = free_cmd(px->cmd);
-	if ((i = check_built_ins(args_ptr[0])) > 0)
+	if ((i = check_built_ins(args_ptr)) > 0)
 	{
 		call_built_ins(envp, args_ptr, i);
 		free_array(args_ptr);
@@ -66,8 +61,8 @@ int	child_process(t_env **envp, t_pipex *px)
 	else
 		executor(px->shell_name, envp, args_ptr);
 	close_fd(&px->outfile);
-	exit_code = ft_exit(envp, NULL);	
-	return (free_env(envp), exit(exit_code), 0);
+	ft_exit(envp, NULL);
+	exit (1);
 }
 
 int	ft_built_ins(t_env **envp, t_pipex *px, int i)
@@ -90,8 +85,6 @@ int	ft_built_ins(t_env **envp, t_pipex *px, int i)
 		|| dup2(stdout_backup, STDOUT_FILENO) == -1
 		|| close_fd(&stdin_backup) || close_fd(&stdout_backup))
 		return (error_printer("dup2", "restore failed"));
-	if (i == 7)
-		exit_without_childs(envp, px);
 	return (0);
 }
 
@@ -101,8 +94,9 @@ int	pipex(t_env **envp, t_pipex *px)
 
 	if (pipe(px->pipe_fd) == -1)
 		return (perror("pipe: error"), 1);
+	pid = check_built_ins(px->cmd->args);
 	if (px->n_pids == 0 && !px->cmd->pipe_cmd
-		&& px->cmd->args && px->cmd->args[0] && (pid = check_built_ins(px->cmd->args[0])) > 0)
+		&& px->cmd->args && px->cmd->args[0] && (pid > 0 && pid < 6))
 		ft_built_ins(envp, px, pid);
 	else
 	{
