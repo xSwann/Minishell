@@ -1,4 +1,3 @@
-
 #include "../includes/parsing.h"
 
 int	arrays_malloc(t_cmd *cmd)
@@ -37,7 +36,8 @@ int	arrays_init(t_token *tokens, t_cmd *cmd)
 			if (access(tokens[i].word, F_OK) == 0 && access(tokens[i].word, W_OK) == -1)
 				cmd->open_errors = 1;
 		}
-		else if (tokens[i].type == WORD && tokens[i].word && tokens[i].word[0] && !(cmd->prev_type == HEREDOC))
+		/* ← Ici, on enlève la vérification word[0] pour compter aussi "" comme argument */
+		else if (tokens[i].type == WORD && tokens[i].word && !(cmd->prev_type == HEREDOC))
 			cmd->counters[0]++;
 		else if (tokens[i].type == PIPE && cmd->counters[0])
 			break ;
@@ -74,7 +74,7 @@ t_cmd	*init_command(t_token *tokens)
 
 int	handle_token(t_cmd *cmd, char *word, t_type curr_type)
 {
-	if (curr_type == WORD && word && word[0])
+	if (curr_type == WORD && word)   /* pas de changement ici */
 	{
 		if (cmd->prev_type == HEREDOC)
 			cmd->here_doc_fd = ft_here_doc(ft_strdup(word));
@@ -87,7 +87,9 @@ int	handle_token(t_cmd *cmd, char *word, t_type curr_type)
 				return (free(word), word = NULL, 1);
 		}
 		else
+		{
 			cmd->args[cmd->counters[0]++] = ft_strdup(word);
+		}
 	}
 	if (cmd->prev_type == REDOUT)
 		cmd->open_options = O_WRONLY | O_CREAT | O_TRUNC;
@@ -121,55 +123,18 @@ int	cmd_creator(t_cmd **cmd, t_token *tokens)
 		handle_token(curr_cmd, tokens[i].word, tokens[i].type);
 		curr_cmd->prev_type = tokens[i++].type;
 	}
-	//print_cmd(*cmd);
 	return (0);
 }
 
 void	print_cmd(t_cmd *cmd)
 {
 	int	i;
-	int	n_cmd;
 
-	n_cmd = 0;
 	if (cmd)
 	{
-		i = -1;
 		fprintf(stderr, "		|||  print_cmd  |||\n");
+		i = -1;
 		while (++i >= 0 && cmd->args && cmd->args[i])
 			fprintf(stderr, "cmd->args[%i] = %s\n", i, cmd->args[i]);
-		//fprintf(stderr, "cmd->infiles[0] = %s\ncmd->outfiles[0] = %s\n\
-		//cmd->open_options = %i\ncmd->fd_here_doc = %i\ncmd->pipe_cmd = %p\n", \
-		//cmd->infiles[0], cmd->outfiles[0], cmd->open_options, cmd->here_doc_fd, \
-		//cmd->pipe_cmd);
 	}
 }
-
-/* int	main(int ac, char **av)
-{
-	t_token	**tokens;
-	t_cmd	*cmd;
-	int		i;
-
-	i = 0;
-	tokens = malloc(sizeof(t_token *) * (ac / 2 + 1));
-	while (i < ac / 2)
-	{
-		tokens[i / 2] = malloc(sizeof(t_token));
-		tokens[i / 2]->word = av[i + 1];
-		i++;
-		tokens[i / 2]->type = av[i + 1][0] - '0';
-		i++;
-	}
-	tokens[i / 2] = NULL;
-	cmd = cmd_creator(tokens);
-	print_cmd(cmd);
-	free(tokens[0]);
-	free(tokens);
-	//cmd_executor(cmd);
-	while (cmd && cmd->pipe_cmd)
-	{
-		prev_cmd = cmd;
-		cmd = cmd->pipe_cmd;
-		free(prev_cmd);
-	}
-} */

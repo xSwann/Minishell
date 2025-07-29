@@ -47,8 +47,14 @@ int	modify_shell_lvl(t_env **env, int modifier)
 
 int	path_checker(char *shell_name, t_env **env, char **cmd, char **path)
 {
-	if (!cmd || !cmd[0])
-		return (CMD_EMPTY);
+	char	*path_value;
+	int		len;
+	int		i;
+	//char	cwd[4097];
+
+	i = 0;
+	if (!cmd || !*cmd || !*cmd[0])
+		return (CMD_NOT_FOUND);
 	if (cmd[0][0] == '/' || (cmd[0][0] == '.' && cmd[0][1] == '/'))
 	{
 		if (access(cmd[0], F_OK) != 0)
@@ -61,15 +67,9 @@ int	path_checker(char *shell_name, t_env **env, char **cmd, char **path)
 			return (CMD_NOT_FOUND);
 		return (*path = ft_strdup(cmd[0]), CMD_OK);
 	}
-	return (CMD_PENDING);
-}
-
-int	path_parser(char **cmd, char **path, char *path_value)
-{
-	int		len;
-	int		i;
-
-	i = 0;
+	path_value = get_env(*env, "PATH");
+	if (!path_value)
+		path_value = ft_strdup("/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin");
 	while (cmd[0] && path_value[i])
 	{
 		len = 0;
