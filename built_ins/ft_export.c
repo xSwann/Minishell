@@ -1,6 +1,3 @@
-
-#include <stdlib.h>
-#include <string.h>
 #include "../includes/built_ins.h"
 
 int     export_loop(t_env **env, char **arg)
@@ -26,6 +23,11 @@ int     export_loop(t_env **env, char **arg)
     return (0);
 }
 
+
+#include <stdlib.h>
+#include <string.h>
+#include "../includes/built_ins.h"
+
 int    ft_export(t_env **env, char *arg)
 {
     int     arg_already_in_env;
@@ -45,6 +47,7 @@ int    ft_export(t_env **env, char *arg)
     i = 0;
     while (arg[i] && arg[i] != '=')
         i++;
+
     arg_malloc = ft_substr(arg, 0, i);
     if (!arg_malloc)
         return (1);
@@ -75,19 +78,19 @@ int    ft_export(t_env **env, char *arg)
 
             j++;
         }
+        new_env[j].key = arg_malloc;
+        arg_malloc = NULL;
         has_no_value = ft_strchr(arg, '=');
-        if (has_no_value)
+        if (has_no_value && has_no_value[1] != '\0')
         {
-            new_env[j].value = ft_strdup(has_no_value + 1);
+            new_env[j].value = ft_strdup(arg + i + 1);
             if (!new_env[j].value)
             {
-                free(arg_malloc);
+                new_env[j].key = NULL;
                 free_env(&new_env);
                 return (1);
             }
         }
-        new_env[j].key = arg_malloc;
-        arg_malloc = NULL;
         free_env(env);
         *env = new_env;
     }
@@ -96,15 +99,15 @@ int    ft_export(t_env **env, char *arg)
         free(arg_malloc);
         arg_malloc = NULL;
 
-        has_no_value = ft_strchr(arg, '=');
-        if (has_no_value)
+        free((*env)[arg_already_in_env].value);
+        (*env)[arg_already_in_env].value = NULL;
+
+        if (arg[i + 1])
         {
-            free((*env)[arg_already_in_env].value);
-            (*env)[arg_already_in_env].value = ft_strdup(has_no_value + 1);
+            (*env)[arg_already_in_env].value = ft_strdup(arg + i + 1);
             if (!(*env)[arg_already_in_env].value)
                 return (1);
         }
     }
     return (0);
 }
-

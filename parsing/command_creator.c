@@ -1,3 +1,4 @@
+
 #include "../includes/parsing.h"
 
 int	arrays_malloc(t_cmd *cmd)
@@ -27,16 +28,15 @@ int	arrays_init(t_token *tokens, t_cmd *cmd)
 	i = 0;
 	while (tokens[i].type != END)
 	{
-		if (tokens[i].type == WORD && tokens[i].word && tokens[i].word[0] && cmd->prev_type == REDIN && !cmd->open_errors)
+		if (tokens[i].type == WORD && tokens[i].word && cmd->prev_type == REDIN && !cmd->open_errors)
 			cmd->counters[1]++;
-		else if (tokens[i].type == WORD && tokens[i].word && tokens[i].word[0] &&
+		else if (tokens[i].type == WORD && tokens[i].word &&
 			(cmd->prev_type == REDOUT || cmd->prev_type == APPEND) && !cmd->open_errors)
 		{
 			cmd->counters[2]++;
 			if (access(tokens[i].word, F_OK) == 0 && access(tokens[i].word, W_OK) == -1)
 				cmd->open_errors = 1;
 		}
-		/* ← Ici, on enlève la vérification word[0] pour compter aussi "" comme argument */
 		else if (tokens[i].type == WORD && tokens[i].word && !(cmd->prev_type == HEREDOC))
 			cmd->counters[0]++;
 		else if (tokens[i].type == PIPE && cmd->counters[0])
@@ -62,9 +62,9 @@ t_cmd	*init_command(t_token *tokens)
 	cmd->args = NULL;
 	cmd->infiles = NULL;
 	cmd->outfiles = NULL;
-	cmd->counters[0] = 0;//ARGS_COUNTER
-	cmd->counters[1] = 0;//INFILES_COUNTER
-	cmd->counters[2] = 0;//OUTFILES_COUNTER
+	cmd->counters[0] = 0;
+	cmd->counters[1] = 0;
+	cmd->counters[2] = 0;
 	cmd->prev_type = INVALID;
 	if (arrays_init(tokens, cmd))
 		return (NULL);
@@ -72,12 +72,12 @@ t_cmd	*init_command(t_token *tokens)
 	return (cmd);
 }
 
-int	handle_token(t_env *env, t_cmd *cmd, char *word, t_type curr_type)
+int	handle_token(t_cmd *cmd, char *word, t_type curr_type)
 {
-	if (curr_type == WORD && word)   /* pas de changement ici */
+	if (curr_type == WORD && word)
 	{
 		if (cmd->prev_type == HEREDOC)
-			cmd->here_doc_fd = ft_here_doc(env, ft_strdup(word));
+			cmd->here_doc_fd = ft_here_doc(ft_strdup(word));
 		else if (cmd->prev_type == REDIN)
 			cmd->infiles[cmd->counters[1]++] = ft_strdup(word);
 		else if (cmd->prev_type == REDOUT || cmd->prev_type == APPEND)
@@ -87,9 +87,7 @@ int	handle_token(t_env *env, t_cmd *cmd, char *word, t_type curr_type)
 				return (free(word), word = NULL, 1);
 		}
 		else
-		{
 			cmd->args[cmd->counters[0]++] = ft_strdup(word);
-		}
 	}
 	if (cmd->prev_type == REDOUT)
 		cmd->open_options = O_WRONLY | O_CREAT | O_TRUNC;
@@ -98,7 +96,7 @@ int	handle_token(t_env *env, t_cmd *cmd, char *word, t_type curr_type)
 	return (free(word), word = NULL, 0);
 }
 
-int	cmd_creator(t_env *env, t_cmd **cmd, t_token *tokens)
+int	cmd_creator(t_cmd **cmd, t_token *tokens)
 {
 	t_cmd	*curr_cmd;
 	int		i;
@@ -120,21 +118,8 @@ int	cmd_creator(t_env *env, t_cmd **cmd, t_token *tokens)
 			curr_cmd = curr_cmd->pipe_cmd;
 			curr_cmd->prev_type = tokens[i].type;
 		}
-		handle_token(env, curr_cmd, tokens[i].word, tokens[i].type);
+		handle_token(curr_cmd, tokens[i].word, tokens[i].type);
 		curr_cmd->prev_type = tokens[i++].type;
 	}
 	return (0);
-}
-
-void	print_cmd(t_cmd *cmd)
-{
-	int	i;
-
-	if (cmd)
-	{
-		fprintf(stderr, "		|||  print_cmd  |||\n");
-		i = -1;
-		while (++i >= 0 && cmd->args && cmd->args[i])
-			fprintf(stderr, "cmd->args[%i] = %s\n", i, cmd->args[i]);
-	}
 }

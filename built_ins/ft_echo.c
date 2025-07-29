@@ -18,6 +18,7 @@ int is_n(char *str)
     }
     return (1);
 }
+
 int ft_echo(char **str, t_env **env)
 {
     int i;
@@ -26,15 +27,11 @@ int ft_echo(char **str, t_env **env)
     i = -1;
     n = 0;
     if ((!str || !str[0]) && printf("\n"))
-    {
 		return (ft_export(env, "EXIT_CODE=0"), 0);
-    }
     while (str[++i] && is_n(str[i]) == 1)
         n = 1;
     if (i >= ft_strslen(str))
-    {
         return (ft_export(env, "EXIT_CODE=0"), 0);
-    }
     while (str && str[i] && i <= ft_strslen(str) - 2)
     {
 		if (str[i]) 

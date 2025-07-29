@@ -65,7 +65,7 @@ int	read_terminal(t_env **env, char *shell_name)
 		put_tokens_in_struct(env, tokens, nb_of_token, &tokens_struct);
 		//print_tokens(nb_of_token, tokens_struct);
 		cmd = NULL;
-		if (cmd_creator(*env, &cmd, tokens_struct))
+		if (cmd_creator(&cmd, tokens_struct))
 			exit(EXIT_FAILURE);
 		free(tokens_struct);
 		tokens_struct = NULL;

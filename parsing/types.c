@@ -107,5 +107,4 @@ void	put_tokens_in_struct(t_env **env, t_tab *tab, int nb_of_tokens, t_token **t
 		free(*tokens);
 		*tokens = NULL;
 	}
-	//print_tokens(nb_of_tokens, tokens);
 }

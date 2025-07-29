@@ -6,18 +6,18 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:00:26 by flebrun           #+#    #+#             */
-/*   Updated: 2025/07/26 15:46:24 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/07/29 13:48:01 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/parsing.h"
+#include <readline/readline.h>
 
 int	error_printer(char *str1, char *str2)
 {
 	int	errno_backup;
 
 	errno_backup = errno;
-	//fprintf(stderr, "std1 = %s, std2 = %s\n", str1, str2);
 	write(2, "minishell: ", 11);
 	if (str1 && *str1)
 	{
@@ -48,7 +48,7 @@ int	close_fd(int *fd)
 	return (0);
 }
 
-int	ft_here_doc(t_env *env, char *limiter)
+int	ft_here_doc(char *limiter)
 {
 	int		pipe_fd[2];
 	char	*line;
@@ -64,7 +64,6 @@ int	ft_here_doc(t_env *env, char *limiter)
 			break ;
 		if (*line)
 			add_history(line);
-        expand_var(&line, env);
 		write(pipe_fd[1], line, ft_strlen(line));
 		write(pipe_fd[1], "\n", 1);
 		free(line);
@@ -72,6 +71,8 @@ int	ft_here_doc(t_env *env, char *limiter)
 	}
 	free(limiter);
 	limiter = NULL;
-	free(line);
+	if (line)
+		free(line);
+	line = NULL;
 	return (line = NULL, close_fd(&pipe_fd[1]), pipe_fd[0]);
 }

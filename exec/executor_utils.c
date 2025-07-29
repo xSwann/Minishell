@@ -1,15 +1,11 @@
 #include "../includes/exec.h"
 
-int	wait_execs(t_env **envp, t_pipex *px)
+int	wait_execs(t_env **envp, t_pipex *px, int i, int status)
 {
-	int		i;
-	int		status;
 	int		exit_code;
 	char	*status_str;
 	char	*exit_str;
 
-	i = -1;
-	status = 0;
 	while (++i < px->n_pids && px->pids[i])
 	{
 		if (px->pids[i] <= 0)
@@ -30,15 +26,33 @@ int	wait_execs(t_env **envp, t_pipex *px)
 	return (ft_export(envp, exit_str), free(exit_str), 0);
 }
 
-char	**env_create(t_env **envp)
+int	status_checker(char *shell_name, t_env **env, char **args, char **path)
 {
-	char	*str_key;
-	char	**env_str;
-	int		is_exit_code;
-	int		i;
+	char	*path_value;
+	int		status;
 
-	i = 0;
-	is_exit_code = 0;
+	status = path_checker(shell_name, env, args, path);
+	if (status == CMD_PENDING)
+	{
+		path_value = get_env(*env, "PATH");
+		if (!path_value)
+			path_value = ft_strdup(PATH_BACKUP);
+		status = path_parser(args, path, path_value);
+		if (path_value)
+			free(path_value);
+	}
+	if (status != CMD_OK && path)
+	{
+		free(*path);
+		*path = NULL;
+	}
+	return (status);
+}
+
+char	**env_create(t_env **envp, int i, int is_exit_code)
+{
+	char	**env_str;
+
 	if (!(*envp) || !(*envp)->key[0])
 		return (NULL);
 	while ((*envp)[i].key)
@@ -49,25 +63,11 @@ char	**env_create(t_env **envp)
 	env_str = malloc(sizeof (char *) * (i - is_exit_code + 1));
 	if (!env_str)
 		return (NULL);
-	i = -1;
-	is_exit_code = 0;
-	while ((*envp)[++i].key)
-	{
-        if (!ft_strcmp((*envp)[i].key, "EXIT_CODE") && ++is_exit_code)
-			continue ;
-		str_key = ft_strjoin((*envp)[i].key, "=");
-		if (!str_key)
-			return (free_array(env_str));
-		env_str[i - is_exit_code] = ft_strjoin(str_key, (*envp)[i].value);
-		if (!env_str[i - is_exit_code])
-			return (free(str_key), free_array(env_str));
-		free(str_key);
-		str_key = NULL;
-	}
+	if (loop_duplicate(envp, env_str))
+		return (NULL);
 	free_env(envp);
 	free(*envp);
-	*envp = NULL;
-	return (env_str[i - is_exit_code] = NULL, env_str);
+	return (*envp = NULL, env_str[i - is_exit_code] = NULL, env_str);
 }
 
 int	call_built_ins(t_env **envp, char **cmd, int i)
@@ -114,5 +114,3 @@ int	check_built_ins(char **cmd)
 		return (7);
 	return (0);
 }
-
-
