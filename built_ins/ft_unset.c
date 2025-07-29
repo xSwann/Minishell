@@ -16,6 +16,23 @@ int     unset_loop(t_env **env, char **arg)
     return (0);
 }
 
+t_env	*init_new_env(int count)
+{
+	t_env	*new_env;
+	int		i;
+
+	new_env = malloc((sizeof(t_env)) * (count + 1));
+	if (!new_env)
+		return (NULL);
+	i = -1;
+	while (++i <= count)
+	{
+		new_env[i].key = NULL;
+		new_env[i].value = NULL;
+	}
+	return (new_env);
+}
+
 int ft_unset(t_env **env, char *arg)
 {
     int i;
@@ -41,7 +58,9 @@ int ft_unset(t_env **env, char *arg)
         if (!ft_strcmp((*env)[i].key, arg) && count--)
             already_in_env = i;
     }
-    new_env = malloc((sizeof(t_env)) * (count + 1));
+    new_env = init_new_env(count);
+	if (!new_env)
+		return (1);
     i = 0;
     while (i < already_in_env)
     {
@@ -63,8 +82,6 @@ int ft_unset(t_env **env, char *arg)
 		if (!new_env[i++].value)
 			return (free_env(&new_env), 1);
     }
-    new_env[count].key   = NULL;
-    new_env[count].value = NULL;
     free_env(env);
     return (*env = new_env, ft_export(env, "EXIT_CODE=0"), 0);
 }
