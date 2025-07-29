@@ -5,6 +5,8 @@
 # define CMD_NO_PATH     2   // pas de $PATH défini
 # define CMD_IS_DIR      3   // chemin pointant vers un répertoire
 # define CMD_NO_ACCESS   4   // permissions refusées
+# define CMD_EMPTY       5   // aucun arguments dans la commande
+# define CMD_PENDING     6   // phase 1 de check non concluante
 
 # include <readline/readline.h>
 # include <readline/history.h>
@@ -26,14 +28,16 @@
 int		close_fd(int *fd);
 int		free_args(char **args);
 int		close_pipe(t_pipex *px);
-char	**env_create(t_env **envp);
 int		ft_argv_updater(char **av, int ac);
 int		error_printer(char *str, char *str2);
-int		wait_execs(t_env **envp, t_pipex *px);
 char	*ft_strndup(const char *src, int len);
 int		child_process(t_env **envp, t_pipex *px);
 int		call_built_ins(t_env **envp, char **cmd, int i);
+char	**env_create(t_env **envp, int i, int is_exit_code);
 int		cmd_executor(char *shell_name, t_env **env, t_cmd **cmd);
+int		wait_execs(t_env **envp, t_pipex *px, int i, int status);
+int		status_checker(char *shell_name, t_env **env, char **args, char **path);
+
 
 /*==============================
 =   STRUCTURE MANIPULATIONS   =
@@ -53,6 +57,7 @@ int		init_px(char *shell_name, t_cmd **cmd, t_pipex *px);
 t_cmd	*free_cmd(t_cmd *cmd);
 int		close_pipe(t_pipex *px);
 char	**free_array(char **array);
+int		loop_duplicate(t_env **envp, char **env_str);
 
 /*==============================
 =        PATH MODIFIERS        =
@@ -62,6 +67,7 @@ int		split_cmd(char **cmd);
 int		check_built_ins(char **cmd);
 int		check_path_value(char *cmd);
 int		find_last_slash_in_str(char *cmd);
-int		path_parser(char *shell_name, t_env **env, char **cmd, char **path);
+int		path_parser(char **cmd, char **path, char *path_value);
+int		path_checker(char *shell_name, t_env **env, char **cmd, char **path);
 
 #endif

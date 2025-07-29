@@ -1,39 +1,31 @@
 #include "../includes/exec.h"
 
-void	executor(char *shell_name, t_env **env, char **args)
+void	executor(char *shell_name, t_env **env, char **args, char *path)
 {
 	char	**env_str;
 	int		status;
-	char	*path;
 
-	path = NULL;
-	status = path_parser(shell_name, env, args, &path);
-	if (status != CMD_OK && path)
+	status = status_checker(shell_name, env, args, &path);
+	if (status == CMD_OK)
 	{
-		free(path);
-		path = NULL;
-	}
-	env_str = env_create(env);
-	if (!env_str && error_printer("envp not found", NULL))
-		return (free_array(args), exit(126));
-	if (status == CMD_OK && execve(path, args, env_str))
-	{
-		if (errno == ENOENT)
-		{
-			error_printer(args[0], "No such file or directory");
+		env_str = env_create(env, 0, 0);
+		if (!env_str && error_printer("envp not found", NULL))
+			return (free_array(args), exit(126));
+		execve(path, args, env_str);
+		free_array(env_str);
+		if (errno == ENOENT && \
+			error_printer(args[0], "No such file or directory"))
 			exit(127);
-		}
 		else if (errno == EISDIR)
 			error_printer(args[0], "Is a directory");
 		else if (errno == EACCES)
 			error_printer(args[0], "Permission denied");
-		else
-			perror("execve");
 	}
-	free_array(env_str);
 	free_array(args);
 	if (status == CMD_NOT_FOUND)
 		return (exit(127));
+	if (status == CMD_EMPTY)
+		return (exit(0));
 	return (exit(126));
 }
 
@@ -41,7 +33,7 @@ int	child_process(t_env **envp, t_pipex *px)
 {
 	char	**args_ptr;
 	int		i;
-	
+
 	free(px->pids);
 	if (manage_infile(px, STDIN_FILENO) || manage_outfile(px, STDOUT_FILENO))
 	{
@@ -53,13 +45,14 @@ int	child_process(t_env **envp, t_pipex *px)
 	px->cmd->args = NULL;
 	while (px->cmd)
 		px->cmd = free_cmd(px->cmd);
-	if ((i = check_built_ins(args_ptr)) > 0)
+	i = check_built_ins(args_ptr);
+	if (i > 0)
 	{
 		call_built_ins(envp, args_ptr, i);
 		free_array(args_ptr);
 	}
 	else
-		executor(px->shell_name, envp, args_ptr);
+		executor(px->shell_name, envp, args_ptr, NULL);
 	close_fd(&px->outfile);
 	ft_exit(envp, NULL);
 	exit (1);
@@ -67,8 +60,8 @@ int	child_process(t_env **envp, t_pipex *px)
 
 int	ft_built_ins(t_env **envp, t_pipex *px, int i)
 {
-	int stdin_backup;
-	int stdout_backup;
+	int	stdin_backup;
+	int	stdout_backup;
 
 	stdin_backup = dup(STDIN_FILENO);
 	stdout_backup = dup(STDOUT_FILENO);
@@ -136,15 +129,9 @@ int	cmd_executor(char *shell_name, t_env **envp, t_cmd **cmd)
 	}
 	exit_status = 0;
 	if (px.n_pids)
-		exit_status = wait_execs(envp, &px);
+		exit_status = wait_execs(envp, &px, -1, 0);
 	free_cmd(px.cmd);
 	close_pipe(&px);
 	close_fd(&px.infile);
-	//close_fd(&px.outfile);
 	return (exit_status);
 }
-		//fprintf(stderr, "		px->here_doc_fd = %i || px->pipe_fd[0] = %i || px->pipe_fd[1] = %i\n\
-		//px->outfile = %i || px->infile = %i\n\
-		//args[0] = %s || t_cmd = %p || pid = %i || n_pid = %i\n", px.here_doc_fd, \
-		//px.pipe_fd[0], px.pipe_fd[1], px.outfile, \
-		//px.infile, px.args[0], px.cmd, px.pids[0], px.n_pids);

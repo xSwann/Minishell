@@ -45,16 +45,10 @@ int	modify_shell_lvl(t_env **env, int modifier)
 	return (1);
 }
 
-int	path_parser(char *shell_name, t_env **env, char **cmd, char **path)
+int	path_checker(char *shell_name, t_env **env, char **cmd, char **path)
 {
-	char	*path_value;
-	int		len;
-	int		i;
-	//char	cwd[4097];
-
-	i = 0;
-	if (!cmd || !*cmd)
-		return (error_printer(NULL, "command not found"), CMD_NOT_FOUND);
+	if (!cmd || !cmd[0])
+		return (CMD_EMPTY);
 	if (cmd[0][0] == '/' || (cmd[0][0] == '.' && cmd[0][1] == '/'))
 	{
 		if (access(cmd[0], F_OK) != 0)
@@ -67,9 +61,15 @@ int	path_parser(char *shell_name, t_env **env, char **cmd, char **path)
 			return (CMD_NOT_FOUND);
 		return (*path = ft_strdup(cmd[0]), CMD_OK);
 	}
-	path_value = get_env(*env, "PATH");
-	if (!path_value)
-		return (CMD_NOT_FOUND);
+	return (CMD_PENDING);
+}
+
+int	path_parser(char **cmd, char **path, char *path_value)
+{
+	int		len;
+	int		i;
+
+	i = 0;
 	while (cmd[0] && path_value[i])
 	{
 		len = 0;
@@ -77,17 +77,16 @@ int	path_parser(char *shell_name, t_env **env, char **cmd, char **path)
 			len++;
 		*path = malloc(len + ft_strlen(cmd[0]) + 2);
 		if (!*path)
-			return (free(path_value), error_printer("malloc", "failed"), CMD_NO_ACCESS);
+			return (CMD_NO_ACCESS);
 		path_builder(path_value + i, cmd[0], *path, len);
 		if (access(*path, X_OK) == 0)
-			return (free(path_value), CMD_OK);
+			return (CMD_OK);
 		free(*path);
 		*path = NULL;
 		i += len;
 		if (path_value[i] == ':')
 			i++;
 	}
-	free(path_value);
 	return (error_printer(cmd[0], "command not found"), CMD_NOT_FOUND);
 }
 

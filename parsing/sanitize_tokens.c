@@ -114,11 +114,17 @@ void clear_space(char *str)
 
 void expand_var(char **str, t_env *env)
 {
-    int i = 0, start = 0, len = 0;
-    char *to_expand;
+	int	i;
+	int	len;
+	int	start;
+
+	i = 0;
+	len = 0;
+	start = 0;
     char *expanded;
-    while ((*str)[i] && (*str)[i] != '$')
-        i++;
+    char *to_expand;
+	while ((*str)[i] && (*str)[i] != '$')
+		i++;
     start = i++;
     while ((*str)[i] && ft_isalnum((*str)[i]))
         i++;

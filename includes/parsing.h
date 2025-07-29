@@ -44,13 +44,13 @@ void	fill_line(char *tab, char *line, int start, int end);
 =      COMMAND_FUNCTIONS      =
 ==============================*/
 
-int		cmd_creator(t_env *env, t_cmd **cmd, t_token *tokens);
+int		cmd_creator(t_cmd **cmd, t_token *tokens);
 void	print_cmd(t_cmd *cmd);
 
 /*==============================
 =    HERE_DOC MANIPULATIONS    =
 ==============================*/
 
-int		ft_here_doc(t_env *env, char *limiter);
+int		ft_here_doc(char *limiter);
 
 #endif

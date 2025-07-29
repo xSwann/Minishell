@@ -1,5 +1,29 @@
 #include "../includes/exec.h"
 
+int	loop_duplicate(t_env **envp, char **env_str)
+{
+	int		i;
+	int		is_exit_code;
+	char	*str_key;
+
+	i = -1;
+	is_exit_code = 0;
+	while ((*envp)[++i].key)
+	{
+		if (!ft_strcmp((*envp)[i].key, "EXIT_CODE") && ++is_exit_code)
+			continue ;
+		str_key = ft_strjoin((*envp)[i].key, "=");
+		if (!str_key)
+			return (free_array(env_str), 1);
+		env_str[i - is_exit_code] = ft_strjoin(str_key, (*envp)[i].value);
+		if (!env_str[i - is_exit_code])
+			return (free(str_key), free_array(env_str), 1);
+		free(str_key);
+		str_key = NULL;
+	}
+	return (0);
+}
+
 char	**free_array(char **array)
 {
 	int	i;
@@ -36,7 +60,8 @@ t_cmd	*free_cmd(t_cmd *cmd)
 int	close_pipe(t_pipex *px)
 {
 	if (close_fd(&px->pipe_fd[0]))
-		return (close_fd(&px->pipe_fd[1]), error_printer("close", "pipe_fd[0]"));
+		return (close_fd(&px->pipe_fd[1]), \
+		error_printer("close", "pipe_fd[0]"));
 	if (close_fd(&px->pipe_fd[1]))
 		return (error_printer("close", "pipe_fd[1]"));
 	return (0);

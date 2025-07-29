@@ -5,20 +5,16 @@ int	manage_outfile(t_pipex *px, int fd_stdout)
 	int	i;
 
 	i = -1;
-	if (px->cmd->outfiles && px->cmd->outfiles[0] && px->cmd->open_options)
+	if (px->cmd->outfiles && px->cmd->outfiles[0])
 	{
 		while (px->cmd->outfiles[++i])
 		{
 			if (px->outfile > 0 && close_fd(&px->outfile))
 				return (1);
-			if (px->cmd->open_options == (O_WRONLY | O_CREAT | O_TRUNC))
-				px->outfile = open(px->cmd->outfiles[i], \
-				O_WRONLY | O_CREAT | O_TRUNC, 0644);
-			else if (px->cmd->open_options == (O_WRONLY | O_CREAT | O_APPEND))
-				px->outfile = open(px->cmd->outfiles[i], \
-				O_WRONLY | O_CREAT | O_APPEND, 0644);
-			if (px->outfile < 0)
-				return (error_printer(NULL, "Permission denied"));
+			px->outfile = open(px->cmd->outfiles[i], \
+				px->cmd->open_options, 0644);
+			if (px->outfile < 0 && error_printer(NULL, "Permission denied"))
+				return (close_fd(&px->infile), close_pipe(px), 1);
 		}
 	}
 	else if (px->cmd->pipe_cmd)
@@ -26,13 +22,10 @@ int	manage_outfile(t_pipex *px, int fd_stdout)
 		px->outfile = px->pipe_fd[1];
 		px->pipe_fd[1] = -1;
 	}
-	if (px->outfile < 0 && error_printer(NULL, "Permission denied"))
-		return (close_fd(&px->infile), close_pipe(px), 1);
 	if (px->outfile && (dup2(px->outfile, fd_stdout) == -1
-		|| close_fd(&px->outfile)) && error_printer("dup2", "error"))
+			|| close_fd(&px->outfile)) && error_printer("dup2", "error"))
 		return (close_fd(&px->outfile), close_pipe(px), 1);
-	close_fd(&px->pipe_fd[1]);
-	return (0);
+	return (close_fd(&px->pipe_fd[1]), 0);
 }
 
 int	manage_infile(t_pipex *px, int fd_stdin)
@@ -50,16 +43,17 @@ int	manage_infile(t_pipex *px, int fd_stdin)
 				return (1);
 			px->infile = open(px->cmd->infiles[i], O_RDONLY);
 			if (px->infile < 0)
-				return (error_printer(px->cmd->infiles[i], "No such file or directory"));
+				return (error_printer(px->cmd->infiles[i], \
+				"No such file or directory"));
 		}
 	}
 	if (px->infile < 0)
-		return (error_printer(px->cmd->infiles[i], "No such file or directory"));
+		return (error_printer(px->cmd->infiles[i], \
+		"No such file or directory"));
 	if (px->infile && (dup2(px->infile, fd_stdin) == -1
-		|| close_fd(&px->infile)) && error_printer("dup2", "error"))
+			|| close_fd(&px->infile)) && error_printer("dup2", "error"))
 		return (close_fd(&px->infile), close_pipe(px), 1);
-	close_fd(&px->pipe_fd[0]);
-	return (0);
+	return (close_fd(&px->pipe_fd[0]), 0);
 }
 
 pid_t	*pid_array_builder(t_cmd *cmd)
@@ -75,7 +69,7 @@ pid_t	*pid_array_builder(t_cmd *cmd)
 		if (cmd->args && cmd->args[0])
 			is_built_in = check_built_ins(cmd->args);
 		if (!(i == 0 && !cmd->pipe_cmd && cmd->args && cmd->args[0]
-			&& (is_built_in > 0 && is_built_in < 6)))
+				&& (is_built_in > 0 && is_built_in < 6)))
 			i++;
 		cmd = cmd->pipe_cmd;
 	}
