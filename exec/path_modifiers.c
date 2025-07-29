@@ -53,8 +53,8 @@ int	path_parser(char *shell_name, t_env **env, char **cmd, char **path)
 	//char	cwd[4097];
 
 	i = 0;
-	if (!cmd || !*cmd)
-		return (error_printer(NULL, "command not found"), CMD_NOT_FOUND);
+	if (!cmd || !*cmd || !*cmd[0])
+		return (CMD_NOT_FOUND);
 	if (cmd[0][0] == '/' || (cmd[0][0] == '.' && cmd[0][1] == '/'))
 	{
 		if (access(cmd[0], F_OK) != 0)
@@ -69,7 +69,7 @@ int	path_parser(char *shell_name, t_env **env, char **cmd, char **path)
 	}
 	path_value = get_env(*env, "PATH");
 	if (!path_value)
-		return (CMD_NOT_FOUND);
+		path_value = ft_strdup("/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin");
 	while (cmd[0] && path_value[i])
 	{
 		len = 0;
