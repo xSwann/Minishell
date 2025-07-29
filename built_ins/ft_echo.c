@@ -34,7 +34,7 @@ int ft_echo(char **str, t_env **env)
         return (ft_export(env, "EXIT_CODE=0"), 0);
     while (str && str[i] && i <= ft_strslen(str) - 2)
     {
-		if (str[i][0]) 
+		if (str[i]) 
         	printf("%s ", str[i]);
         i++;
     }

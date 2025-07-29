@@ -47,8 +47,8 @@ int	modify_shell_lvl(t_env **env, int modifier)
 
 int	path_checker(char *shell_name, t_env **env, char **cmd, char **path)
 {
-	if (!cmd || !cmd[0])
-		return (CMD_EMPTY);
+	if (!cmd || !cmd[0] || !cmd[0][0])
+		return (CMD_PENDING);
 	if (cmd[0][0] == '/' || (cmd[0][0] == '.' && cmd[0][1] == '/'))
 	{
 		if (access(cmd[0], F_OK) != 0)
@@ -70,7 +70,7 @@ int	path_parser(char **cmd, char **path, char *path_value)
 	int		i;
 
 	i = 0;
-	while (cmd[0] && path_value[i])
+	while (cmd[0] && cmd[0][0] && path_value[i])
 	{
 		len = 0;
 		while (path_value[i + len] && path_value[i + len] != ':')
@@ -87,7 +87,7 @@ int	path_parser(char **cmd, char **path, char *path_value)
 		if (path_value[i] == ':')
 			i++;
 	}
-	return (error_printer(cmd[0], "command not found"), CMD_NOT_FOUND);
+	return (CMD_NOT_FOUND);
 }
 
 int	find_last_slash_in_str(char *cmd)

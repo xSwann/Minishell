@@ -23,9 +23,7 @@ void	executor(char *shell_name, t_env **env, char **args, char *path)
 	}
 	free_array(args);
 	if (status == CMD_NOT_FOUND)
-		return (exit(127));
-	if (status == CMD_EMPTY)
-		return (exit(0));
+		return (error_printer(NULL, "command not found"), exit(127));
 	return (exit(126));
 }
 

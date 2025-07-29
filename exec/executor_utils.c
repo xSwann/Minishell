@@ -36,12 +36,10 @@ int	status_checker(char *shell_name, t_env **env, char **args, char **path)
 	{
 		path_value = get_env(*env, "PATH");
 		if (!path_value)
-			status = CMD_NOT_FOUND;
-		else
-		{
-			status = path_parser(args, path, path_value);
+			path_value = ft_strdup(PATH_BACKUP);
+		status = path_parser(args, path, path_value);
+		if (path_value)
 			free(path_value);
-		}
 	}
 	if (status != CMD_OK && path)
 	{

@@ -37,7 +37,7 @@ void	ft_exit(t_env **env, char **args)
 		return (free(join), join = NULL, free_env(env), exit(arg_n));
     }
 	free_env(env);
-    if (!str_is_num(args[0] + is_negative))
+    if (!args[0][0] || !str_is_num(args[0]))
 	{
 		fprintf(stderr, "minishell: exit: %s: numeric argument required\n", args[0]);
         return (exit(2));
