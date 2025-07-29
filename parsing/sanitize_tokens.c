@@ -46,7 +46,7 @@ void replace_expanded_value(char **str, char *expanded, int len)
     if ((*str)[i] == '?')
         i++;
     else
-        while ((*str)[i] && (ft_isalnum((*str)[i]) || (*str)[i] == '_'))
+        while ((*str)[i] && ft_isalnum((*str)[i]))
             i++;
     while (expanded[k])
         new[j++] = expanded[k++];
@@ -126,7 +126,7 @@ void expand_var(char **str, t_env *env)
 	while ((*str)[i] && (*str)[i] != '$')
 		i++;
     start = i++;
-    while ((*str)[i] && (ft_isalnum((*str)[i]) || (*str)[i] == '_'))
+    while ((*str)[i] && ft_isalnum((*str)[i]))
         i++;
     if ((*str)[start + 1] == '?')
     {
