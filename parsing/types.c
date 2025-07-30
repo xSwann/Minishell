@@ -33,13 +33,17 @@ t_type	find_type(t_token token)
 		return (END);
 	if (token.word[0] == '|')
 		return (PIPE);
-	else if (token.word[0] == '<' && token.word[1] == '<' && ft_strlen(token.word) == 2)
+	else if (token.word[0] == '<'
+		&& token.word[1] == '<' && ft_strlen(token.word) == 2)
 		return (HEREDOC);
-	else if (token.word[0] == '>' && token.word[1] == '>' && ft_strlen(token.word) == 2)
+	else if (token.word[0] == '>'
+		&& token.word[1] == '>' && ft_strlen(token.word) == 2)
 		return (APPEND);
-	else if (token.word[0] == '<' && ft_strlen(token.word) == 1)
+	else if (token.word[0] == '<'
+		&& ft_strlen(token.word) == 1)
 		return (REDIN);
-	else if (token.word[0] == '>' && ft_strlen(token.word) == 1)
+	else if (token.word[0] == '>'
+		&& ft_strlen(token.word) == 1)
 		return (REDOUT);
 	return (WORD);
 }
@@ -61,12 +65,12 @@ int	validate_tokens(t_env **env, t_token *tokens)
 	int	i;
 
 	i = 0;
-
 	while (tokens && tokens[i].type && tokens[i].type != END)
 	{
 		if (tokens[i].type == PIPE)
 		{
-			if (i == 0 || tokens[i + 1].type == END || tokens[i + 1].type == PIPE)
+			if (i == 0 || tokens[i + 1].type == END
+				|| tokens[i + 1].type == PIPE)
 				return (error_parser_printer(env, tokens[i].word));
 		}
 		else if (tokens[i].type == REDIN || tokens[i].type == REDOUT
@@ -82,29 +86,29 @@ int	validate_tokens(t_env **env, t_token *tokens)
 	return (0);
 }
 
-void	put_tokens_in_struct(t_env **env, t_tab *tab, int nb_of_tokens, t_token **tokens)
+void	put_tks_in_struct(t_env **env, t_tab *tab, int nb_of_tks, t_token **tks)
 {
 	int	i;
 
 	i = 0;
-	while (i < nb_of_tokens)
+	while (i < nb_of_tks)
 	{
-		(*tokens)[i].word = strdup(tab[i].str);
+		(*tks)[i].word = strdup(tab[i].str);
 		free(tab[i].str);
 		if (tab[i].quoted == 0)
-			(*tokens)[i].type = find_type((*tokens)[i]);
+			(*tks)[i].type = find_type((*tks)[i]);
 		else
-			(*tokens)[i].type = WORD;
+			(*tks)[i].type = WORD;
 		i++;
 	}
 	free(tab);
-	(*tokens)[i].word = NULL;
-	(*tokens)[i].type = find_type((*tokens)[i]);
-	if (validate_tokens(env, *tokens))
+	(*tks)[i].word = NULL;
+	(*tks)[i].type = find_type((*tks)[i]);
+	if (validate_tokens(env, *tks))
 	{
 		while (--i >= 0)
-			free((*tokens)[i].word);
-		free(*tokens);
-		*tokens = NULL;
+			free((*tks)[i].word);
+		free(*tks);
+		*tks = NULL;
 	}
 }
