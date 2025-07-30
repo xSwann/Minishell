@@ -1,20 +1,16 @@
 #include "../includes/built_ins.h"
 
 char	*get_pwd(void)
-char	*get_pwd(void)
 {
 	char	buffer[4097];
 	char	*cwd;
 
 	cwd = getcwd(buffer, 4097);
 	if (cwd == NULL)
-	cwd = getcwd(buffer, 4097);
-	if (cwd == NULL)
 		return (NULL);
 	return (ft_strdup(cwd));
 }
 
-int	ft_pwd(t_env **env)
 int	ft_pwd(t_env **env)
 {
 	char	*pwd;
