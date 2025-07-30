@@ -5,24 +5,26 @@ void	executor(char *shell_name, t_env **env, char **args, char *path)
 	char	**env_str;
 	int		status;
 
+	errno = 0;
 	status = status_checker(shell_name, env, args, &path);
-	if (status == CMD_OK)
+	if (path && status == CMD_OK)
 	{
 		env_str = env_create(env, 0, 0);
 		if (!env_str && error_printer("envp not found", NULL))
 			return (free_array(args), exit(126));
 		execve(path, args, env_str);
+		free(path);
 		free_array(env_str);
-		if (errno == ENOENT && \
-			error_printer(args[0], "No such file or directory"))
-			exit(127);
-		else if (errno == EISDIR)
-			error_printer(args[0], "Is a directory");
-		else if (errno == EACCES)
-			error_printer(args[0], "Permission denied");
 	}
-	free_array(args);
 	free_env(env);
+	if (errno == ENOENT && \
+		error_printer(args[0], "No such file or directory"))
+		return (free_array(args), exit(127));
+	else if (errno == EISDIR)
+		error_printer(args[0], "Is a directory");
+	else if (errno == EACCES)
+		error_printer(args[0], "Permission denied");
+	free_array(args);
 	if (status == CMD_NOT_FOUND)
 		return (error_printer(NULL, "command not found"), exit(127));
 	return (exit(126));
@@ -46,15 +48,11 @@ int	child_process(t_env **envp, t_pipex *px)
 		px->cmd = free_cmd(px->cmd);
 	i = check_built_ins(args_ptr);
 	if (i > 0)
-	{
 		call_built_ins(envp, args_ptr, i);
-		free_array(args_ptr);
-	}
-	else
+	else if (args_ptr && args_ptr[0])
 		executor(px->shell_name, envp, args_ptr, NULL);
-	close_fd(&px->outfile);
-	ft_exit(envp, NULL);
-	exit (1);
+	free_array(args_ptr);
+	return (close_fd(&px->outfile), ft_exit(envp, NULL), exit(1), 1);
 }
 
 int	ft_built_ins(t_env **envp, t_pipex *px, int i)

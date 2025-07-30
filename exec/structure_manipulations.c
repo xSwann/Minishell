@@ -88,7 +88,16 @@ int	init_px(char *shell_name, t_cmd **cmd, t_pipex *px)
 	px->cmd = *cmd;
 	px->pids = NULL;
 	px->outfile = 0;
-	px->here_doc_fd = 0;
+	if (px->cmd->here_doc_fd)
+	{
+		if (px->infile && close_fd(&px->infile))
+			return (error_printer("pipe", "pipe_fd[0]"), 1);
+		px->infile = px->cmd->here_doc_fd;
+		if (px->infile < 0)
+			return (error_printer("open", "here_doc_fd"), 1);
+	}
+	else
+		px->here_doc_fd = 0;
 	px->pipe_fd[0] = -1;
 	px->pipe_fd[1] = -1;
 	px->first_cmd = *cmd;

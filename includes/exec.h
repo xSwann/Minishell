@@ -7,7 +7,6 @@
 # define CMD_NO_ACCESS   4   // permissions refusées
 # define CMD_EMPTY       5   // aucun arguments dans la commande
 # define CMD_PENDING     6   // phase 1 de check non concluante
-# define PATH_BACKUP     "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # include <readline/readline.h>
 # include <readline/history.h>
