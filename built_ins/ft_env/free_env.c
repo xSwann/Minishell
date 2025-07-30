@@ -1,15 +1,13 @@
-
 #include "../../includes/built_ins.h"
 
-void    free_env(t_env **env)
+void	free_env(t_env **env)
 {
-    int i;
+	int	i;
 
-    i = 0;
+	i = 0;
 	if (!env || !*env)
 		return ;
-
-	while((*env)[i].key)
+	while ((*env)[i].key)
 	{
 		if ((*env)[i].key)
 		{
@@ -23,6 +21,6 @@ void    free_env(t_env **env)
 		}
 		i++;
 	}
-    free(*env);
+	free(*env);
 	*env = NULL;
 }

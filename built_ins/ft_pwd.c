@@ -1,14 +1,13 @@
-
 #include "../includes/built_ins.h"
 #include <string.h>
 
-char	*get_pwd()
+char	*get_pwd(void)
 {
 	char	buffer[4097];
 	char	*cwd;
 
-    cwd = getcwd(buffer, 4097);
-    if (cwd == NULL)
+	cwd = getcwd(buffer, 4097);
+	if (cwd == NULL)
 		return (NULL);
 	return (ft_strdup(cwd));
 }

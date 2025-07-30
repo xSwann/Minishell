@@ -12,7 +12,8 @@ SRCS	= \
 	ft_cd.c \
 	ft_echo.c \
 	ft_env/get_env.c \
-	ft_unset.c \
+	ft_unset/ft_unset.c \
+	ft_unset/unset_loop.c \
 	is_exportable.c \
 	ft_exit.c
 
