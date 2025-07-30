@@ -86,35 +86,20 @@ int	ft_export(t_env **env, char *arg)
 			if (!new_env[count].value)
 				return (free_env(&new_env), 1);
 		}
-		new_env[count].key = ft_substr(arg, 0, i);
-      has_value = ft_strchr(arg, '=');
-      if (has_value)
-      {
-          new_env[count].value = ft_strdup(has_value + 1);
-          if (!new_env[count].value)
-              return (free_env(&new_env), 1);
-      }
 		free_env(env);
 		*env = new_env;
 	}
-	else if (arg[i + 1])
+	else
 	{
-			free((*env)[arg_already_in_env].value);
-			(*env)[arg_already_in_env].value = NULL;
-			(*env)[arg_already_in_env].value = ft_strdup(arg + i + 1);
+		free((*env)[arg_already_in_env].value);
+		(*env)[arg_already_in_env].value = NULL;
+		has_value = ft_strchr(arg, '=');
+		if (has_value + 1)
+		{
+			(*env)[arg_already_in_env].value = ft_strdup(has_value + 1);
 			if (!(*env)[arg_already_in_env].value)
 				return (1);
+		}
 	}
-	else
-   {
-       has_value = ft_strchr(arg, '=');
-       if (has_value)
-       {
-           free((*env)[arg_already_in_env].value);
-           (*env)[arg_already_in_env].value = ft_strdup(has_value + 1);
-           if (!(*env)[arg_already_in_env].value)
-               return (1);
-       }
-   }
 	return (0);
 }
