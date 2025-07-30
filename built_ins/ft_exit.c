@@ -1,4 +1,3 @@
-
 #include "../includes/built_ins.h"
 /*
 void	exit_without_childs(t_env **env, t_pipex *px)
@@ -20,38 +19,50 @@ void	exit_without_childs(t_env **env, t_pipex *px)
 	exit (exit_code);
 }*/
 
+void	exit_printer2(char **args)
+{
+	fprintf(stderr, "minishell: exit: %s: numeric argument required\n", args[0]);
+	return (exit(2));
+}
+
+void	exit_printer1(void)
+{
+	fprintf(stderr, "minishell: exit: too many arguments\n");
+	return (exit(1));
+}
+
+void	init_arg_n(int *arg_n, char **args, int is_negative)
+{
+	*arg_n = ft_atoi(args[0] + is_negative) % 256;
+	if (is_negative)
+		*arg_n = 256 - *arg_n;
+}
+
 void	ft_exit(t_env **env, char **args)
 {
-    char	*join;
-    int		arg_n;
+	char	*join;
+	int		arg_n;
 	int		is_negative;
 
+	printf("");
 	arg_n = 0;
 	is_negative = 0;
-    if (!args || !args[0])
-    {
-        join = get_env(*env, "EXIT_CODE");
+	if (!args || !args[0])
+	{
+		join = get_env(*env, "EXIT_CODE");
 		if (!join)
 			return (free_env(env), exit(1));
 		arg_n = ft_atoi(join);
 		return (free(join), join = NULL, free_env(env), exit(arg_n));
-    }
+	}
 	free_env(env);
-    if (!args[0][0] || !str_is_num(args[0]))
-	{
-		fprintf(stderr, "minishell: exit: %s: numeric argument required\n", args[0]);
-        return (exit(2));
-	}
-    if (args[1] && args[1][0])
-	{
-		fprintf(stderr, "minishell: exit: too many arguments\n");
-        return (exit(1));
-	}
+	if (!args[0][0] || !str_is_num(args[0] + is_negative))
+		return (exit_printer2(args));
+	if (args[1] && args[1][0])
+		return (exit_printer1());
 	if (args[0][0] && args[0][0] == '-')
 		is_negative = 1;
-    arg_n = ft_atoi(args[0] + is_negative) % 256;
-	if (is_negative)
-		arg_n = 256 - arg_n;
+	init_arg_n(&arg_n, args, is_negative);
 	free(args[0]);
-    return (exit(arg_n));
+	return (exit(arg_n));
 }
