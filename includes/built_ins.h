@@ -24,6 +24,7 @@ void	exit_without_childs(t_env **env, t_pipex *cmd);
 
 //env_utils
 void    free_env(t_env **env);
+t_env	*init_new_env(int count);
 char    *get_env(t_env *env, char *arg);
 int     init_env(char **envp, t_env **env);
 

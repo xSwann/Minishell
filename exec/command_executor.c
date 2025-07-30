@@ -22,6 +22,7 @@ void	executor(char *shell_name, t_env **env, char **args, char *path)
 			error_printer(args[0], "Permission denied");
 	}
 	free_array(args);
+	free_env(env);
 	if (status == CMD_NOT_FOUND)
 		return (error_printer(NULL, "command not found"), exit(127));
 	return (exit(126));
