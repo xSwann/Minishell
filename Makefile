@@ -34,7 +34,6 @@ LIBFT_SRCS = \
 # Get next line functions
 GNL_SRCS = \
 	$(GNL_DIR)get_next_line.c \
-	$(GNL_DIR)get_next_line_utils.c
 
 # Parsing functions
 PARSING_SRCS = \

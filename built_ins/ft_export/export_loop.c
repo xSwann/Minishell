@@ -5,9 +5,9 @@ int	export_loop(t_env **env, char **arg)
 	int		i;
 	char	*str;
 
-	i = 0;
+	i = -1;
 	ft_export(env, "EXIT_CODE=0");
-	while (arg[i])
+	while (arg[++i])
 	{
 		ft_export(env, arg[i]);
 		str = get_env(*env, "EXIT_CODE");
@@ -25,7 +25,6 @@ int	export_loop(t_env **env, char **arg)
 			free(str);
 			str = NULL;
 		}
-		i++;
 	}
 	return (0);
 }

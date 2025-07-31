@@ -83,7 +83,7 @@ int	call_built_ins(t_env **envp, char **cmd, int i)
 	else if (i == 1)
 		return (ft_cd(cmd + 1, envp));
 	else if (i == 2)
-		return (ft_env(envp));
+		return (ft_env(envp, cmd + 1));
 	else if (i == 3)
 		return (export_loop(envp, cmd + 1));
 	else if (i == 4)

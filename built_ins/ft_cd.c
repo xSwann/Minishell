@@ -24,6 +24,7 @@ int	auto_complete_path(char **path, t_env **env)
 		path[0] = get_env(*env, "OLDPWD");
 		if (!path[0] && printf("minishell: cd: OLDPWD not set\n"))
 			return (1);
+		printf("%s\n", path[0]);
 	}
 	return (0);
 }

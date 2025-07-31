@@ -91,7 +91,7 @@ int	ft_export(t_env **env, char *arg)
 	int		i;
 
 	if (!arg)
-		return (ft_env(env), 0);
+		return (ft_env(env, NULL), 0);
 	if (!is_exportable(arg) && \
 		fprintf(stderr, "export: `%s': not a valid identifier\n", arg))
 		return (ft_export(env, "EXIT_CODE=1"));
