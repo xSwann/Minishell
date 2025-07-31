@@ -68,7 +68,10 @@ int	read_terminal(t_env **env, char *shell_name)
 		if (!tokens_struct)
 			exit(EXIT_FAILURE);
 		ft_memset(tokens_struct, 0, sizeof(t_token) * (nb_of_token + 1));
-		tks_to_struct(env, tokens, nb_of_token, &tokens_struct);
+
+		if(put_tks_in_struct(env, tokens, nb_of_token, &tokens_struct))
+			continue ;
+		//print_tokens(nb_of_token, tokens_struct);
 		cmd = NULL;
 		if (cmd_creator(&cmd, tokens_struct))
 			exit(EXIT_FAILURE);
