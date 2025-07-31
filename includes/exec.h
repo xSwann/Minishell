@@ -38,7 +38,6 @@ int		cmd_executor(char *shell_name, t_env **env, t_cmd **cmd);
 int		wait_execs(t_env **envp, t_pipex *px, int i, int status);
 int		status_checker(char *shell_name, t_env **env, char **args, char **path);
 
-
 /*==============================
 =   STRUCTURE MANIPULATIONS   =
 ==============================*/
@@ -69,5 +68,7 @@ int		check_path_value(char *cmd);
 int		find_last_slash_in_str(char *cmd);
 int		path_parser(char **cmd, char **path, char *path_value);
 int		path_checker(char *shell_name, t_env **env, char **cmd, char **path);
+
+void	signalhandler(int signal);
 
 #endif

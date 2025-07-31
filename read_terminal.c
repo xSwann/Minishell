@@ -40,10 +40,16 @@ int	read_terminal(t_env **env, char *shell_name)
 	t_token	*tokens_struct;
 	t_cmd	*cmd;
 
+	line = NULL;
 	signal(SIGINT, signalhandler);
 	signal(SIGQUIT, SIG_IGN);
 	while (1)
 	{
+		// if (line)
+		// {
+		// 	free(line);
+		// 	line = NULL;
+		// }
 		//line = readline("minishell$ ");
 		line = get_input();
 		if (g_receive_sig == 1 && g_receive_sig--)
@@ -62,6 +68,7 @@ int	read_terminal(t_env **env, char *shell_name)
 		if (!tokens_struct)
 			exit(EXIT_FAILURE);
 		ft_memset(tokens_struct, 0, sizeof(t_token) * (nb_of_token + 1));
+
 		if(put_tks_in_struct(env, tokens, nb_of_token, &tokens_struct))
 			continue ;
 		//print_tokens(nb_of_token, tokens_struct);
@@ -80,13 +87,14 @@ int	main(int argc, char **argv, char **envp)
 	char	*shell_name;
 	char	*exit_str;
 	int		exit_code;
+	t_env	*env;
 
 	(void)argc;
+	env = NULL;
 	exit_code = 1;
 	shell_name = argv[0] + 2;
 	if (!shell_name)
 		return (1);
-	t_env *env = NULL;
 	init_env(envp, &env);
 	if (!env)
 		return (1);
