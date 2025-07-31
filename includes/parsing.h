@@ -20,13 +20,44 @@
 /*==============================
 =     TOKENIZATION FUNCTIONS   =
 ==============================*/
-
 int		count_tokens(char *line);
 void	symbol_handler(int *i, char *line);
-void	sanitize_tokens(t_tab *tokens, t_env *env);
 void	print_tokens(int nb_of_tokens, t_token *tokens);
 void	put_tokens_in_tab(int nb_of_token, char *line, t_tab *tab);
 void	tks_to_struct(t_env **env, t_tab *tab, int nb_of_tks, t_token **tks);
+
+//sanitize_tokens
+void	sanitize_tokens(t_tab *tokens, t_env *env);
+
+//sanitize_tokens_utils1
+void	replace_expanded_value(char **str, char *expanded, int len);
+void	copy_before_dollar_erase(char **str, char *new, int *i, int *j);
+void	skip_variable_erase(char **str, int *i);
+void	erase_expand(char **str, int len);
+void	skip_leading_spaces(char *str, int *i);
+
+//sanitize_tokens_utils2
+void	copy_word_characters(char *str, int *i, int *j, int *in_word);
+void	handle_spaces(char *str, int *i, int *j, int *in_word);
+void	clear_space(char *str);
+void	find_dollar_position(char **str, int *i);
+void	find_variable_end(char **str, int *i);
+
+//sanitize_tokens_utils3
+void	handle_special_cases(char **str, char **to_expand, int start);
+void	set_to_expand(char **to_expand, char **str);
+void	expand_var(char **str, t_env *env);
+int     should_expand(t_tab *tokens, int i, int j, char quote);
+void	handle_expansion(t_tab *tokens, t_env *env, int i, char quote);
+
+//sanitize_tokens_utils4
+void	copy_without_quotes(char *old, char *new, size_t len);
+void	strip_quotes(char **p);
+void	copy_before_dollar(char **str, char *new, int *i, int *j);
+void	skip_variable_name(char **str, int *i);
+void	copy_expanded_value(char *expanded, char *new, int *j, int *k);
+
+
 
 /*==============================
 =       UTILITY FUNCTIONS      =

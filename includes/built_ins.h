@@ -20,6 +20,7 @@ void	ft_exit(t_env **env, char **arg);
 int		ft_export(t_env **env, char *arg);
 int		unset_loop(t_env **env, char **arg);
 int		export_loop(t_env **env, char **arg);
+int	find_equal_index(char *arg);
 void	exit_without_childs(t_env **env, t_pipex *cmd);
 
 //env_utils

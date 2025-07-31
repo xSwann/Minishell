@@ -83,4 +83,17 @@ typedef struct s_env
 	char	*value;
 }	t_env;
 
+/*==============================
+=     SANITIZE TOKENS STRUCT   =
+==============================*/
+
+typedef struct s_token_data
+{
+	t_tab	*tokens;
+	t_env	*env;
+	int		i;
+	int		*j;
+	char	*quote;
+}	t_token_data;
+
 #endif
