@@ -86,7 +86,7 @@ int	validate_tokens(t_env **env, t_token *tokens)
 	return (0);
 }
 
-void	put_tks_in_struct(t_env **env, t_tab *tab, int nb_of_tks, t_token **tks)
+int	put_tks_in_struct(t_env **env, t_tab *tab, int nb_of_tks, t_token **tks)
 {
 	int	i;
 
@@ -104,11 +104,13 @@ void	put_tks_in_struct(t_env **env, t_tab *tab, int nb_of_tks, t_token **tks)
 	free(tab);
 	(*tks)[i].word = NULL;
 	(*tks)[i].type = find_type((*tks)[i]);
+	//print_tokens(nb_of_tks, *tks);
 	if (validate_tokens(env, *tks))
 	{
 		while (--i >= 0)
 			free((*tks)[i].word);
 		free(*tks);
-		*tks = NULL;
+		return(*tks = NULL, 1);
 	}
+	return (0);
 }

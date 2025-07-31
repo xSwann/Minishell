@@ -6,9 +6,11 @@ int	export_loop(t_env **env, char **arg)
 	char	*str;
 
 	i = 0;
+	ft_export(env, "EXIT_CODE=0");
 	while (arg[i])
 	{
 		ft_export(env, arg[i]);
+		//printf("HEY\n");
 		str = get_env(*env, "EXIT_CODE");
 		if (ft_strcmp(str, "0"))
 		{
