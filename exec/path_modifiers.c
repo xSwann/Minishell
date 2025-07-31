@@ -70,7 +70,9 @@ int	path_parser(char **cmd, char **path, char *path_value)
 	int		i;
 
 	i = 0;
-	while (cmd && cmd[0] && cmd[0][0] && path_value[i])
+	if (!cmd || !cmd[0] || !cmd[0][0])
+		return (errno = ENOENT, CMD_EMPTY);
+	while (path_value && path_value[i])
 	{
 		len = 0;
 		while (path_value[i + len] && path_value[i + len] != ':')

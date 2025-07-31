@@ -1,4 +1,5 @@
 #include "../includes/built_ins.h"
+#include "../includes/parsing.h"
 /*
 void	exit_without_childs(t_env **env, t_pipex *px)
 {
@@ -21,13 +22,14 @@ void	exit_without_childs(t_env **env, t_pipex *px)
 
 void	exit_printer2(char **args)
 {
-	fprintf(stderr, "minishell: exit: %s: numeric argument required\n", args[0]);
+	write(2, "exit: ", 6);
+	error_printer(args[0], "numeric argument required");
 	return (exit(2));
 }
 
 void	exit_printer1(void)
 {
-	fprintf(stderr, "minishell: exit: too many arguments\n");
+	error_printer("exit", "too many arguments");
 	return (exit(1));
 }
 
