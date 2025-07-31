@@ -6,12 +6,12 @@
 /*   By: slatrech <slatrech@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/19 10:18:38 by slatrech          #+#    #+#             */
-/*   Updated: 2025/01/28 14:40:22 by slatrech         ###   ########.fr       */
+/*   Updated: 2025/07/31 14:48:53 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-//#define BUFFER_SIZE 10
+
 int	terminatingfinder(char *buffer, int j, int readreturn)
 {
 	while (buffer && buffer[j] != '\n' && buffer[j] != '\0' && j < readreturn)
