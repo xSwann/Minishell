@@ -38,7 +38,6 @@ int		cmd_executor(char *shell_name, t_env **env, t_cmd **cmd);
 int		wait_execs(t_env **envp, t_pipex *px, int i, int status);
 int		status_checker(char *shell_name, t_env **env, char **args, char **path);
 
-
 /*==============================
 =   STRUCTURE MANIPULATIONS   =
 ==============================*/

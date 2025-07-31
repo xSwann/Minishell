@@ -47,6 +47,7 @@ int	modify_shell_lvl(t_env **env, int modifier)
 
 int	path_checker(char *shell_name, t_env **env, char **cmd, char **path)
 {
+	errno = 0;
 	if (!cmd || !cmd[0] || !cmd[0][0])
 		return (CMD_PENDING);
 	if (cmd[0][0] == '/' || (cmd[0][0] == '.' && cmd[0][1] == '/'))

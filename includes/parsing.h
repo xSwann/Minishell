@@ -22,9 +22,9 @@
 ==============================*/
 int		count_tokens(char *line);
 void	symbol_handler(int *i, char *line);
-void	put_tokens_in_tab(int nb_of_token, char *line, t_tab *tab);
-void	put_tks_in_struct(t_env **env, t_tab *tab, int nb_of_tks, t_token **tks);
 void	print_tokens(int nb_of_tokens, t_token *tokens);
+void	put_tokens_in_tab(int nb_of_token, char *line, t_tab *tab);
+void	tks_to_struct(t_env **env, t_tab *tab, int nb_of_tks, t_token **tks);
 
 //sanitize_tokens
 void	sanitize_tokens(t_tab *tokens, t_env *env);

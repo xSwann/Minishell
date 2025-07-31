@@ -5,7 +5,6 @@ void	executor(char *shell_name, t_env **env, char **args, char *path)
 	char	**env_str;
 	int		status;
 
-	errno = 0;
 	status = status_checker(shell_name, env, args, &path);
 	if (path && status == CMD_OK)
 	{
