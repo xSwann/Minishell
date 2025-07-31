@@ -1,4 +1,3 @@
-
 #include "../includes/libft.h"
 
 int	concat(const char *ch, char *nv, size_t in, size_t len)

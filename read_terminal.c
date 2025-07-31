@@ -54,7 +54,7 @@ int	read_terminal(t_env **env, char *shell_name)
 		line = get_input();
 		if (g_receive_sig == 1 && g_receive_sig--)
 			ft_export(env, "EXIT_CODE=130");
-		if (!line)
+		if (!line && write(1, "exit\n", 5))
 			break ;
 		if (*line)
 			add_history(line);
@@ -69,7 +69,7 @@ int	read_terminal(t_env **env, char *shell_name)
 			exit(EXIT_FAILURE);
 		ft_memset(tokens_struct, 0, sizeof(t_token) * (nb_of_token + 1));
 
-		if(put_tks_in_struct(env, tokens, nb_of_token, &tokens_struct))
+		if(tks_to_struct(env, tokens, nb_of_token, &tokens_struct))
 			continue ;
 		//print_tokens(nb_of_token, tokens_struct);
 		cmd = NULL;

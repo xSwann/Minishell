@@ -22,13 +22,9 @@
 ==============================*/
 int		count_tokens(char *line);
 void	symbol_handler(int *i, char *line);
-
 void	put_tokens_in_tab(int nb_of_token, char *line, t_tab *tab);
-int     put_tks_in_struct(t_env **env, t_tab *tab, int nb_of_tks, t_token **tks);
-
-
+int		tks_to_struct(t_env **env, t_tab *tab, int nb_of_tks, t_token **tks);
 void	print_tokens(int nb_of_tokens, t_token *tokens);
-
 
 //sanitize_tokens
 void	sanitize_tokens(t_tab *tokens, t_env *env);
@@ -51,7 +47,7 @@ void	find_variable_end(char **str, int *i);
 void	handle_special_cases(char **str, char **to_expand, int start);
 void	set_to_expand(char **to_expand, char **str);
 void	expand_var(char **str, t_env *env);
-int     should_expand(t_tab *tokens, int i, int j, char quote);
+int		should_expand(t_tab *tokens, int i, int j, char quote);
 void	handle_expansion(t_tab *tokens, t_env *env, int i, char quote);
 
 //sanitize_tokens_utils4
@@ -60,8 +56,6 @@ void	strip_quotes(char **p);
 void	copy_before_dollar(char **str, char *new, int *i, int *j);
 void	skip_variable_name(char **str, int *i);
 void	copy_expanded_value(char *expanded, char *new, int *j, int *k);
-
-
 
 /*==============================
 =       UTILITY FUNCTIONS      =

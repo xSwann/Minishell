@@ -1,4 +1,3 @@
-
 #include "../includes/libft.h"
 
 int	ft_isalpha(int a)

@@ -86,7 +86,7 @@ int	validate_tokens(t_env **env, t_token *tokens)
 	return (0);
 }
 
-int	put_tks_in_struct(t_env **env, t_tab *tab, int nb_of_tks, t_token **tks)
+int	tks_to_struct(t_env **env, t_tab *tab, int nb_of_tks, t_token **tks)
 {
 	int	i;
 
