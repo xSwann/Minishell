@@ -1,12 +1,10 @@
 #include "../includes/built_ins.h"
 
-int	auto_complete_path(char **path, t_env **env)
+int	auto_complete_path(char **path, t_env **env, int has_tilde)
 {
 	char	*path_env;
 	char	*new_path;
-	int		has_tilde;
 
-	has_tilde = 0;
 	if (!path || !path[0] || !path[0][0] || (path[0][0] == '~' && ++has_tilde))
 	{
 		path_env = get_env(*env, "HOME");
@@ -15,7 +13,7 @@ int	auto_complete_path(char **path, t_env **env)
 		new_path = ft_strjoin(path_env, path[0] + has_tilde);
 		if (!new_path && fprintf(stderr, "cd: PWD not set\n"))
 			return (free(path_env), 1);
-		return (free(path[0]), path[0] = new_path, new_path = NULL, 0);
+		return (free(path_env), free(path[0]), path[0] = new_path, new_path = NULL, 0);
 	}
 	else if (!ft_strcmp(path[0], "-"))
 	{
@@ -31,7 +29,7 @@ int	auto_complete_path(char **path, t_env **env)
 
 int	no_file_error(char **path, t_env **env)
 {
-	fprintf(stderr, "minishell: cd: %s: No such file or directory\n", path[1]);
+	fprintf(stderr, "minishell: cd: %s: No such file or directory\n", path[0]);
 	return (ft_export(env, "EXIT_CODE=1"), 0);
 }
 
@@ -48,7 +46,7 @@ int	ft_cd(char **path, t_env **env)
 	int		i;
 
 	i = 0;
-	if ((path && path[1] && path[1][0]) || auto_complete_path(path, env))
+	if ((path && path[1] && path[1][0]) || auto_complete_path(path, env, 0))
 		return (too_many_args_error(env));
 	if (chdir(path[0]) != 0)
 		return (no_file_error(path, env));
