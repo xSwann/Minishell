@@ -79,8 +79,8 @@ typedef struct s_pipex
 
 typedef struct s_env
 {
-    char *key;
-    char *value;
-}   t_env;
+	char	*key;
+	char	*value;
+}	t_env;
 
 #endif

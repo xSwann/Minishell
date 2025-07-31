@@ -1,4 +1,3 @@
-
 #include "../includes/parsing.h"
 
 int	arrays_malloc(t_cmd *cmd)
@@ -14,7 +13,8 @@ int	arrays_malloc(t_cmd *cmd)
 		return (free(cmd->args), 1);
 	cmd->counters[1] = 0;
 	if (cmd->counters[2])
-		cmd->outfiles = (char **)ft_calloc(cmd->counters[2] + 1, sizeof(char *));
+		cmd->outfiles = (char **)ft_calloc(cmd->counters[2] + 1, \
+		sizeof(char *));
 	if (cmd->counters[2] && !cmd->outfiles)
 		return (free(cmd->args), free(cmd->infiles), 1);
 	cmd->counters[2] = 0;
@@ -25,28 +25,28 @@ int	arrays_init(t_token *tokens, t_cmd *cmd)
 {
 	int		i;
 
-	i = 0;
-	while (tokens[i].type != END)
+	i = -1;
+	while (tokens[++i].type != END)
 	{
-		if (tokens[i].type == WORD && tokens[i].word && cmd->prev_type == REDIN && !cmd->open_errors)
+		if (tokens[i].type == WORD && tokens[i].word
+			&& cmd->prev_type == REDIN && !cmd->open_errors)
 			cmd->counters[1]++;
-		else if (tokens[i].type == WORD && tokens[i].word &&
-			(cmd->prev_type == REDOUT || cmd->prev_type == APPEND) && !cmd->open_errors)
+		else if ((tokens[i].type == WORD && tokens[i].word
+				&& (cmd->prev_type == REDOUT || cmd->prev_type == APPEND)
+				&& !cmd->open_errors) && ++cmd->counters[2])
 		{
-			cmd->counters[2]++;
-			if (access(tokens[i].word, F_OK) == 0 && access(tokens[i].word, W_OK) == -1)
+			if (access(tokens[i].word, F_OK) == 0
+				&& access(tokens[i].word, W_OK) == -1)
 				cmd->open_errors = 1;
 		}
-		else if (tokens[i].type == WORD && tokens[i].word && !(cmd->prev_type == HEREDOC))
+		else if (tokens[i].type == WORD && tokens[i].word
+			&& !(cmd->prev_type == HEREDOC))
 			cmd->counters[0]++;
 		else if (tokens[i].type == PIPE && cmd->counters[0])
 			break ;
 		cmd->prev_type = tokens[i].type;
-		i++;
 	}
-	if (arrays_malloc(cmd))
-		return (1);
-	return (0);
+	return (arrays_malloc(cmd));
 }
 
 t_cmd	*init_command(t_token *tokens)

@@ -40,7 +40,7 @@ int	status_checker(char *shell_name, t_env **env, char **args, char **path)
 			path_value = ft_strjoin("./", args[0]);
 			if (!path_value)
 				return (CMD_NOT_FOUND);
-			if (access(path_value ,X_OK) == 0)
+			if (access(path_value, X_OK) == 0)
 				return (*path = path_value, CMD_OK);
 		}
 		status = path_parser(args, path, path_value);
