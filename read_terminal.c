@@ -8,16 +8,23 @@
 
 volatile sig_atomic_t g_receive_sig;
 
-char *get_input(void)
+char	*get_input(void)
 {
-	char *line;
+	char	*line;
 
 	if (isatty(STDIN_FILENO))
-		return readline("minishell$ ");
-	line = get_next_line(STDIN_FILENO);
-	if (line && line[ft_strlen(line) - 1] == '\n')
-		line[ft_strlen(line) - 1] = '\0';
-	return line;
+	{
+		line = readline("minishell$ ");
+		if (line && *line)
+			add_history(line);
+	}
+	else
+	{
+		line = get_next_line(STDIN_FILENO);
+		if (line && line[ft_strlen(line) - 1] == '\n')
+			line[ft_strlen(line) - 1] = '\0';
+	}
+	return (line);
 }
 
 void	signalhandler(int signal)
@@ -54,10 +61,8 @@ int	read_terminal(t_env **env, char *shell_name)
 		line = get_input();
 		if (g_receive_sig == 1 && g_receive_sig--)
 			ft_export(env, "EXIT_CODE=130");
-		if (!line && write(1, "exit\n", 5))
+		if (!line)
 			break ;
-		if (*line)
-			add_history(line);
 		nb_of_token = count_tokens(line);
 		tokens = ft_calloc(nb_of_token + 1, sizeof(t_tab));
 		if (!tokens)

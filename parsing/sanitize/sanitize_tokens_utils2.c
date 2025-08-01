@@ -51,6 +51,6 @@ void	find_dollar_position(char **str, int *i)
 
 void	find_variable_end(char **str, int *i)
 {
-	while ((*str)[*i] && ft_isalnum((*str)[*i]))
+	while ((*str)[*i] && (ft_isalnum((*str)[*i])))
 		(*i)++;
 }
