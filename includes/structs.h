@@ -30,9 +30,9 @@ struct	s_cmd
 	t_cmd	*pipe_cmd;
 	t_type	prev_type;
 	int		open_errors;
-	int		here_doc_fd;
+	int		*here_doc_fds;
 	int		open_options;
-	int		counters[3];
+	int		counters[4];
 	char	**outfiles;
 	char	**infiles;
 	char	**args;

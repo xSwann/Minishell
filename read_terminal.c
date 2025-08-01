@@ -1,12 +1,10 @@
+#include "./gnl/get_next_line.h"
 #include "./includes/structs.h"
+#include "./includes/parsing.h"
 #include "./includes/libft.h"
 #include "./includes/exec.h"
-#include "./gnl/get_next_line.h"
-#include <signal.h>
-#include <aio.h>
-#include <termios.h>
 
-volatile sig_atomic_t g_receive_sig;
+volatile sig_atomic_t	g_receive_sig;
 
 char	*get_input(void)
 {
@@ -31,7 +29,7 @@ void	signalhandler(int signal)
 {
 	if (signal == SIGINT)
 	{
-		g_receive_sig = 1;
+		g_receive_sig++;
 		rl_replace_line("", 0);
 		write(1, "\n", 1);
 		rl_on_new_line();
@@ -43,11 +41,13 @@ int	read_terminal(t_env **env, char *shell_name)
 {
 	char	*line;
 	int		nb_of_token;
+	int		sig_backup;
 	t_tab	*tokens;
 	t_token	*tokens_struct;
 	t_cmd	*cmd;
 
 	line = NULL;
+	sig_backup = g_receive_sig;
 	signal(SIGINT, signalhandler);
 	signal(SIGQUIT, SIG_IGN);
 	while (1)
@@ -59,10 +59,13 @@ int	read_terminal(t_env **env, char *shell_name)
 		// }
 		//line = readline("minishell$ ");
 		line = get_input();
-		if (g_receive_sig == 1 && g_receive_sig--)
-			ft_export(env, "EXIT_CODE=130");
 		if (!line)
 			break ;
+		if (g_receive_sig > sig_backup)
+		{
+			g_receive_sig--;
+			ft_export(env, "EXIT_CODE=130");
+		}
 		nb_of_token = count_tokens(line);
 		tokens = ft_calloc(nb_of_token + 1, sizeof(t_tab));
 		if (!tokens)
@@ -73,12 +76,11 @@ int	read_terminal(t_env **env, char *shell_name)
 		if (!tokens_struct)
 			exit(EXIT_FAILURE);
 		ft_memset(tokens_struct, 0, sizeof(t_token) * (nb_of_token + 1));
-
 		if(tks_to_struct(env, tokens, nb_of_token, &tokens_struct))
 			continue ;
 		//print_tokens(nb_of_token, tokens_struct);
 		cmd = NULL;
-		if (cmd_creator(&cmd, tokens_struct))
+		if (cmd_creator(env, &cmd, tokens_struct))
 			exit(EXIT_FAILURE);
 		free(tokens_struct);
 		tokens_struct = NULL;
@@ -90,7 +92,7 @@ int	read_terminal(t_env **env, char *shell_name)
 int	main(int argc, char **argv, char **envp)
 {
 	char	*shell_name;
-	char	*exit_str;
+	char	*tmp_str;
 	int		exit_code;
 	t_env	*env;
 
@@ -103,12 +105,22 @@ int	main(int argc, char **argv, char **envp)
 	init_env(envp, &env);
 	if (!env)
 		return (1);
-	read_terminal(&env, shell_name);
-	exit_str = get_env(env, "EXIT_CODE");
-	if (exit_str)
+	tmp_str = get_env(env, "SHLVL");
+	if (tmp_str)
 	{
-		exit_code = atoi(exit_str);
-		free(exit_str);
+		g_receive_sig = atoi(tmp_str);
+		free(tmp_str);
+		tmp_str = NULL;
+	}
+	if (!g_receive_sig)
+		g_receive_sig = 1;
+	read_terminal(&env, shell_name);
+	tmp_str = get_env(env, "EXIT_CODE");
+	if (tmp_str)
+	{
+		exit_code = atoi(tmp_str);
+		free(tmp_str);
+		tmp_str = NULL;
 	}
 	free_env(&env);
 	exit (exit_code);

@@ -50,6 +50,11 @@ t_cmd	*free_cmd(t_cmd *cmd)
 	cmd->args = free_array(cmd->args);
 	cmd->infiles = free_array(cmd->infiles);
 	cmd->outfiles = free_array(cmd->outfiles);
+	if (cmd->here_doc_fds)
+	{
+		free(cmd->here_doc_fds);
+		cmd->here_doc_fds = NULL;
+	}
 	prev_cmd = cmd;
 	cmd = cmd->pipe_cmd;
 	free(prev_cmd);

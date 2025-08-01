@@ -10,13 +10,17 @@
 # include <sys/wait.h>
 # include <stdbool.h>
 # include "structs.h"
+# include <termios.h>
 # include <stdlib.h>
 # include <string.h>
+# include <signal.h>
 # include <stdio.h>
-# include <fcntl.h> // pour O_CREAT, O_TRUNC, O_WRONLY, etc.
+# include <fcntl.h>
 # include <errno.h>
 # include "libft.h"
+# include <aio.h>
 
+extern volatile sig_atomic_t	g_receive_sig;
 /*==============================
 =     TOKENIZATION FUNCTIONS   =
 ==============================*/
@@ -74,13 +78,14 @@ void	fill_line(char *tab, char *line, int start, int end);
 =      COMMAND_FUNCTIONS      =
 ==============================*/
 
-int		cmd_creator(t_cmd **cmd, t_token *tokens);
+int		cmd_creator(t_env **env, t_cmd **cmd, t_token *tokens);
 void	print_cmd(t_cmd *cmd);
 
 /*==============================
 =    HERE_DOC MANIPULATIONS    =
 ==============================*/
 
-int		ft_here_doc(char *limiter);
+int		ft_here_doc(t_env **env, char *limiter);
+void	signalhandler(int signal);
 
 #endif

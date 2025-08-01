@@ -6,12 +6,14 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:00:26 by flebrun           #+#    #+#             */
-/*   Updated: 2025/07/31 18:36:23 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/08/01 15:48:33 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "../includes/built_ins.h"
 #include "../includes/parsing.h"
 #include <readline/readline.h>
+#include <unistd.h>
 
 int	error_printer(char *str1, char *str2)
 {
@@ -48,31 +50,62 @@ int	close_fd(int *fd)
 	return (0);
 }
 
-int	ft_here_doc(char *limiter)
+void	kill_here_doc(int signal)
 {
-	int		pipe_fd[2];
-	char	*line;
+	if (signal == SIGINT)
+	{
+		g_receive_sig++;
+		rl_replace_line("", 0);
+		rl_on_new_line();
+		rl_redisplay();
+		close(STDIN_FILENO);
+	}
+}
 
-	if (!limiter)
-		return (1);
-	if (pipe(pipe_fd) == -1)
-		return (free(limiter), error_printer("pipe", "error"), -1);
+void	loop_readline(t_env **env, char *limiter, int pipe_fd[2])
+{
+	int		sig_backup;
+	char	*line;
+	
+	sig_backup = g_receive_sig;
 	while (1)
 	{
 		line = readline("> ");
+		if (g_receive_sig > sig_backup && g_receive_sig--)
+		{
+			ft_export(env, "EXIT_CODE=130");
+			close_fd(&pipe_fd[0]);
+			break ;
+		}
 		if (!line || ft_strcmp(line, limiter) == 0)
 			break ;
-		if (*line)
+		if (line[0])
 			add_history(line);
 		write(pipe_fd[1], line, ft_strlen(line));
 		write(pipe_fd[1], "\n", 1);
 		free(line);
 		line = NULL;
 	}
-	free(limiter);
-	limiter = NULL;
 	if (line)
 		free(line);
-	line = NULL;
-	return (line = NULL, close_fd(&pipe_fd[1]), pipe_fd[0]);
+}
+
+int	ft_here_doc(t_env **env, char *limiter)
+{
+	int	pipe_fd[2];
+	int	stdin_backup;
+
+	stdin_backup = dup(STDIN_FILENO);
+	signal(SIGINT, kill_here_doc);
+	if (!limiter)
+		return (1);
+	if (pipe(pipe_fd) == -1)
+		return (free(limiter), error_printer("pipe", "error"), -1);
+	loop_readline(env, limiter, pipe_fd);
+	dup2(stdin_backup, STDIN_FILENO);
+	close(stdin_backup);
+	signal(SIGINT, signalhandler);
+	free(limiter);
+	limiter = NULL;
+	return (close_fd(&pipe_fd[1]), pipe_fd[0]);
 }

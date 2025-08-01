@@ -18,6 +18,12 @@ int	arrays_malloc(t_cmd *cmd)
 	if (cmd->counters[2] && !cmd->outfiles)
 		return (free(cmd->args), free(cmd->infiles), 1);
 	cmd->counters[2] = 0;
+	if (cmd->counters[3])
+		cmd->here_doc_fds = (int *)ft_calloc(cmd->counters[3] + 1, \
+		sizeof(int));
+	if (cmd->counters[3] && !cmd->here_doc_fds)
+		return (free(cmd->args), free(cmd->infiles), free(cmd->outfiles), 1);
+	cmd->counters[3] = 0;
 	return (0);
 }
 
@@ -39,8 +45,9 @@ int	arrays_init(t_token *tokens, t_cmd *cmd)
 				&& access(tokens[i].word, W_OK) == -1)
 				cmd->open_errors = 1;
 		}
-		else if (tokens[i].type == WORD && tokens[i].word
-			&& !(cmd->prev_type == HEREDOC))
+		else if (cmd->prev_type == HEREDOC)
+			cmd->counters[3]++;
+		else if (tokens[i].type == WORD && tokens[i].word)
 			cmd->counters[0]++;
 		else if (tokens[i].type == PIPE && cmd->counters[0])
 			break ;
@@ -58,13 +65,14 @@ t_cmd	*init_command(t_token *tokens)
 		return (NULL);
 	cmd->pipe_cmd = 0;
 	cmd->open_errors = 0;
-	cmd->here_doc_fd = 0;
 	cmd->args = NULL;
 	cmd->infiles = NULL;
 	cmd->outfiles = NULL;
+	cmd->here_doc_fds = NULL;
 	cmd->counters[0] = 0;
 	cmd->counters[1] = 0;
 	cmd->counters[2] = 0;
+	cmd->counters[3] = 0;
 	cmd->prev_type = INVALID;
 	if (arrays_init(tokens, cmd))
 		return (NULL);
@@ -72,12 +80,16 @@ t_cmd	*init_command(t_token *tokens)
 	return (cmd);
 }
 
-int	handle_token(t_cmd *cmd, char *word, t_type curr_type)
+int	handle_token(t_env **env, t_cmd *cmd, char *word, t_type curr_type)
 {
 	if (curr_type == WORD && word)
 	{
 		if (cmd->prev_type == HEREDOC)
-			cmd->here_doc_fd = ft_here_doc(ft_strdup(word));
+		{
+			cmd->here_doc_fds[cmd->counters[3]++] = ft_here_doc(env, ft_strdup(word));
+			if (cmd->here_doc_fds[cmd->counters[3]] <= 0)
+				cmd->counters[3]--;
+		}
 		else if (cmd->prev_type == REDIN)
 			cmd->infiles[cmd->counters[1]++] = ft_strdup(word);
 		else if (cmd->prev_type == REDOUT || cmd->prev_type == APPEND)
@@ -96,7 +108,7 @@ int	handle_token(t_cmd *cmd, char *word, t_type curr_type)
 	return (free(word), word = NULL, 0);
 }
 
-int	cmd_creator(t_cmd **cmd, t_token *tokens)
+int	cmd_creator(t_env **env, t_cmd **cmd, t_token *tokens)
 {
 	t_cmd	*curr_cmd;
 	int		i;
@@ -118,7 +130,7 @@ int	cmd_creator(t_cmd **cmd, t_token *tokens)
 			curr_cmd = curr_cmd->pipe_cmd;
 			curr_cmd->prev_type = tokens[i].type;
 		}
-		handle_token(curr_cmd, tokens[i].word, tokens[i].type);
+		handle_token(env, curr_cmd, tokens[i].word, tokens[i].type);
 		curr_cmd->prev_type = tokens[i++].type;
 	}
 	return (0);

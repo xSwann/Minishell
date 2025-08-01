@@ -1,6 +1,5 @@
 #include "../includes/exec.h"
 #include <signal.h>
-#include <signal.h>
 
 void	executor(char *shell_name, t_env **env, char **args, char *path)
 {
@@ -36,8 +35,6 @@ int	child_process(t_env **envp, t_pipex *px)
 	char	**args_ptr;
 	int		i;
 
-	signal(SIGQUIT, signalhandler);
-	signal(SIGINT, SIG_DFL);
 	rl_clear_history();
 	free(px->pids);
 	if (manage_infile(px, STDIN_FILENO) || manage_outfile(px, STDOUT_FILENO))
