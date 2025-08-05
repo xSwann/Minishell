@@ -6,7 +6,7 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:00:26 by flebrun           #+#    #+#             */
-/*   Updated: 2025/08/05 16:06:13 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/08/05 18:16:53 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,6 +98,22 @@ int	here_doc_loop(char *limiter, int pipe_fd[2])
 	return (line = NULL, close_fd(&pipe_fd[1]), exit(g_receive_sig == 3), 1);
 }
 
+void	free_gc(t_gc *gc)
+{
+	while (gc->tokens[gc->actual_i].word)
+	{
+		free(gc->tokens[gc->actual_i].word);
+		gc->tokens[gc->actual_i++].word = NULL;
+	}
+	free(gc->tokens);
+	gc->tokens = NULL;
+	while (gc->first_cmd)
+		gc->first_cmd = free_cmd(gc->first_cmd);
+	free_env(gc->env);
+	rl_clear_history();
+	gc->env = NULL;
+}
+
 int	ft_here_doc(t_gc *gc)
 {
 	int		pipe_fd[2];
@@ -110,15 +126,7 @@ int	ft_here_doc(t_gc *gc)
 	if (pid == 0)
 	{
 		limiter = ft_strdup(gc->tokens[gc->actual_i].word);
-		while (gc->tokens[gc->actual_i].word)
-		{
-			free(gc->tokens[gc->actual_i].word);
-			gc->tokens[gc->actual_i++].word = NULL;
-		}
-		while (gc->first_cmd)
-			gc->first_cmd = free_cmd(gc->first_cmd);
-		free(gc->tokens);
-		free_env(gc->env);
+		free_gc(gc);
 		here_doc_loop(limiter, pipe_fd);
 		return (exit (1), 1);
 	}

@@ -92,8 +92,8 @@ int	handle_token(t_cmd *cmd, t_gc *gc)
 	{
 		if (cmd->prev_type == HEREDOC)
 		{
-			cmd->here_doc_fds[cmd->counters[3]++] = ft_here_doc(gc);
-			if (cmd->here_doc_fds[cmd->counters[3]] <= 0)
+			cmd->here_doc_fds[cmd->counters[3]] = ft_here_doc(gc);
+			if (cmd->here_doc_fds[cmd->counters[3]++] <= 0)
 				cmd->counters[3]--;
 		}
 		else if (cmd->prev_type == REDIN)

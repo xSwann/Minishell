@@ -71,31 +71,36 @@ int	ft_built_ins(t_env **envp, t_pipex *px, int i)
 		close_fd(&stdout_backup);
 		return (ft_export(envp, "EXIT_CODE=1"), 1);
 	}
-	call_built_ins(envp, px->cmd->args, i);
+	if (i < 6)
+		call_built_ins(envp, px->cmd->args, i);
 	if (dup2(stdin_backup, STDIN_FILENO) == -1
 		|| dup2(stdout_backup, STDOUT_FILENO) == -1
 		|| close_fd(&stdin_backup) || close_fd(&stdout_backup))
 		return (error_printer("dup2", "restore failed"));
+	if (i == 6)
+		return (exit_code_exit(envp, ft_exit_without_childs(envp, px->cmd->args + 1)), 1);
 	return (0);
 }
 
 int	pipex(t_env **envp, t_pipex *px)
 {
 	int	pid;
+	int	exit_nb;
 
+	exit_nb = 0;
 	if (pipe(px->pipe_fd) == -1)
 		return (perror("pipe: error"), 1);
 	pid = check_built_ins(px->cmd->args);
 	if (px->n_pids == 0 && !px->cmd->pipe_cmd
-		&& px->cmd->args && px->cmd->args[0] && (pid > 0 && pid < 6))
-		ft_built_ins(envp, px, pid);
+		&& px->cmd->args && px->cmd->args[0] && (pid > 0 && pid < 7))
+		exit_nb = ft_built_ins(envp, px, pid);
 	else
 	{
 		pid = fork();
 		if (pid == 0)
 		{
 			child_process(envp, px);
-			exit (EXIT_FAILURE);
+			exit(1);
 		}
 		else if (pid < 0)
 			return (close_pipe(px), error_printer("fork", "error"), 1);
@@ -104,7 +109,7 @@ int	pipex(t_env **envp, t_pipex *px)
 	if (close_fd(&px->pipe_fd[1]) == -1
 		|| (px->infile > 0 && close_fd(&px->infile) == -1))
 		return (-1);
-	return (px->infile = px->pipe_fd[0], px->pipe_fd[0] = -1, 0);
+	return (px->infile = px->pipe_fd[0], px->pipe_fd[0] = -1, exit_nb);
 }
 
 int	cmd_executor(char *shell_name, t_env **envp, t_cmd **cmd)
@@ -112,6 +117,7 @@ int	cmd_executor(char *shell_name, t_env **envp, t_cmd **cmd)
 	t_pipex	px;
 	int		exit_status;
 
+	exit_status = 0;
 	g_receive_sig = 4;
 	if (!envp || !(*cmd))
 		return (1);
@@ -119,14 +125,16 @@ int	cmd_executor(char *shell_name, t_env **envp, t_cmd **cmd)
 		return (1);
 	while (px.cmd)
 	{
-		if (pipex(envp, &px))
-			return (close_pipe(&px), 1);
+		if (pipex(envp, &px) && ++exit_status)
+		{
+			close_pipe(&px);
+			break ;
+		}
 		if (!px.cmd->pipe_cmd)
 			break ;
 		if (update_px(&px))
 			return (1);
 	}
-	exit_status = 0;
 	if (px.n_pids)
 		exit_status = wait_execs(envp, &px, -1, 0);
 	free_cmd(px.cmd);

@@ -35,7 +35,7 @@ void	sanitize_tokens(t_tab *tokens, t_env *env);
 
 //sanitize_tokens_utils1
 void	replace_expanded_value(char **str, char *expanded, int len);
-void	copy_before_dollar_erase(char **str, char *new, int *i, int *j);
+void	copy_before_dollar_erase(char **str, char *new_str, int *i, int *j);
 void	skip_variable_erase(char **str, int *i);
 void	erase_expand(char **str, int len);
 void	skip_leading_spaces(char *str, int *i);
@@ -55,11 +55,11 @@ int		should_expand(t_tab *tokens, int i, int j, char quote);
 void	handle_expansion(t_tab *tokens, t_env *env, int i, char quote);
 
 //sanitize_tokens_utils4
-void	copy_without_quotes(char *old, char *new, size_t len);
+void	copy_without_quotes(char *old, char *new_str, size_t len);
 void	strip_quotes(char **p);
-void	copy_before_dollar(char **str, char *new, int *i, int *j);
+void	copy_before_dollar(char **str, char *new_str, int *i, int *j);
 void	skip_variable_name(char **str, int *i);
-void	copy_expanded_value(char *expanded, char *new, int *j, int *k);
+void	copy_expanded_value(char *expanded, char *new_str, int *j, int *k);
 
 /*==============================
 =       UTILITY FUNCTIONS      =

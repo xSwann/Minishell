@@ -1,5 +1,4 @@
 #include "../../includes/parsing.h"
-#include "../../includes/built_ins.h"
 
 void	handle_quote_start(t_tab *tokens, int i, int *j, char *quote)
 {

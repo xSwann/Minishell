@@ -1,5 +1,4 @@
 #include "../../includes/parsing.h"
-#include "../../includes/built_ins.h"
 
 void	copy_word_characters(char *str, int *i, int *j, int *in_word)
 {

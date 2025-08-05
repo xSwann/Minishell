@@ -72,6 +72,7 @@ EXEC_SRCS = \
 	$(EXEC_DIR)path_modifiers.c \
 	$(EXEC_DIR)free_functions.c \
 	$(EXEC_DIR)command_executor.c \
+	$(EXEC_DIR)variables_modifiers.c \
 	$(EXEC_DIR)structure_manipulations.c
 
 SRCS	= \

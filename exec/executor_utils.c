@@ -6,6 +6,7 @@ int	wait_execs(t_env **envp, t_pipex *px, int i, int status)
 	char	*status_str;
 	char	*exit_str;
 
+	exit_code = 0;
 	while (++i < px->n_pids && px->pids[i])
 	{
 		if (px->pids[i] <= 0)

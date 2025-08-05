@@ -28,7 +28,7 @@ char	**free_array(char **array)
 {
 	int	i;
 
-	if (!array || !array[0])
+	if (!array)
 		return (NULL);
 	i = 0;
 	while (array[i])
@@ -43,7 +43,9 @@ char	**free_array(char **array)
 t_cmd	*free_cmd(t_cmd *cmd)
 {
 	t_cmd	*prev_cmd;
+	int		i;
 
+	i = 0;
 	prev_cmd = NULL;
 	if (!cmd)
 		return (NULL);
@@ -52,6 +54,8 @@ t_cmd	*free_cmd(t_cmd *cmd)
 	cmd->outfiles = free_array(cmd->outfiles);
 	if (cmd->here_doc_fds)
 	{
+		while (cmd->here_doc_fds[i])
+			close_fd(&cmd->here_doc_fds[i++]);
 		free(cmd->here_doc_fds);
 		cmd->here_doc_fds = NULL;
 	}
