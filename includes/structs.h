@@ -96,4 +96,16 @@ typedef struct s_token_data
 	char	*quote;
 }	t_token_data;
 
+/*==============================
+=         GC STRUCTURE         =
+==============================*/
+
+typedef struct	s_gc
+{
+	t_cmd		*first_cmd;
+	t_token		*tokens;
+	t_env		**env;
+	int			actual_i;
+}	t_gc;
+
 #endif

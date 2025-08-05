@@ -1,5 +1,4 @@
 #include "../includes/exec.h"
-#include <signal.h>
 
 void	executor(char *shell_name, t_env **env, char **args, char *path)
 {
@@ -35,6 +34,7 @@ int	child_process(t_env **envp, t_pipex *px)
 	char	**args_ptr;
 	int		i;
 
+	signal(SIGQUIT, SIG_DFL);
 	rl_clear_history();
 	free(px->pids);
 	if (manage_infile(px, STDIN_FILENO) || manage_outfile(px, STDOUT_FILENO))
@@ -112,6 +112,7 @@ int	cmd_executor(char *shell_name, t_env **envp, t_cmd **cmd)
 	t_pipex	px;
 	int		exit_status;
 
+	g_receive_sig = 4;
 	if (!envp || !(*cmd))
 		return (1);
 	if (init_px(shell_name, cmd, &px))
@@ -131,5 +132,8 @@ int	cmd_executor(char *shell_name, t_env **envp, t_cmd **cmd)
 	free_cmd(px.cmd);
 	close_pipe(&px);
 	close_fd(&px.infile);
+	if (g_receive_sig == 5)
+		ft_export(envp, "EXIT_CODE=130");
+	g_receive_sig = 0;
 	return (exit_status);
 }

@@ -85,7 +85,7 @@ void	print_cmd(t_cmd *cmd);
 =    HERE_DOC MANIPULATIONS    =
 ==============================*/
 
-int		ft_here_doc(t_env **env, char *limiter);
+int		ft_here_doc(t_gc *gc);
 void	signalhandler(int signal);
 
 #endif

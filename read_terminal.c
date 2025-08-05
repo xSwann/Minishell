@@ -3,6 +3,7 @@
 #include "./includes/parsing.h"
 #include "./includes/libft.h"
 #include "./includes/exec.h"
+#include <unistd.h>
 
 volatile sig_atomic_t	g_receive_sig;
 
@@ -29,11 +30,30 @@ void	signalhandler(int signal)
 {
 	if (signal == SIGINT)
 	{
-		g_receive_sig++;
-		rl_replace_line("", 0);
-		write(1, "\n", 1);
-		rl_on_new_line();
-		rl_redisplay();
+		if (g_receive_sig == 0 || g_receive_sig == 1)
+		{
+			g_receive_sig = 1;
+			rl_replace_line("", 0);
+			write(1, "\n", 1);
+			rl_on_new_line();
+			rl_redisplay();
+		}
+		if (g_receive_sig == 2 || g_receive_sig == 3)
+		{
+			int nullfd = open("/dev/null", O_RDONLY);
+			dup2(nullfd, STDIN_FILENO);
+			close(nullfd);
+			write(1, "\n", 1);
+			rl_replace_line("", 0);
+			rl_on_new_line();
+			rl_redisplay();
+			g_receive_sig = 3;
+		}
+		if (g_receive_sig == 4)
+		{
+			g_receive_sig = 5;
+			write(1, "\n", 1);
+		}
 	}
 }
 
@@ -41,13 +61,11 @@ int	read_terminal(t_env **env, char *shell_name)
 {
 	char	*line;
 	int		nb_of_token;
-	int		sig_backup;
 	t_tab	*tokens;
 	t_token	*tokens_struct;
 	t_cmd	*cmd;
 
 	line = NULL;
-	sig_backup = g_receive_sig;
 	signal(SIGINT, signalhandler);
 	signal(SIGQUIT, SIG_IGN);
 	while (1)
@@ -61,9 +79,8 @@ int	read_terminal(t_env **env, char *shell_name)
 		line = get_input();
 		if (!line)
 			break ;
-		if (g_receive_sig > sig_backup)
+		if (g_receive_sig == 1 || g_receive_sig == -1)
 		{
-			g_receive_sig--;
 			ft_export(env, "EXIT_CODE=130");
 		}
 		nb_of_token = count_tokens(line);
@@ -105,15 +122,7 @@ int	main(int argc, char **argv, char **envp)
 	init_env(envp, &env);
 	if (!env)
 		return (1);
-	tmp_str = get_env(env, "SHLVL");
-	if (tmp_str)
-	{
-		g_receive_sig = atoi(tmp_str);
-		free(tmp_str);
-		tmp_str = NULL;
-	}
-	if (!g_receive_sig)
-		g_receive_sig = 1;
+	g_receive_sig = 0;
 	read_terminal(&env, shell_name);
 	tmp_str = get_env(env, "EXIT_CODE");
 	if (tmp_str)

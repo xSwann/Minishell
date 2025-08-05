@@ -14,6 +14,11 @@ int	wait_execs(t_env **envp, t_pipex *px, int i, int status)
 			error_printer("waitpid failed", NULL);
 		if (WIFEXITED(status))
 			exit_code = WEXITSTATUS(status);
+		if (WIFSIGNALED(status))
+		{
+			if (WTERMSIG(status) == SIGQUIT)
+				write(2, "Quit (core dumped)\n", 19);
+		}
 	}
 	free(px->pids);
 	status_str = ft_itoa(exit_code);

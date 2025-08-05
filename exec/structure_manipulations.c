@@ -118,7 +118,7 @@ int	update_px(t_pipex *px)
 	px->cmd = free_cmd(px->cmd);
 	if (px->outfile && close_fd(&px->outfile))
 		return (error_printer("pipe", "pipe_fd[1]"), 1);
-	if (px->cmd->here_doc_fds[0] && px->cmd->here_doc_fds[0]
+	if (px->cmd->here_doc_fds && px->cmd->here_doc_fds[0] && px->cmd->here_doc_fds[0]
 		&& px->cmd->here_doc_fds[0] > 0)
 	{
 		while (px->cmd->here_doc_fds[i + 1] && px->cmd->here_doc_fds[i + 1] > 0)

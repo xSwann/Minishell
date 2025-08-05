@@ -56,7 +56,7 @@ int	arrays_init(t_token *tokens, t_cmd *cmd)
 	return (arrays_malloc(cmd));
 }
 
-t_cmd	*init_command(t_token *tokens)
+t_cmd	*init_command(t_gc *cmd_gc, t_env **env, t_token *tokens)
 {
 	t_cmd	*cmd;
 
@@ -77,61 +77,67 @@ t_cmd	*init_command(t_token *tokens)
 	if (arrays_init(tokens, cmd))
 		return (NULL);
 	cmd->open_options = O_WRONLY | O_CREAT | O_TRUNC;
+	if (cmd_gc->actual_i == 0)
+	{
+		cmd_gc->tokens = tokens;
+		cmd_gc->first_cmd = cmd;
+		cmd_gc->env = env;
+	}
 	return (cmd);
 }
 
-int	handle_token(t_env **env, t_cmd *cmd, char *word, t_type curr_type)
+int	handle_token(t_cmd *cmd, t_gc *gc)
 {
-	if (curr_type == WORD && word)
+	if (gc->tokens[gc->actual_i].type == WORD && gc->tokens[gc->actual_i].word)
 	{
 		if (cmd->prev_type == HEREDOC)
 		{
-			cmd->here_doc_fds[cmd->counters[3]++] = ft_here_doc(env, ft_strdup(word));
+			cmd->here_doc_fds[cmd->counters[3]++] = ft_here_doc(gc);
 			if (cmd->here_doc_fds[cmd->counters[3]] <= 0)
 				cmd->counters[3]--;
 		}
 		else if (cmd->prev_type == REDIN)
-			cmd->infiles[cmd->counters[1]++] = ft_strdup(word);
+			cmd->infiles[cmd->counters[1]++] = ft_strdup(gc->tokens[gc->actual_i].word);
 		else if (cmd->prev_type == REDOUT || cmd->prev_type == APPEND)
 		{
-			cmd->outfiles[cmd->counters[2]++] = ft_strdup(word);
-			if (access(word, F_OK) == 0 && access(word, W_OK) == -1)
-				return (free(word), word = NULL, 1);
+			cmd->outfiles[cmd->counters[2]++] = ft_strdup(gc->tokens[gc->actual_i].word);
+			if (access(gc->tokens[gc->actual_i].word, F_OK) == 0 && access(gc->tokens[gc->actual_i].word, W_OK) == -1)
+				return (free(gc->tokens[gc->actual_i].word), gc->tokens[gc->actual_i].word = NULL, 1);
 		}
 		else
-			cmd->args[cmd->counters[0]++] = ft_strdup(word);
+			cmd->args[cmd->counters[0]++] = ft_strdup(gc->tokens[gc->actual_i].word);
 	}
 	if (cmd->prev_type == REDOUT)
 		cmd->open_options = O_WRONLY | O_CREAT | O_TRUNC;
 	if (cmd->prev_type == APPEND)
 		cmd->open_options = O_WRONLY | O_CREAT | O_APPEND;
-	return (free(word), word = NULL, 0);
+	return (free(gc->tokens[gc->actual_i].word), gc->tokens[gc->actual_i].word = NULL, 0);
 }
 
 int	cmd_creator(t_env **env, t_cmd **cmd, t_token *tokens)
 {
+	t_gc	cmd_gc;
 	t_cmd	*curr_cmd;
-	int		i;
 
-	i = 0;
-	if (!tokens || tokens[i].type == END)
+	cmd_gc.actual_i = 0;
+	if (!tokens || tokens[0].type == END)
 		return ((*cmd) = NULL, 0);
-	*cmd = init_command(tokens);
+	*cmd = init_command(&cmd_gc, env, tokens);
 	if (!*cmd)
 		return (1);
 	curr_cmd = *cmd;
-	while (tokens[i].type != END)
+	while (tokens[cmd_gc.actual_i].type != END)
 	{
 		if (curr_cmd->prev_type == PIPE)
 		{
-			curr_cmd->pipe_cmd = init_command(tokens + i);
+			curr_cmd->pipe_cmd = init_command(&cmd_gc, env, tokens + cmd_gc.actual_i);
 			if (!curr_cmd->pipe_cmd)
 				return (1);
 			curr_cmd = curr_cmd->pipe_cmd;
-			curr_cmd->prev_type = tokens[i].type;
+			curr_cmd->prev_type = tokens[cmd_gc.actual_i].type;
 		}
-		handle_token(env, curr_cmd, tokens[i].word, tokens[i].type);
-		curr_cmd->prev_type = tokens[i++].type;
+		handle_token(curr_cmd, &cmd_gc);
+		curr_cmd->prev_type = tokens[cmd_gc.actual_i++].type;
 	}
 	return (0);
 }

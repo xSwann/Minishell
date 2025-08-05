@@ -6,14 +6,14 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:00:26 by flebrun           #+#    #+#             */
-/*   Updated: 2025/08/01 15:48:33 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/08/05 16:06:13 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/built_ins.h"
 #include "../includes/parsing.h"
+#include "../includes/exec.h"
 #include <readline/readline.h>
-#include <unistd.h>
 
 int	error_printer(char *str1, char *str2)
 {
@@ -50,62 +50,83 @@ int	close_fd(int *fd)
 	return (0);
 }
 
-void	kill_here_doc(int signal)
+int	here_doc_wait(t_env **envp, int pid)
 {
-	if (signal == SIGINT)
-	{
-		g_receive_sig++;
-		rl_replace_line("", 0);
-		rl_on_new_line();
-		rl_redisplay();
-		close(STDIN_FILENO);
-	}
+	int		status;
+	int		exit_code;
+	char	*status_str;
+	char	*exit_str;
+
+	exit_code = 0;
+	if (waitpid(pid, &status, 0) == -1)
+		error_printer("waitpid failed", NULL);
+	if (WIFEXITED(status))
+		exit_code = WEXITSTATUS(status);
+	status_str = ft_itoa(exit_code);
+	if (!status_str)
+		return (exit_code);
+	exit_str = ft_strjoin("EXIT_CODE=", status_str);
+	free(status_str);
+	if (!exit_str)
+		return (exit_code);
+	return (ft_export(envp, exit_str), free(exit_str), exit_code);
 }
 
-void	loop_readline(t_env **env, char *limiter, int pipe_fd[2])
+int	here_doc_loop(char *limiter, int pipe_fd[2])
 {
-	int		sig_backup;
 	char	*line;
-	
-	sig_backup = g_receive_sig;
+
+	g_receive_sig = 2;
+	close_fd(&pipe_fd[0]);
 	while (1)
 	{
 		line = readline("> ");
-		if (g_receive_sig > sig_backup && g_receive_sig--)
-		{
-			ft_export(env, "EXIT_CODE=130");
-			close_fd(&pipe_fd[0]);
+		if (!line || g_receive_sig == 3 || !ft_strcmp(line, limiter))
 			break ;
-		}
-		if (!line || ft_strcmp(line, limiter) == 0)
-			break ;
-		if (line[0])
+		if (*line)
 			add_history(line);
 		write(pipe_fd[1], line, ft_strlen(line));
 		write(pipe_fd[1], "\n", 1);
 		free(line);
 		line = NULL;
 	}
-	if (line)
-		free(line);
-}
-
-int	ft_here_doc(t_env **env, char *limiter)
-{
-	int	pipe_fd[2];
-	int	stdin_backup;
-
-	stdin_backup = dup(STDIN_FILENO);
-	signal(SIGINT, kill_here_doc);
-	if (!limiter)
-		return (1);
-	if (pipe(pipe_fd) == -1)
-		return (free(limiter), error_printer("pipe", "error"), -1);
-	loop_readline(env, limiter, pipe_fd);
-	dup2(stdin_backup, STDIN_FILENO);
-	close(stdin_backup);
-	signal(SIGINT, signalhandler);
+	rl_clear_history();
 	free(limiter);
 	limiter = NULL;
+	if (line)
+		free(line);
+	return (line = NULL, close_fd(&pipe_fd[1]), exit(g_receive_sig == 3), 1);
+}
+
+int	ft_here_doc(t_gc *gc)
+{
+	int		pipe_fd[2];
+	int		pid;
+	char	*limiter;
+
+	if (pipe(pipe_fd) == -1)
+		return (error_printer("pipe", "error"), -1);
+	pid = fork();
+	if (pid == 0)
+	{
+		limiter = ft_strdup(gc->tokens[gc->actual_i].word);
+		while (gc->tokens[gc->actual_i].word)
+		{
+			free(gc->tokens[gc->actual_i].word);
+			gc->tokens[gc->actual_i++].word = NULL;
+		}
+		while (gc->first_cmd)
+			gc->first_cmd = free_cmd(gc->first_cmd);
+		free(gc->tokens);
+		free_env(gc->env);
+		here_doc_loop(limiter, pipe_fd);
+		return (exit (1), 1);
+	}
+	else if (pid < 0)
+		return (close_fd(&pipe_fd[0]), close_fd(&pipe_fd[1]), error_printer("fork", "error"), 1);
+	signal(SIGINT, SIG_IGN);
+	if (here_doc_wait(gc->env, pid))
+		close_fd(&pipe_fd[0]);
+	signal(SIGINT, signalhandler);
 	return (close_fd(&pipe_fd[1]), pipe_fd[0]);
 }
