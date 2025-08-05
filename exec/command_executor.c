@@ -125,8 +125,9 @@ int	cmd_executor(char *shell_name, t_env **envp, t_cmd **cmd)
 		return (1);
 	while (px.cmd)
 	{
-		if (pipex(envp, &px) && ++exit_status)
+		if (pipex(envp, &px))
 		{
+			exit_status = 1;
 			close_pipe(&px);
 			break ;
 		}

@@ -73,7 +73,7 @@ int	read_terminal(t_env **env, char *shell_name)
 		// }
 		//line = readline("minishell$ ");
 		line = get_input();
-		if (!line && write(1, "exit\n", 5))
+		if (!line/* && write(1, "exit\n", 5)*/)
 			break ;
 		if (g_receive_sig == 1 || g_receive_sig == 5)
 		{
