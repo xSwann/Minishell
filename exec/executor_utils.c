@@ -97,7 +97,7 @@ int	call_built_ins(t_env **envp, char **cmd, int i)
 	else if (i == 5)
 		return (unset_loop(envp, cmd + 1));
 	else if (i == 6)
-		return (ft_exit(envp, cmd + 1), 1);
+		return (ft_exit(envp, cmd + 1, 0), 1);
 	else if (i == 7)
 		return (ft_echo(cmd + 1, envp));
 	return (-1);

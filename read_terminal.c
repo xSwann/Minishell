@@ -60,18 +60,17 @@ int	read_terminal(t_env **env, char *shell_name)
 	t_tab	*tokens;
 	t_token	*tokens_struct;
 	t_cmd	*cmd;
+	char *exit_string;
+	char *exit_string2;
 
+	int i;
+
+	i = 1;
 	line = NULL;
 	signal(SIGINT, signalhandler);
 	signal(SIGQUIT, SIG_IGN);
 	while (1)
 	{
-		// if (line)
-		// {
-		// 	free(line);
-		// 	line = NULL;
-		// }
-		//line = readline("minishell$ ");
 		line = get_input();
 		if (!line/* && write(1, "exit\n", 5)*/)
 			break ;
@@ -98,8 +97,22 @@ int	read_terminal(t_env **env, char *shell_name)
 			break ;
 		free(tokens_struct);
 		tokens_struct = NULL;
+		if (cmd && cmd->args
+     		&& cmd->args[0]
+     		&& ft_strcmp(cmd->args[0], "exit") == 0)
+		{
+			exit_string = ft_strdup(cmd->args[1]);
+			exit_string2 = ft_strdup(cmd->args[2]);
+			if (exit_string2)
+				i = 0;
+			free_cmd(cmd);
+        	ft_exit(env, &exit_string, i);
+		}
 		if (cmd_executor(shell_name, env, &cmd))
-			break ;
+		{
+			g_receive_sig = 0;
+			continue ;
+		}
 	}
 	return (rl_clear_history(), 0);
 }

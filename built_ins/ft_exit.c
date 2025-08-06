@@ -63,7 +63,7 @@ int	ft_exit_without_childs(t_env **env, char **args)
 	return (arg_n);
 }
 
-void	ft_exit(t_env **env, char **args)
+void	ft_exit(t_env **env, char **args, int is_one)
 {
 	char	*join;
 	int		arg_n;
@@ -81,9 +81,9 @@ void	ft_exit(t_env **env, char **args)
 		return (free(join), join = NULL, free_env(env), exit(arg_n));
 	}
 	free_env(env);
-	if (!args[0][0] || !str_is_num(args[0] + is_negative))
+	if ((!args[0][0] || !str_is_num(args[0] + is_negative)))
 		return (exit(exit_printer2(args)));
-	if (args[1] && args[1][0])
+	if (is_one == 0 && (args[1] && args[1][0]))
 		return (error_printer("exit", "too many arguments"), exit(1));
 	if (args[0][0] && args[0][0] == '-')
 		is_negative = 1;

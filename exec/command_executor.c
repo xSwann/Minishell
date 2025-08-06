@@ -53,7 +53,7 @@ int	child_process(t_env **envp, t_pipex *px)
 	else if (args_ptr && args_ptr[0])
 		executor(px->shell_name, envp, args_ptr, NULL);
 	free_array(args_ptr);
-	return (close_fd(&px->outfile), ft_exit(envp, NULL), exit(1), 1);
+	return (close_fd(&px->outfile), ft_exit(envp, NULL, 0), exit(1), 1);
 }
 
 int	ft_built_ins(t_env **envp, t_pipex *px, int i)

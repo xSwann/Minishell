@@ -3,7 +3,7 @@
 int	arrays_malloc(t_cmd *cmd)
 {
 	if (cmd->counters[0])
-		cmd->args = (char **)ft_calloc(cmd->counters[0] + 1, sizeof(char *));
+		cmd->args = (char **)ft_calloc(cmd->counters[0] + 2, sizeof(char *));
 	if (cmd->counters[0] && !cmd->args)
 		return (1);
 	cmd->counters[0] = 0;
