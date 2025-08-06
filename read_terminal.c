@@ -46,7 +46,7 @@ int	launch_command(t_env **env, char *shell_name, t_cmd *cmd)
 
 void	dd(t_env **env)
 {
-	if (g_receive_sig == 1 || g_receive_sig == 5)
+	if (g_receive_sig == 1)
 	{
 		g_receive_sig = 0;
 		ft_export(env, "EXIT_CODE=130");

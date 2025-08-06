@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   command_executor.c                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/06 13:54:08 by flebrun           #+#    #+#             */
+/*   Updated: 2025/08/06 14:01:13 by flebrun          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../includes/exec.h"
 
 void	executor(char *shell_name, t_env **env, char **args, char *path)
@@ -78,16 +90,13 @@ int	ft_built_ins(t_env **envp, t_pipex *px, int i)
 		|| close_fd(&stdin_backup) || close_fd(&stdout_backup))
 		return (error_printer("dup2", "restore failed"));
 	if (i == 6)
-		return (exit_code_exit(envp, ft_exit_without_childs(envp, px->cmd->args + 1)), 1);
+		return (exit_code_exit(envp, \
+			ft_exit_without_childs(envp, px->cmd->args + 1)), 1);
 	return (0);
 }
 
-int	pipex(t_env **envp, t_pipex *px)
+int	pipex(t_env **envp, t_pipex *px, int pid, int exit_nb)
 {
-	int	pid;
-	int	exit_nb;
-
-	exit_nb = 0;
 	if (pipe(px->pipe_fd) == -1)
 		return (perror("pipe: error"), 1);
 	pid = check_built_ins(px->cmd->args);
@@ -118,31 +127,25 @@ int	cmd_executor(char *shell_name, t_env **envp, t_cmd **cmd)
 	int		exit_status;
 
 	exit_status = 0;
-	g_receive_sig = 4;
 	if (!envp || !(*cmd))
 		return (1);
 	if (init_px(shell_name, cmd, &px))
 		return (1);
 	while (px.cmd)
 	{
-		if (pipex(envp, &px))
+		g_receive_sig = 4;
+		if (pipex(envp, &px, 0, 0))
 		{
 			exit_status = 1;
 			close_pipe(&px);
 			break ;
 		}
-		if (!px.cmd->pipe_cmd)
+		if (!px.cmd->pipe_cmd || update_px(&px))
 			break ;
-		if (update_px(&px))
-			return (1);
 	}
 	if (px.n_pids)
 		exit_status = wait_execs(envp, &px, -1, 0);
 	free_cmd(px.cmd);
 	close_pipe(&px);
-	close_fd(&px.infile);
-	if (g_receive_sig == 5)
-		ft_export(envp, "EXIT_CODE=130");
-	g_receive_sig = 0;
-	return (exit_status);
+	return (close_fd(&px.infile), g_receive_sig = 0, exit_status);
 }
