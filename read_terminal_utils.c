@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   read_terminal_utils.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: slatrech <slatrech@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/06 14:41:47 by slatrech          #+#    #+#             */
+/*   Updated: 2025/08/06 14:41:53 by slatrech         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "./gnl/get_next_line.h"
 #include "./includes/structs.h"
 #include "./includes/parsing.h"
@@ -47,8 +59,6 @@ void	signalhandler(int signal)
 			rl_on_new_line();
 			return (rl_redisplay(), g_receive_sig = 3, (void)0);
 		}
-		if (g_receive_sig == 4 && write(1, "\n", 1))
-			return (g_receive_sig = 5, (void)0);
 	}
 }
 

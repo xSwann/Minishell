@@ -1,9 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   read_terminal.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: slatrech <slatrech@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/06 14:41:49 by slatrech          #+#    #+#             */
+/*   Updated: 2025/08/06 14:45:40 by slatrech         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "./gnl/get_next_line.h"
 #include "./includes/structs.h"
 #include "./includes/parsing.h"
 #include "./includes/libft.h"
 #include "./includes/exec.h"
-#include <unistd.h>
 
 volatile sig_atomic_t	g_receive_sig;
 
@@ -65,7 +76,7 @@ int	read_terminal(t_env **env, char *shell_name)
 	while (1)
 	{
 		line = get_input();
-		if (!line/* && write(1, "exit\n", 5)*/)
+		if (!line/* && write(1, "exit\n", 5) */)
 			break ;
 		dd(env);
 		tokens_struct = create_tokens(line, env);
