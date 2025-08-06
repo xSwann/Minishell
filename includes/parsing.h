@@ -88,4 +88,12 @@ void	print_cmd(t_cmd *cmd);
 int		ft_here_doc(t_gc *gc);
 void	signalhandler(int signal);
 
+/*==============================
+=        READ_TERMINAL         =
+==============================*/
+
+char	*get_input(void);
+void	signalhandler(int signal);
+void	exit_case(t_cmd *cmd, t_env **env);
+
 #endif

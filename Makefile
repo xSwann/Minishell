@@ -76,7 +76,8 @@ EXEC_SRCS = \
 	$(EXEC_DIR)structure_manipulations.c
 
 SRCS	= \
-	read_terminal.c
+	read_terminal.c \
+	read_terminal_utils.c
 
 MAIN_OBJS = $(SRCS:.c=.o)
 GNL_OBJS = $(GNL_SRCS:.c=.o)
