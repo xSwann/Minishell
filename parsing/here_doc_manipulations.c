@@ -6,7 +6,7 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:00:26 by flebrun           #+#    #+#             */
-/*   Updated: 2025/08/06 13:56:34 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/08/06 15:24:17 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ int	error_printer(char *str1, char *str2)
 	write(2, "minishell: ", 11);
 	if (str1 && *str1)
 	{
-		write(2, str1, strlen(str1));
+		write(2, str1, ft_strlen(str1));
 		write(2, ": ", 2);
 	}
 	if (errno_backup == EISDIR)
@@ -33,9 +33,9 @@ int	error_printer(char *str1, char *str2)
 	else if (!str2 && errno_backup == EACCES)
 		return (write(2, "Permission denied\n", 19));
 	if (str2 && *str2)
-		write(2, str2, strlen(str2));
+		write(2, str2, ft_strlen(str2));
 	else
-		write(2, strerror(errno_backup), strlen(strerror(errno_backup)));
+		write(2, strerror(errno_backup), ft_strlen(strerror(errno_backup)));
 	return (write(2, "\n", 1));
 }
 
@@ -119,8 +119,8 @@ int	ft_here_doc(t_gc *gc)
 		here_doc_loop(limiter, pipe_fd);
 		return (exit (1), 1);
 	}
-	else if (pid < 0)
-		return (close_fd(&pipe_fd[0]), close_fd(&pipe_fd[1]), error_printer("fork", "error"), 1);
+	else if (pid < 0 && error_printer("fork", "error"))
+		return (close_fd(&pipe_fd[0]), close_fd(&pipe_fd[1]), 1);
 	signal(SIGINT, SIG_IGN);
 	if (here_doc_wait(gc->env, pid))
 		close_fd(&pipe_fd[0]);

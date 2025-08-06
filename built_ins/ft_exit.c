@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_exit.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: slatrech <slatrech@student.42.fr>          +#+  +:+       +#+        */
+/*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:42:00 by slatrech          #+#    #+#             */
-/*   Updated: 2025/08/06 14:42:01 by slatrech         ###   ########.fr       */
+/*   Updated: 2025/08/06 15:34:23 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ int	ft_exit_without_childs(t_env **env, char **args)
 	int		arg_n;
 	int		is_negative;
 
-	printf("");
 	arg_n = 0;
 	is_negative = 0;
 	if (!args || !args[0])
@@ -81,7 +80,6 @@ void	ft_exit(t_env **env, char **args, int is_one)
 	int		arg_n;
 	int		is_negative;
 
-	printf("");
 	arg_n = 0;
 	is_negative = 0;
 	if (!args || !args[0])

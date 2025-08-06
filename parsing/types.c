@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   types.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: slatrech <slatrech@student.42.fr>          +#+  +:+       +#+        */
+/*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:43:37 by slatrech          #+#    #+#             */
-/*   Updated: 2025/08/06 14:43:38 by slatrech         ###   ########.fr       */
+/*   Updated: 2025/08/06 15:19:01 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/parsing.h"
 #include "../includes/built_ins.h"
-
+/*
 void	print_tokens(int nb_of_tokens, t_token *tokens)
 {
 	int	i;
@@ -37,7 +37,7 @@ void	print_tokens(int nb_of_tokens, t_token *tokens)
 			printf("type = END\n");
 		i++;
 	}
-}
+}*/
 
 t_type	find_type(t_token token)
 {
@@ -105,7 +105,7 @@ int	tks_to_struct(t_env **env, t_tab *tab, int nb_of_tks, t_token **tks)
 	i = 0;
 	while (i < nb_of_tks)
 	{
-		(*tks)[i].word = strdup(tab[i].str);
+		(*tks)[i].word = ft_strdup(tab[i].str);
 		free(tab[i].str);
 		if (tab[i].quoted == 0)
 			(*tks)[i].type = find_type((*tks)[i]);

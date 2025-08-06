@@ -3,14 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   read_terminal.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: slatrech <slatrech@student.42.fr>          +#+  +:+       +#+        */
+/*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:41:49 by slatrech          #+#    #+#             */
-/*   Updated: 2025/08/06 14:45:40 by slatrech         ###   ########.fr       */
+/*   Updated: 2025/08/06 15:41:17 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./gnl/get_next_line.h"
 #include "./includes/structs.h"
 #include "./includes/parsing.h"
 #include "./includes/libft.h"
@@ -76,7 +75,7 @@ int	read_terminal(t_env **env, char *shell_name)
 	while (1)
 	{
 		line = get_input();
-		if (!line/* && write(1, "exit\n", 5) */)
+		if (!line && write(1, "exit\n", 5))
 			break ;
 		dd(env);
 		tokens_struct = create_tokens(line, env);
@@ -114,7 +113,7 @@ int	main(int argc, char **argv, char **envp)
 	tmp_str = get_env(env, "EXIT_CODE");
 	if (tmp_str)
 	{
-		exit_code = atoi(tmp_str);
+		exit_code = ft_atoi(tmp_str);
 		free(tmp_str);
 		tmp_str = NULL;
 	}

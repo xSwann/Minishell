@@ -6,7 +6,7 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 13:54:43 by flebrun           #+#    #+#             */
-/*   Updated: 2025/08/06 13:55:40 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/08/06 14:57:25 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,6 @@ t_cmd	*init_command(t_gc *cmd_gc, t_env **env, t_token *tokens)
 	if (!cmd)
 		return (NULL);
 	cmd->pipe_cmd = 0;
-	cmd->open_errors = 0;
 	cmd->args = NULL;
 	cmd->infiles = NULL;
 	cmd->outfiles = NULL;
@@ -95,12 +94,12 @@ t_cmd	*init_command(t_gc *cmd_gc, t_env **env, t_token *tokens)
 		cmd_gc->first_cmd = cmd;
 		cmd_gc->env = env;
 	}
-	return (cmd);
+	return (cmd->open_errors = 0, cmd);
 }
 
-int	handle_token(t_cmd *cmd, t_gc *gc)
+int	handle_token(t_cmd *cmd, t_gc *gc, t_token *tkn)
 {
-	if (gc->tokens[gc->actual_i].type == WORD && gc->tokens[gc->actual_i].word)
+	if (tkn->type == WORD && tkn->word)
 	{
 		if (cmd->prev_type == HEREDOC)
 		{
@@ -109,21 +108,21 @@ int	handle_token(t_cmd *cmd, t_gc *gc)
 				cmd->counters[3]--;
 		}
 		else if (cmd->prev_type == REDIN)
-			cmd->infiles[cmd->counters[1]++] = ft_strdup(gc->tokens[gc->actual_i].word);
+			cmd->infiles[cmd->counters[1]++] = ft_strdup(tkn->word);
 		else if (cmd->prev_type == REDOUT || cmd->prev_type == APPEND)
 		{
-			cmd->outfiles[cmd->counters[2]++] = ft_strdup(gc->tokens[gc->actual_i].word);
-			if (access(gc->tokens[gc->actual_i].word, F_OK) == 0 && access(gc->tokens[gc->actual_i].word, W_OK) == -1)
-				return (free(gc->tokens[gc->actual_i].word), gc->tokens[gc->actual_i].word = NULL, 1);
+			cmd->outfiles[cmd->counters[2]++] = ft_strdup(tkn->word);
+			if (access(tkn->word, F_OK) == 0 && access(tkn->word, W_OK) == -1)
+				return (free(tkn->word), tkn->word = NULL, 1);
 		}
 		else
-			cmd->args[cmd->counters[0]++] = ft_strdup(gc->tokens[gc->actual_i].word);
+			cmd->args[cmd->counters[0]++] = ft_strdup(tkn->word);
 	}
 	if (cmd->prev_type == REDOUT)
 		cmd->open_options = O_WRONLY | O_CREAT | O_TRUNC;
 	if (cmd->prev_type == APPEND)
 		cmd->open_options = O_WRONLY | O_CREAT | O_APPEND;
-	return (free(gc->tokens[gc->actual_i].word), gc->tokens[gc->actual_i].word = NULL, 0);
+	return (free(tkn->word), tkn->word = NULL, 0);
 }
 
 int	cmd_creator(t_env **env, t_cmd **cmd, t_token *tokens)
@@ -142,13 +141,14 @@ int	cmd_creator(t_env **env, t_cmd **cmd, t_token *tokens)
 	{
 		if (curr_cmd->prev_type == PIPE)
 		{
-			curr_cmd->pipe_cmd = init_command(&cmd_gc, env, tokens + cmd_gc.actual_i);
+			curr_cmd->pipe_cmd = init_command(&cmd_gc, env, \
+				tokens + cmd_gc.actual_i);
 			if (!curr_cmd->pipe_cmd)
 				return (1);
 			curr_cmd = curr_cmd->pipe_cmd;
 			curr_cmd->prev_type = tokens[cmd_gc.actual_i].type;
 		}
-		handle_token(curr_cmd, &cmd_gc);
+		handle_token(curr_cmd, &cmd_gc, &tokens[cmd_gc.actual_i]);
 		curr_cmd->prev_type = tokens[cmd_gc.actual_i++].type;
 	}
 	return (0);
