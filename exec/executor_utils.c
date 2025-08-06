@@ -1,4 +1,34 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   executor_utils.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/06 13:54:11 by flebrun           #+#    #+#             */
+/*   Updated: 2025/08/06 14:13:02 by flebrun          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../includes/exec.h"
+
+int	check_exec(t_pipex *px, int i, int *status)
+{
+	if (px->pids[i] <= 0)
+		return (0);
+	if (waitpid(px->pids[i], status, 0) == -1)
+		error_printer("waitpid failed", NULL);
+	if (WIFEXITED(*status))
+		return (WEXITSTATUS(*status));
+	if (WIFSIGNALED(*status))
+	{
+		if (WTERMSIG(*status) == SIGINT && write(2, "\n", 1))
+			return (130);
+		if (WTERMSIG(*status) == SIGQUIT && write(2, "Quit (core dumped)\n", 19))
+			return (131);
+	}
+	return (0);
+}
 
 int	wait_execs(t_env **envp, t_pipex *px, int i, int status)
 {
@@ -9,17 +39,7 @@ int	wait_execs(t_env **envp, t_pipex *px, int i, int status)
 	exit_code = 0;
 	while (++i < px->n_pids && px->pids[i])
 	{
-		if (px->pids[i] <= 0)
-			continue ;
-		if (waitpid(px->pids[i], &status, 0) == -1)
-			error_printer("waitpid failed", NULL);
-		if (WIFEXITED(status))
-			exit_code = WEXITSTATUS(status);
-		if (WIFSIGNALED(status))
-		{
-			if (WTERMSIG(status) == SIGQUIT)
-				write(2, "Quit (core dumped)\n", 19);
-		}
+		exit_code = check_exec(px, i, &status);
 	}
 	free(px->pids);
 	status_str = ft_itoa(exit_code);
@@ -59,27 +79,6 @@ int	status_checker(char *shell_name, t_env **env, char **args, char **path)
 		*path = NULL;
 	}
 	return (status);
-}
-
-char	**env_create(t_env **envp, int i, int is_exit_code)
-{
-	char	**env_str;
-
-	if (!(*envp) || !(*envp)->key[0])
-		return (NULL);
-	while ((*envp)[i].key)
-	{
-		if (!ft_strcmp((*envp)[i++].key, "EXIT_CODE"))
-			is_exit_code++;
-	}
-	env_str = malloc(sizeof (char *) * (i - is_exit_code + 1));
-	if (!env_str)
-		return (NULL);
-	if (loop_duplicate(envp, env_str))
-		return (NULL);
-	free_env(envp);
-	free(*envp);
-	return (*envp = NULL, env_str[i - is_exit_code] = NULL, env_str);
 }
 
 int	call_built_ins(t_env **envp, char **cmd, int i)

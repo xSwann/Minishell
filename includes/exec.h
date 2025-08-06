@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   exec.h                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/06 13:57:44 by flebrun           #+#    #+#             */
+/*   Updated: 2025/08/06 13:58:37 by flebrun          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef EXEC_H
 # define EXEC_H
 # define CMD_OK          0   // chemin résolu et exécutable
@@ -73,6 +85,6 @@ int		path_checker(char *shell_name, t_env **env, char **cmd, char **path);
 =        PATH MODIFIERS        =
 ==============================*/
 
-int	int_switcher(int *value_to_exchange);
+int		int_switcher(int *value_to_exchange);
 
 #endif

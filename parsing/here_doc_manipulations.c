@@ -6,7 +6,7 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/22 17:00:26 by flebrun           #+#    #+#             */
-/*   Updated: 2025/08/05 18:16:53 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/08/06 13:56:34 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,17 +37,6 @@ int	error_printer(char *str1, char *str2)
 	else
 		write(2, strerror(errno_backup), strlen(strerror(errno_backup)));
 	return (write(2, "\n", 1));
-}
-
-int	close_fd(int *fd)
-{
-	if (fd && *fd >= 0)
-	{
-		if (close(*fd) == -1)
-			return (*fd = -1, error_printer("close", "failed closing fd"), 1);
-		*fd = -1;
-	}
-	return (0);
 }
 
 int	here_doc_wait(t_env **envp, int pid)

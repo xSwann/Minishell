@@ -48,8 +48,6 @@ void	signalhandler(int signal)
 			rl_replace_line("", 0);
 			return (rl_on_new_line(), rl_redisplay(), g_receive_sig = 3, (void)0);
 		}
-		if (g_receive_sig == 4 && write(1, "\n", 1))
-			return (g_receive_sig = 5, (void)0);
 	}
 }
 
@@ -74,7 +72,7 @@ int	read_terminal(t_env **env, char *shell_name)
 		line = get_input();
 		if (!line/* && write(1, "exit\n", 5)*/)
 			break ;
-		if (g_receive_sig == 1 || g_receive_sig == 5)
+		if (g_receive_sig == 1)
 		{
 			g_receive_sig = 0;
 			ft_export(env, "EXIT_CODE=130");

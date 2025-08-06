@@ -100,7 +100,7 @@ typedef struct s_token_data
 =         GC STRUCTURE         =
 ==============================*/
 
-typedef struct	s_gc
+typedef struct s_gc
 {
 	t_cmd		*first_cmd;
 	t_token		*tokens;
