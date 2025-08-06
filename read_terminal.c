@@ -7,63 +7,58 @@
 
 volatile sig_atomic_t	g_receive_sig;
 
-char	*get_input(void)
+t_token	*create_tokens(char *line, t_env **env)
 {
-	char	*line;
+	int		nb_of_token;
+	t_tab	*tokens;
+	t_token	*tokens_struct;
 
-	if (isatty(STDIN_FILENO))
+	nb_of_token = count_tokens(line);
+	tokens = ft_calloc(nb_of_token + 1, sizeof(t_tab));
+	if (!tokens)
+		exit(EXIT_FAILURE);
+	put_tokens_in_tab(nb_of_token, line, tokens);
+	sanitize_tokens(tokens, *env);
+	tokens_struct = malloc(sizeof(t_token) * (nb_of_token + 1));
+	if (!tokens_struct)
 	{
-		line = readline("minishell$ ");
-		if (line && *line)
-			add_history(line);
+		free(tokens);
+		exit(EXIT_FAILURE);
 	}
-	else
-	{
-		line = get_next_line(STDIN_FILENO);
-		if (line && line[ft_strlen(line) - 1] == '\n')
-			line[ft_strlen(line) - 1] = '\0';
-	}
-	return (line);
+	ft_memset(tokens_struct, 0, sizeof(t_token) * (nb_of_token + 1));
+	if (tks_to_struct(env, tokens, nb_of_token, &tokens_struct))
+		return (NULL);
+	return (tokens_struct);
 }
 
-void	signalhandler(int signal)
+int	launch_command(t_env **env, char *shell_name, t_cmd *cmd)
 {
-	int	null_fd;
-
-	if (signal == SIGINT)
+	if (cmd && cmd->args && cmd->args[0]
+		&& ft_strcmp(cmd->args[0], "exit") == 0)
+		exit_case(cmd, env);
+	if (cmd_executor(shell_name, env, &cmd))
 	{
-		if (g_receive_sig == 0 || g_receive_sig == 1)
-		{
-			g_receive_sig = 1;
-			rl_replace_line("", 0);
-			write(1, "\n", 1);
-			return (rl_on_new_line(), rl_redisplay());
-		}
-		if (g_receive_sig == 2 || g_receive_sig == 3)
-		{
-			null_fd = open("/dev/null", O_RDONLY);
-			dup2(null_fd, STDIN_FILENO);
-			close(null_fd);
-			write(1, "\n", 1);
-			rl_replace_line("", 0);
-			return (rl_on_new_line(), rl_redisplay(), g_receive_sig = 3, (void)0);
-		}
+		g_receive_sig = 0;
+		return (1);
+	}
+	return (0);
+}
+
+void	dd(t_env **env)
+{
+	if (g_receive_sig == 1)
+	{
+		g_receive_sig = 0;
+		ft_export(env, "EXIT_CODE=130");
 	}
 }
 
 int	read_terminal(t_env **env, char *shell_name)
 {
 	char	*line;
-	int		nb_of_token;
-	t_tab	*tokens;
 	t_token	*tokens_struct;
 	t_cmd	*cmd;
-	char *exit_string;
-	char *exit_string2;
 
-	int i;
-
-	i = 1;
 	line = NULL;
 	signal(SIGINT, signalhandler);
 	signal(SIGQUIT, SIG_IGN);
@@ -72,45 +67,17 @@ int	read_terminal(t_env **env, char *shell_name)
 		line = get_input();
 		if (!line/* && write(1, "exit\n", 5)*/)
 			break ;
-		if (g_receive_sig == 1)
-		{
-			g_receive_sig = 0;
-			ft_export(env, "EXIT_CODE=130");
-		}
-		nb_of_token = count_tokens(line);
-		tokens = ft_calloc(nb_of_token + 1, sizeof(t_tab));
-		if (!tokens)
-			exit(EXIT_FAILURE);
-		put_tokens_in_tab(nb_of_token, line, tokens);
-		sanitize_tokens(tokens, *env);
-		tokens_struct = malloc(sizeof(t_token) * (nb_of_token + 1));
+		dd(env);
+		tokens_struct = create_tokens(line, env);
 		if (!tokens_struct)
-			exit(EXIT_FAILURE);
-		ft_memset(tokens_struct, 0, sizeof(t_token) * (nb_of_token + 1));
-		if(tks_to_struct(env, tokens, nb_of_token, &tokens_struct))
 			continue ;
-		//print_tokens(nb_of_token, tokens_struct);
 		cmd = NULL;
 		if (cmd_creator(env, &cmd, tokens_struct))
 			break ;
 		free(tokens_struct);
 		tokens_struct = NULL;
-		if (cmd && cmd->args
-     		&& cmd->args[0]
-     		&& ft_strcmp(cmd->args[0], "exit") == 0)
-		{
-			exit_string = ft_strdup(cmd->args[1]);
-			exit_string2 = ft_strdup(cmd->args[2]);
-			if (exit_string2)
-				i = 0;
-			free_cmd(cmd);
-        	ft_exit(env, &exit_string, i);
-		}
-		if (cmd_executor(shell_name, env, &cmd))
-		{
-			g_receive_sig = 0;
+		if (launch_command(env, shell_name, cmd))
 			continue ;
-		}
 	}
 	return (rl_clear_history(), 0);
 }
