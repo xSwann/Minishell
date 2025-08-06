@@ -92,9 +92,13 @@ int	ft_export(t_env **env, char *arg)
 
 	if (!arg)
 		return (ft_env(env, NULL), 0);
-	if (!is_exportable(arg) && \
-		fprintf(stderr, "export: `%s': not a valid identifier\n", arg))
+	if (!is_exportable(arg))
+	{
+		write(2, "export: `", 9);
+		write(2, arg, ft_strlen(arg));
+		write(2, "': not a valid identifier\n", 26);
 		return (ft_export(env, "EXIT_CODE=1"));
+	}
 	i = 0;
 	arg_already_in_env = 0;
 	if (is_arg_already_in_env(arg, &arg_already_in_env, env, &count))

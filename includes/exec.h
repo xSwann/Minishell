@@ -73,6 +73,6 @@ int		path_checker(char *shell_name, t_env **env, char **cmd, char **path);
 =        PATH MODIFIERS        =
 ==============================*/
 
-int	int_switcher(int *value_to_exchange);
+int		int_switcher(int *value_to_exchange);
 
 #endif
