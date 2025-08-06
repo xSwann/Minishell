@@ -10,13 +10,17 @@
 # include <sys/wait.h>
 # include <stdbool.h>
 # include "structs.h"
+# include <termios.h>
 # include <stdlib.h>
 # include <string.h>
+# include <signal.h>
 # include <stdio.h>
-# include <fcntl.h> // pour O_CREAT, O_TRUNC, O_WRONLY, etc.
+# include <fcntl.h>
 # include <errno.h>
 # include "libft.h"
+# include <aio.h>
 
+extern volatile sig_atomic_t	g_receive_sig;
 /*==============================
 =     TOKENIZATION FUNCTIONS   =
 ==============================*/
@@ -31,7 +35,7 @@ void	sanitize_tokens(t_tab *tokens, t_env *env);
 
 //sanitize_tokens_utils1
 void	replace_expanded_value(char **str, char *expanded, int len);
-void	copy_before_dollar_erase(char **str, char *new, int *i, int *j);
+void	copy_before_dollar_erase(char **str, char *new_str, int *i, int *j);
 void	skip_variable_erase(char **str, int *i);
 void	erase_expand(char **str, int len);
 void	skip_leading_spaces(char *str, int *i);
@@ -51,11 +55,11 @@ int		should_expand(t_tab *tokens, int i, int j, char quote);
 void	handle_expansion(t_tab *tokens, t_env *env, int i, char quote);
 
 //sanitize_tokens_utils4
-void	copy_without_quotes(char *old, char *new, size_t len);
+void	copy_without_quotes(char *old, char *new_str, size_t len);
 void	strip_quotes(char **p);
-void	copy_before_dollar(char **str, char *new, int *i, int *j);
+void	copy_before_dollar(char **str, char *new_str, int *i, int *j);
 void	skip_variable_name(char **str, int *i);
-void	copy_expanded_value(char *expanded, char *new, int *j, int *k);
+void	copy_expanded_value(char *expanded, char *new_str, int *j, int *k);
 
 /*==============================
 =       UTILITY FUNCTIONS      =
@@ -74,13 +78,14 @@ void	fill_line(char *tab, char *line, int start, int end);
 =      COMMAND_FUNCTIONS      =
 ==============================*/
 
-int		cmd_creator(t_cmd **cmd, t_token *tokens);
+int		cmd_creator(t_env **env, t_cmd **cmd, t_token *tokens);
 void	print_cmd(t_cmd *cmd);
 
 /*==============================
 =    HERE_DOC MANIPULATIONS    =
 ==============================*/
 
-int		ft_here_doc(char *limiter);
+int		ft_here_doc(t_gc *gc);
+void	signalhandler(int signal);
 
 #endif

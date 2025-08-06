@@ -17,11 +17,12 @@ int		ft_cd(char **path, t_env **env);
 int		ft_env(t_env **env, char **arg);
 int		ft_echo(char **str, t_env **env);
 int		ft_unset(t_env **env, char *arg);
-void	ft_exit(t_env **env, char **arg);
+void	ft_exit(t_env **env, char **args, int is_one);
 int		ft_export(t_env **env, char *arg);
 int		unset_loop(t_env **env, char **arg);
 int		export_loop(t_env **env, char **arg);
-void	exit_without_childs(t_env **env, t_pipex *cmd);
+void	exit_code_exit(t_env **env, int exit_code);
+int		ft_exit_without_childs(t_env **env, char **args);
 
 //env_utils
 void	free_env(t_env **env);

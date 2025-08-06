@@ -30,9 +30,9 @@ struct	s_cmd
 	t_cmd	*pipe_cmd;
 	t_type	prev_type;
 	int		open_errors;
-	int		here_doc_fd;
+	int		*here_doc_fds;
 	int		open_options;
-	int		counters[3];
+	int		counters[4];
 	char	**outfiles;
 	char	**infiles;
 	char	**args;
@@ -95,5 +95,17 @@ typedef struct s_token_data
 	int		*j;
 	char	*quote;
 }	t_token_data;
+
+/*==============================
+=         GC STRUCTURE         =
+==============================*/
+
+typedef struct	s_gc
+{
+	t_cmd		*first_cmd;
+	t_token		*tokens;
+	t_env		**env;
+	int			actual_i;
+}	t_gc;
 
 #endif

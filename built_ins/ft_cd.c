@@ -46,7 +46,7 @@ int	ft_cd(char **path, t_env **env)
 	int		i;
 
 	i = 0;
-	if ((path && path[1] && path[1][0]) || auto_complete_path(path, env, 0))
+	if ((path && path[0] && path[1] && path[1][0]) || auto_complete_path(path, env, 0))
 		return (too_many_args_error(env));
 	if (chdir(path[0]) != 0)
 		return (no_file_error(path, env));

@@ -6,6 +6,7 @@ int	wait_execs(t_env **envp, t_pipex *px, int i, int status)
 	char	*status_str;
 	char	*exit_str;
 
+	exit_code = 0;
 	while (++i < px->n_pids && px->pids[i])
 	{
 		if (px->pids[i] <= 0)
@@ -14,6 +15,11 @@ int	wait_execs(t_env **envp, t_pipex *px, int i, int status)
 			error_printer("waitpid failed", NULL);
 		if (WIFEXITED(status))
 			exit_code = WEXITSTATUS(status);
+		if (WIFSIGNALED(status))
+		{
+			if (WTERMSIG(status) == SIGQUIT)
+				write(2, "Quit (core dumped)\n", 19);
+		}
 	}
 	free(px->pids);
 	status_str = ft_itoa(exit_code);
@@ -91,7 +97,7 @@ int	call_built_ins(t_env **envp, char **cmd, int i)
 	else if (i == 5)
 		return (unset_loop(envp, cmd + 1));
 	else if (i == 6)
-		return (ft_exit(envp, cmd + 1), 1);
+		return (ft_exit(envp, cmd + 1, 0), 1);
 	else if (i == 7)
 		return (ft_echo(cmd + 1, envp));
 	return (-1);
