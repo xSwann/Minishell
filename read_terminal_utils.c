@@ -6,7 +6,7 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:41:47 by slatrech          #+#    #+#             */
-/*   Updated: 2025/08/06 15:26:14 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/08/06 16:10:25 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,11 @@ void	exit_case(t_cmd *cmd, t_env **env)
 	exit_string = ft_strdup(cmd->args[1]);
 	exit_string2 = ft_strdup(cmd->args[2]);
 	if (exit_string2)
+	{
+		free(exit_string2);
+		exit_string2 = NULL;
 		i = 0;
+	}
 	free_cmd(cmd);
 	ft_exit(env, &exit_string, i);
 }

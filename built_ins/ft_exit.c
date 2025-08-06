@@ -6,7 +6,7 @@
 /*   By: flebrun <flebrun@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/06 14:42:00 by slatrech          #+#    #+#             */
-/*   Updated: 2025/08/06 15:34:23 by flebrun          ###   ########.fr       */
+/*   Updated: 2025/08/06 16:25:25 by flebrun          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ int	exit_printer2(char **args)
 {
 	write(2, "exit: ", 6);
 	error_printer(args[0], "numeric argument required");
+	free(args[0]);
+	args[0] = NULL;
 	return (2);
 }
 
@@ -93,8 +95,9 @@ void	ft_exit(t_env **env, char **args, int is_one)
 	free_env(env);
 	if ((!args[0][0] || !str_is_num(args[0] + is_negative)))
 		return (exit(exit_printer2(args)));
-	if (is_one == 0 && (args[1] && args[1][0]))
-		return (error_printer("exit", "too many arguments"), exit(1));
+	if (is_one == 0)
+		return (free(args[0]),
+			error_printer("exit", "too many arguments"), exit(1));
 	if (args[0][0] && args[0][0] == '-')
 		is_negative = 1;
 	init_arg_n(&arg_n, args, is_negative);
