@@ -1,24 +1,20 @@
-# Minishell (42) — un shell minimaliste compatible Bash
+# Minishell (42)
 
-> **FR** · Shell interpréteur écrit en C dans le cadre du projet 42. Ce README explique **ce que fait ce Minishell**, **comment l’utiliser**, **comment il est organisé**, et **comment il fonctionne en interne**.
->
-> **EN** · POSIX-like shell in C for 42. Features, Build, Usage, and Architecture explained below.
+> A minimal Bash-like shell written in **C** as part of the 42 curriculum. Supports command parsing, pipelines, redirections, environment variables and built-in commands.
 
 ---
 
-## ✨ Fonctionnalités
+## 🚀 Features
 
-* Exécution de commandes simples et chaînées avec **pipes** `|`
-* **Redirections** : `<`, `>`, `>>`, `<<` (heredoc sans expansion de variables)
-* **Expansion des variables** environnement `$VAR` et `$?` (hors heredoc)
-* **Quotes** : simples `'` (littéral) et doubles `"`
-* **Built‑ins** inclus : `echo`, `cd`, `pwd`, `export`, `unset`, `env`, `exit`
-* **Gestion basique des erreurs** et de `$?`
-* **Signaux** : `Ctrl-C`, `Ctrl-D`, `Ctrl-\` (comportement similaire à Bash)
+* Execution of simple and piped commands using `|`
+* **Redirections**: `<`, `>`, `>>`, `<<` (heredoc without variable expansion)
+* **Environment variables**: `$VAR`, `$?`
+* **Quote handling**: `'` (literal), `"` (expands variables)
+* **Built-in commands**: `echo`, `cd`, `pwd`, `export`, `unset`, `env`, `exit`
+* **Basic error handling**
+* **Signal handling**: `Ctrl-C`, `Ctrl-D`, `Ctrl-\\`
 
-> **Limites actuelles** : pas de `;`, pas de `&&` ou `||`, pas de subshell `( )`, pas de globbing `*`, pas de gestion de jobs.
-
----** : `&&`, `||`, subshell `( )`, wildcard `*`, job control.
+> **Limitations**: no `;`, no logical operators `&&` / `||`, no subshells `( )`, no wildcard expansion `*`, no job control.
 
 ---
 
@@ -26,20 +22,20 @@
 
 ```bash
 make            # compile minishell
-make clean      # supprime .o
-make fclean     # supprime .o + binaire
-make re         # recompile propre
+make clean      # remove .o files
+make fclean     # remove .o + binary
+make re         # rebuild
 ```
 
-### Dépendance Readline
+### Dependency: Readline
 
-Ubuntu/Debian :
+Ubuntu/Debian:
 
 ```bash
 sudo apt install -y libreadline-dev
 ```
 
-macOS (Homebrew) :
+macOS (Homebrew):
 
 ```bash
 brew install readline
@@ -47,13 +43,13 @@ brew install readline
 
 ---
 
-## ▶️ Utilisation
+## ▶️ Usage
 
 ```bash
 ./minishell
-minishell$ echo "Hello world"
-minishell$ ls | grep c
-minishell$ echo "Test" > file
+minishell$ echo "Hello"
+minishell$ ls | grep src
+minishell$ echo "test" > file.txt
 minishell$ cat << EOF
 hello
 EOF
@@ -62,24 +58,24 @@ minishell$ exit 0
 
 ---
 
-## 📁 Arborescence du projet
+## 📁 Project structure
 
 ```
 Minishell/
 ├── Makefile
 ├── README.md
-├── valgrind-readline.supp          # suppression warnings readline pour valgrind
-├── read_terminal.c                # gestion entrée utilisateur (readline + signaux)
-├── read_terminal_utils.c          # utilitaires lecture terminal
+├── valgrind-readline.supp
+├── read_terminal.c
+├── read_terminal_utils.c
 │
-├── includes/                      # headers principaux
+├── includes/
 │   ├── built_ins.h
 │   ├── exec.h
 │   ├── libft.h
 │   ├── parsing.h
-│   └── structs.h                  # structures globales
+│   └── structs.h
 │
-├── built_ins/                     # built-ins Minishell
+├── built_ins/
 │   ├── ft_cd.c
 │   ├── ft_echo.c
 │   ├── ft_exit.c
@@ -97,93 +93,88 @@ Minishell/
 │       ├── ft_unset.c
 │       └── unset_loop.c
 │
-├── parsing/                       # étape parsing/lexing
-│   ├── tokenization.c             # découpe commande en tokens
+├── parsing/
+│   ├── tokenization.c
 │   ├── tokenization_utils.c
 │   ├── count_tokens.c
 │   ├── put_tokens_in_tab.c
-│   ├── command_creator.c          # construit structure commande
-│   ├── here_doc_manipulations.c   # gestion heredoc
-│   ├── sanitize/                  # nettoyage tokens invalides
+│   ├── command_creator.c
+│   ├── here_doc_manipulations.c
+│   ├── sanitize/
 │   │   ├── sanitize_tokens.c
 │   │   ├── sanitize_tokens_utils.c
 │   │   ├── sanitize_tokens_utils2.c
 │   │   ├── sanitize_tokens_utils3.c
-│   │   ├── sanitize_tokens_utils4.c
+│   │   └── sanitize_tokens_utils4.c
 │   └── types.c
 │
-├── exec/                          # exécution commandes
-│   ├── command_executor.c         # fork/execve + pipes
+├── exec/
+│   ├── command_executor.c
 │   ├── executor_utils.c
-│   ├── free_functions.c           # free mémoire
-│   ├── path_modifiers.c           # gestion PATH
-│   ├── structure_manipulations.c  # gestion structures
-│   └── variables_modifiers.c      # variables env/export
+│   ├── free_functions.c
+│   ├── path_modifiers.c
+│   ├── structure_manipulations.c
+│   └── variables_modifiers.c
 │
-├── gnl/                           # get_next_line si nécessaire
+├── gnl/
 │   ├── get_next_line.c
 │   └── get_next_line.h
 │
-└── libft/                         # utils perso
-    ├── ft_atoi.c ft_calloc.c ft_isalnum.c ft_isalpha.c ... etc
+└── libft/
+    ├── ft_atoi.c ft_calloc.c ft_isalnum.c ft_isalpha.c ...
 ```
 
 ---
 
-## 🧠 Architecture interne
+## 🧠 Architecture overview
 
 ```
 readline → tokenization → sanitize → command_creator → executor
                                         │
-                                        └─ heredoc (sans expansion)
+                                        └─ heredoc (no expansion)
 ```
 
-* **Tokenization** : découpe la ligne utilisateur en tokens (`|`, `<`, `>`, mots...)
-* **Sanitize** : vérifie les erreurs syntaxiques simples
-* **Command_creator** : organise les tokens en commandes chaînées
-* **Executor** : gère pipes, redirections et exécution via `execve`
-* **Built‑ins** : exécutés directement sans `execve` lorsque nécessaire
+* **Tokenization**: splits input into tokens
+* **Sanitize**: basic syntax validation
+* **Command creator**: builds executable command chains
+* **Executor**: handles pipes, redirections, and `execve`
+* **Built-ins**: executed without `execve` when necessary
 
 ---
 
-## 🧪 Tests rapides
+## ✅ Quick tests
 
 ```bash
 echo hello | cat
 ls | wc -l
-echo coucou > test.txt
+echo test > file.txt
 cat << EOF | grep o
-bonjour
+hello
 EOF
 ```
 
 ---
 
-## 🐞 Gestion des erreurs
+## 🐞 Error handling
 
-* `command not found` → 127
-* Permission refusée → 126
-* Mauvaise redirection → message error
-* Messages sur **stderr**
-* Valeur de retour dans `$?`
-
----
-
-## 🧹 Norme & mémoire
-
-* Respect **Norminette**
-* Testé **Valgrind** (+ fichier suppression `valgrind-readline.supp`)
-* Pas de leaks mémoire
+* `command not found` → exit code **127**
+* Permission denied → exit code **126**
+* Redirection errors → error message to **stderr**
+* `$?` updated after each command
 
 ---
 
-## 👤 Auteurs
+## 🧼 Norm & memory
+
+* Follows **42 Norminette** rules
+* No memory leaks (**Valgrind checked**)
+* Uses `valgrind-readline.supp` to suppress readline warnings
+
+---
+
+## 👤 Authors
 
 * Swann — @xSwann
 * Flavien — @Flavien-Lebrun
 
 ---
-
-## 🇬🇧 English Summary
-
-Minishell: small Bash-like shell in C, supporting pipes, redirections, environment, and built-ins.
